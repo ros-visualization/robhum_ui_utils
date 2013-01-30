@@ -126,7 +126,8 @@ class MorseGenerator(object):
         @type speed: float
         '''
         self.dotDuration = 1.0/(2*dotsPlusPausePerSec);
-        self.dashDuration = 3*self.dotDuration;
+        #self.dashDuration = 3*self.dotDuration;
+        self.dashDuration = 2*self.dotDuration;
         self.interSigPauseDots = self.dotDuration;
         self.interSigPauseDashes = 1.5 * self.dotDuration;
         
