@@ -9,6 +9,13 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/morseInput</url>
 
+  <depend package="rospy" />
+  <depend package="python_qt_binding"/>
+  <depend package="gesture_buttons" />
+
+  <rosdep name="python-qt4"/>
+
+
 </package>
 
 
