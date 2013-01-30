@@ -1,0 +1,14 @@
+<package>
+  <description brief="gesture_buttons">
+
+     gesture_buttons
+
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/gesture_buttons</url>
+
+</package>
+
+

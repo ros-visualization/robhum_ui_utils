@@ -1,0 +1,11 @@
+<stack>
+  <description brief="robhum_ui_utils">
+    GUI utilies for Robots for Humanity type packages.
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD, LGPL, GPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/robhum_ui_utils</url>
+  <depend stack="python_qt_binding" />
+  <depend stack="ros" />
+</stack>
