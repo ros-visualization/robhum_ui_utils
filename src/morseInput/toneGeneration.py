@@ -15,16 +15,15 @@ class MorseGenerator(object):
     def __init__(self):
         super(MorseGenerator, self).__init__();
         
-        # ------ Public Instance Vars  ------------
-        self.frequency      	 = 300; # Hz
-        self.dotDuration    	 = 0.15; # seconds = 15ms
-        self.dashDuration   	 = 0.30; # seconds = 300ms
-        self.speed          	 = 33.0;   # Hz
-        # Duration of one dot plus time of one cycle as specified by speed:
-        self.interSigPauseDots   = self.dotDuration + 1.0/self.speed       # 180ms
-        # Duration of one half dash plus time of one cycle as specified by speed:        
-        self.interSigPauseDashes = self.dashDuration/2.0 + 1.0/self.speed  # 180ms
-        self.automaticMorse      = False;
+        # ------ Instance Vars Available Through Getters/Setters ------------
+
+        # Frequency of the tone:        
+        self.frequency = 300; # Hz
+        
+        self.setSpeed(3.3);
+        self.automaticMorse = True;
+        self.recentDots = 0;
+        self.recentDashes = 0;
         
         # ------ Private Instance Vars  ------------
         
@@ -105,23 +104,51 @@ class MorseGenerator(object):
         '''
         self.automaticMorse = yesNo;
         
-    def setSpeed(self, speed):
+    def setSpeed(self, dotsPlusPausePerSec):
         '''
-        Set speed at which automatic dots and dashes are
-        generated. Units are Herz. Default is ~33Hz. The
-        higher the number, the faster the dots/dashes are
-        generated. This is equivalent to controlling the
-        time between successive dots or dashes.
+        Sets speed at which automatic dots and dashes are
+        generated. Units are Herz. One cycle is a single
+        dot, followed by the pause that separates two dots.
+        Since that pause is standardized to be equal to 
+        a dot length, one can think of the speed as the
+        number times the letter "i" is generated per second.
+        
+        The higher the number, the faster the dots/dashes are
+        generated. Default is 3.3.
+        
         @param speed: rate at which dots or dashes are produced in automatic mode.
         @type speed: float
         '''
-        self.speed = speed;
-        #***********
-        self.dotDuration    	 = 0.10; # seconds = 15ms
-        self.dashDuration   	 = 0.20; # seconds = 300ms
-        #***********
-        self.interSigPauseDots   = self.dotDuration + 1.0/self.speed;
-        self.interSigPauseDashes = self.dashDuration/2.0 + 1.0/self.speed;                
+        self.dotDuration = 1.0/(2*dotsPlusPausePerSec);
+        self.dashDuration = 3*self.dotDuration;
+        self.interSigPauseDots = self.dotDuration;
+        self.interSigPauseDashes = 1.5 * self.dotDuration;
+        
+        self.interLetterTime = 3.0*self.dotDuration;
+        self.interWordTime   = 7.0*self.dotDuration;
+        
+    def getInterLetterTime(self):
+        '''
+        Return the minimum amount of silence time required
+        for the system to conclude that the Morse code equivalent
+        of a letter has been generated. I.e.: end-of-letter pause.
+        '''
+        return self.interLetterTime;
+    
+    def getInterWordTime(self):
+        '''
+        Return the minimum amount of silence time required
+        for the system to conclude that a word has ended.
+        I.e.: end-of-word pause.
+        '''
+        return self.interWordTime;
+
+
+    def numRecentDots(self):
+        return self.recentDots;
+    
+    def numRecentDashes(self):
+        return self.recentDashes;
                 
     # ------------------------------ Private ---------------------
 
@@ -146,6 +173,7 @@ class MorseGenerator(object):
             numDots = 0;
             
             while self.parent.morseDotEvent.is_set():
+            #while self.parent.keepRunning:
                 
                 # Stop thread altogether?
                 if not self.parent.keepRunning:
@@ -234,10 +262,13 @@ if __name__ == "__main__":
     generator = MorseGenerator();
 
     # Initially: not automatic:
+    generator.setAutoMorse(False);
+
     generator.startMorseSeq(Morse.DOT);
     time.sleep(1);
     generator.startMorseSeq(Morse.DASH);
     time.sleep(1);
+    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDots()));
     
     generator.setAutoMorse(True);
 
@@ -250,8 +281,9 @@ if __name__ == "__main__":
     time.sleep(1);
     generator.stopMorseSeq();
     time.sleep(1.5);    
+    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDots()));
 
-    generator.setSpeed(3000.0); #Hz
+    generator.setSpeed(6.0); #Hz
     generator.startMorseSeq(Morse.DOT);
     time.sleep(1);
     generator.stopMorseSeq();
@@ -261,6 +293,19 @@ if __name__ == "__main__":
     time.sleep(1);
     generator.stopMorseSeq();
     time.sleep(0.5);    
+    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDots()));
+    
+    generator.setSpeed(12.0); #Hz
+    generator.startMorseSeq(Morse.DOT);
+    time.sleep(1);
+    generator.stopMorseSeq();
+    time.sleep(0.5);    
+
+    generator.startMorseSeq(Morse.DASH);
+    time.sleep(1);
+    generator.stopMorseSeq();
+    time.sleep(0.5);    
+    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDots()));
     
     generator.stopMorseGenerator();
     
