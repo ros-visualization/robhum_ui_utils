@@ -1,0 +1,14 @@
+<package>
+  <description brief="morseInput">
+
+     morseInput
+
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/morseInput</url>
+
+</package>
+
+
