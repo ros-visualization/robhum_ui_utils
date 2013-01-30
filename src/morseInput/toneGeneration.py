@@ -104,6 +104,12 @@ class MorseGenerator(object):
         '''
         self.automaticMorse = yesNo;
         
+    def numRecentDots(self):
+        return self.recentDots;
+    
+    def numRecentDashes(self):
+        return self.recentDashes;
+
     def setSpeed(self, dotsPlusPausePerSec):
         '''
         Sets speed at which automatic dots and dashes are
@@ -143,13 +149,6 @@ class MorseGenerator(object):
         '''
         return self.interWordTime;
 
-
-    def numRecentDots(self):
-        return self.recentDots;
-    
-    def numRecentDashes(self):
-        return self.recentDashes;
-                
     # ------------------------------ Private ---------------------
 
     #-----------------------------
@@ -171,36 +170,33 @@ class MorseGenerator(object):
             self.parent.morseDotEvent.wait();
             # No dots generated yet:
             numDots = 0;
+                        
+            while self.parent.keepRunning:
             
-            while self.parent.morseDotEvent.is_set():
-            #while self.parent.keepRunning:
+                while self.parent.morseDotEvent.is_set():    
                 
-                # Stop thread altogether?
-                if not self.parent.keepRunning:
-                    return;
-                
-                # Use Alsa utils speaker tester to produce sound:
-                proc = subprocess.Popen(['speaker-test', 
-                                         "--test", "sine", 
-                                         "--frequency", str(self.parent.frequency)],
-                                        stdout=subprocess.PIPE); # suppress speaker-test display output
-                time.sleep(self.parent.dotDuration);
-                os.kill(proc.pid, signal.SIGUSR1)
-                
-                numDots += 1;
-                if not self.parent.automaticMorse:
-                    # Not doing automatic dot generation.
-                    # So clear the dot event that controls out
-                    # loop. That would otherwise happen 
-                    # in self.parent.stopMorseSequence(), which
-                    # clients call:
-                    self.parent.morseDotEvent.clear();
-                    self.parent.recentDots = numDots;
-                else:
-                    # Auto dot generation: pause for
-                    # the inter-dot period:
-                    time.sleep(self.parent.interSigPauseDots);
-                
+                    # Use Alsa utils speaker tester to produce sound:
+                    proc = subprocess.Popen(['speaker-test', 
+                                             "--test", "sine", 
+                                             "--frequency", str(self.parent.frequency)],
+                                            stdout=subprocess.PIPE); # suppress speaker-test display output
+                    time.sleep(self.parent.dotDuration);
+                    os.kill(proc.pid, signal.SIGUSR1)
+                    
+                    numDots += 1;
+                    if not self.parent.automaticMorse:
+                        # Not doing automatic dot generation.
+                        # So clear the dot event that controls out
+                        # loop. That would otherwise happen 
+                        # in self.parent.stopMorseSequence(), which
+                        # clients call:
+                        self.parent.morseDotEvent.clear();
+                    else:
+                        # Auto dot generation: pause for
+                        # the inter-dot period:
+                        time.sleep(self.parent.interSigPauseDots);
+                        
+                self.parent.recentDots = numDots;
                 # Get ready for the next request for dot sequences:
                 numDots = 0;
                 self.parent.morseDotEvent.wait();
@@ -225,34 +221,30 @@ class MorseGenerator(object):
             # No dashes generated yet:
             numDashes = 0;
             
-            while self.parent.morseDashEvent.is_set():
-                
-                # Stop thread altogether?
-                if not self.parent.keepRunning:
-                    return;
-                
-                # Speaker-test subprocess will run until we kill it:
-                proc = subprocess.Popen(['speaker-test', 
-                                         "--test", "sine", 
-                                         "--frequency", str(self.parent.frequency)],
-                                        stdout=subprocess.PIPE); # Suppress print output
-                time.sleep(self.parent.dashDuration);
-                os.kill(proc.pid, signal.SIGUSR1)
-                
-                numDashes += 1;
-                if not self.parent.automaticMorse:
-                    # Not doing automatic dash generation.
-                    # So clear the dash event that controls out
-                    # loop. That would otherwise happen 
-                    # in self.parent.stopMorseSequence(), which
-                    # clients call:
-                    self.parent.morseDashEvent.clear();
-                    self.parent.recentDashes = numDashes;
-                else:
-                    # Auto dot generation: pause for
-                    # the inter-dash period:
-                    time.sleep(self.parent.interSigPauseDashes);
+            while self.parent.keepRunning:
+                while self.parent.morseDashEvent.is_set():
+                    # Speaker-test subprocess will run until we kill it:
+                    proc = subprocess.Popen(['speaker-test', 
+                                             "--test", "sine", 
+                                             "--frequency", str(self.parent.frequency)],
+                                            stdout=subprocess.PIPE); # Suppress print output
+                    time.sleep(self.parent.dashDuration);
+                    os.kill(proc.pid, signal.SIGUSR1)
                     
+                    numDashes += 1;
+                    if not self.parent.automaticMorse:
+                        # Not doing automatic dash generation.
+                        # So clear the dash event that controls out
+                        # loop. That would otherwise happen 
+                        # in self.parent.stopMorseSequence(), which
+                        # clients call:
+                        self.parent.morseDashEvent.clear();                        
+                    else:
+                        # Auto dot generation: pause for
+                        # the inter-dash period:
+                        time.sleep(self.parent.interSigPauseDashes);
+                    
+                self.parent.recentDashes = numDashes;
                 # Get ready for the next request for dashes sequences:
                 numDashes = 0;
                 self.parent.morseDashEvent.wait();
@@ -268,7 +260,7 @@ if __name__ == "__main__":
     time.sleep(1);
     generator.startMorseSeq(Morse.DASH);
     time.sleep(1);
-    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDots()));
+    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDashes()));
     
     generator.setAutoMorse(True);
 
@@ -281,7 +273,7 @@ if __name__ == "__main__":
     time.sleep(1);
     generator.stopMorseSeq();
     time.sleep(1.5);    
-    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDots()));
+    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDashes()));
 
     generator.setSpeed(6.0); #Hz
     generator.startMorseSeq(Morse.DOT);
@@ -293,7 +285,7 @@ if __name__ == "__main__":
     time.sleep(1);
     generator.stopMorseSeq();
     time.sleep(0.5);    
-    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDots()));
+    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDashes()));
     
     generator.setSpeed(12.0); #Hz
     generator.startMorseSeq(Morse.DOT);
@@ -305,7 +297,7 @@ if __name__ == "__main__":
     time.sleep(1);
     generator.stopMorseSeq();
     time.sleep(0.5);    
-    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDots()));
+    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDashes()));
     
     generator.stopMorseGenerator();
     
