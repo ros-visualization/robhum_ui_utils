@@ -15,13 +15,18 @@ from python_qt_binding import QtGui;
 from python_qt_binding import QtCore;
 #from word_completion.word_collection import WordCollection;
 from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor;
-from QtCore import QPoint, Qt; 
+from QtCore import QPoint, Qt, QTimer; 
+
+class Direction:
+    HORIZONTAL = 0
+    VERTICAL   = 1
 
 class MorseInput(QMainWindow):
     
     commChannel = CommChannel.getInstance();
     MORSE_BUTTON_WIDTH = 100; #px
     MORSE_BUTTON_HEIGHT = 100; #px
+    MOUSE_UNCONSTRAIN_TIMEOUT = 300; # msec
     
     def __init__(self):
         super(MorseInput,self).__init__();
@@ -43,14 +48,26 @@ class MorseInput(QMainWindow):
         GestureButton.setFlicksEnabled(False);
         
         self.connectWidgets();
-        # Monitor mouse, so that we can constrain mouse movement to
-        # vertical and horizontal:
-        self.setMouseTracking(True)
-        QApplication.setOverrideCursor(QCursor(Qt.OpenHandCursor))
+        self.morseCursor = QCursor(Qt.OpenHandCursor);
+        QApplication.setOverrideCursor(self.morseCursor);
         #QApplication.restoreOverrideCursor()
-
+        self.recentMousePos = None;
+        self.currentMouseDirection = None;
+        # Timer that frees the cursor from
+        # vertical/horizontal constraint every few
+        # milliseconds, unless mouse keeps moving:
+        self.mouseUnconstrainTimer = QTimer();
+        self.mouseUnconstrainTimer.setInterval(MorseInput.MOUSE_UNCONSTRAIN_TIMEOUT);
+        self.mouseUnconstrainTimer.setSingleShot(True);
+        self.mouseUnconstrainTimer.timeout.connect(self.unconstrainTheCursor);
 
         self.show();
+        # Monitor mouse, so that we can constrain mouse movement to
+        # vertical and horizontal (must be set after the affected
+        # widget(s) are visible):
+        #self.setMouseTracking(True)
+        #self.centralWidget.grabMouse()
+        
         #*****************
         selfPoint00 = self.mapToParent(QPoint(0,0))
         selfX00 = selfPoint00.x();
@@ -135,10 +152,47 @@ class MorseInput(QMainWindow):
             self.morseGenerator.stopMorseSeq();
         
     def mouseMoveEvent(self, mouseEvent):
-        globalPosX = mouseEvent.globalX()
-        globalPosY = mouseEvent.globalY()
-        mouseEvent.cursor().setPosition(globalPosX + 300)
-        10+3
+        
+        try:
+            if self.recentMousePos is None:
+                # Very first time: establish a 'previous' mouse cursor position:
+                self.recentMousePos = mouseEvent.globalPos();
+                return;
+                
+            globalPosX = mouseEvent.globalX()
+            globalPosY = mouseEvent.globalY()
+            
+            # If cursor moved while we are constraining motion 
+            # vertically or horizontally, enforce that constraint now:
+            if self.currentMouseDirection is not None:
+                if self.currentMouseDirection == Direction.HORIZONTAL:
+                    correctedCurPos = QPoint(globalPosX, self.recentMousePos.y());
+                    self.recentMousePos.setX(globalPosX);
+                else:
+                    correctedCurPos = QPoint(self.recentMousePos.x(), globalPosY);
+                    self.recentMousePos.setY(globalPosY);
+                self.morseCursor.setPos(correctedCurPos);
+                return;
+
+            # Not currently constraining mouse move. Check which 
+            # movement larger compared to the most recent position: x or y:
+            if abs(globalPosX - self.recentMousePos.x()) > abs(globalPosY - self.recentMousePos.y()):
+                self.currentMouseDirection = Direction.HORIZONTAL;
+            else:
+                self.currentMouseDirection = Direction.VERTICAL;
+            self.recentMousePos = mouseEvent.globalPos();
+        finally:
+            # Set timer to unconstrain the mouse if it is
+            # not moved for a while (interval is set in __init__()):
+            self.mouseUnconstrainTimer.start();
+            
+            # Have the event travel up the chain:
+            #mouseEvent.ignore();
+            super(MorseInput,self).mouseMoveEvent(mouseEvent);
+            return
+
+    def unconstrainTheCursor(self):
+        self.currentMouseDirection = None;
         
     def exit(self):
         self.morseGenerator.stopMorseGenerator();
