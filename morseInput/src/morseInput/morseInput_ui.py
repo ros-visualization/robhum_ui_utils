@@ -15,7 +15,7 @@ from python_qt_binding import QtGui;
 from python_qt_binding import QtCore;
 #from word_completion.word_collection import WordCollection;
 from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor;
-from QtCore import QPoint, Qt, QTimer; 
+from QtCore import QPoint, Qt, QTimer, QEvent; 
 
 class Direction:
     HORIZONTAL = 0
@@ -66,7 +66,8 @@ class MorseInput(QMainWindow):
         # vertical and horizontal (must be set after the affected
         # widget(s) are visible):
         #self.setMouseTracking(True)
-        #self.centralWidget.grabMouse()
+        self.centralWidget.installEventFilter(self);
+        self.centralWidget.setMouseTracking(True)
         
         #*****************
         selfPoint00 = self.mapToParent(QPoint(0,0))
@@ -150,8 +151,15 @@ class MorseInput(QMainWindow):
             self.morseGenerator.stopMorseSeq();
         elif buttonObj == self.dashButton:
             self.morseGenerator.stopMorseSeq();
+
+    def eventFilter(self, target, event):
+        #if target == self.centralWidget and event.type() == QEvent.MouseMove:
+        if event.type() == QEvent.MouseMove:
+            self.handleCursorConstraint(event);
+        # Pass this event on to its destination (rather than filtering it):
+        return False;
         
-    def mouseMoveEvent(self, mouseEvent):
+    def handleCursorConstraint(self, mouseEvent):
         
         try:
             if self.recentMousePos is None:
@@ -184,14 +192,16 @@ class MorseInput(QMainWindow):
         finally:
             # Set timer to unconstrain the mouse if it is
             # not moved for a while (interval is set in __init__()):
+            self.mouseUnconstrainTimer.setInterval(MorseInput.MOUSE_UNCONSTRAIN_TIMEOUT);
             self.mouseUnconstrainTimer.start();
-            
-            # Have the event travel up the chain:
-            #mouseEvent.ignore();
-            super(MorseInput,self).mouseMoveEvent(mouseEvent);
             return
 
     def unconstrainTheCursor(self):
+        # If user is hovering inside the dot or dash button,
+        # keep the hor/vert mouse move constraint going, even
+        # though the timeout of no mouse movement is done:
+        if self.dotButton.underMouse() or self.dashButton.underMouse():
+            self.mouseUnconstrainTimer.start();
         self.currentMouseDirection = None;
         
     def exit(self):
