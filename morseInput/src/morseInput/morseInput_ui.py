@@ -14,7 +14,7 @@ from python_qt_binding import loadUi;
 from python_qt_binding import QtGui;
 from python_qt_binding import QtCore;
 #from word_completion.word_collection import WordCollection;
-from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor;
+from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor, QHoverEvent;
 from QtCore import QPoint, Qt, QTimer, QEvent; 
 
 class Direction:
@@ -154,7 +154,8 @@ class MorseInput(QMainWindow):
 
     def eventFilter(self, target, event):
         #if target == self.centralWidget and event.type() == QEvent.MouseMove:
-        if event.type() == QEvent.MouseMove:
+        if (event.type() == QEvent.MouseMove) or (event.type == QHoverEvent):
+            self.mouseUnconstrainTimer.stop();
             self.handleCursorConstraint(event);
         # Pass this event on to its destination (rather than filtering it):
         return False;
@@ -202,6 +203,7 @@ class MorseInput(QMainWindow):
         # though the timeout of no mouse movement is done:
         if self.dotButton.underMouse() or self.dashButton.underMouse():
             self.mouseUnconstrainTimer.start();
+            return
         self.currentMouseDirection = None;
         
     def exit(self):

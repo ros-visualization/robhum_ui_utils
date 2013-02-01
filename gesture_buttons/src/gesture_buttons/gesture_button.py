@@ -6,8 +6,8 @@ import time;
 import math;
 
 from python_qt_binding import QtCore, QtGui
-from QtCore import QCoreApplication, QEvent, QEventTransition, QObject, QPoint, QSignalTransition, QState, QStateMachine, QTimer, Signal, SIGNAL, Slot
-from QtGui import QApplication, QCursor, QPushButton, QWidget
+from QtCore import QCoreApplication, QEvent, QEventTransition, QObject, QPoint, QSignalTransition, QState, QStateMachine, QTimer, Signal, SIGNAL, Slot, Qt
+from QtGui import QApplication, QCursor, QPushButton, QWidget, QHoverEvent
 
 class FlickDirection:
     NORTH = 0;
@@ -191,6 +191,8 @@ class GestureButton(QPushButton):
         self.stateMachine.addState(self.stateReEntered);
         self.stateMachine.addState(self.stateIdle);
         
+        self.installEventFilter(self);
+        
         self.stateMachine.setInitialState(self.stateIdle);
         self.stateMachine.start();
         
@@ -232,9 +234,14 @@ class GestureButton(QPushButton):
         #self.maxFlickDurationTimer.timeout.connect(self.flickThresholdExceeded);
         pass;
     
-    def mouseMoveEvent(self, mouseEvent):
-        self.latestMousePos = mouseEvent.pos();
-        super(GestureButton, self).mouseMoveEvent(mouseEvent);
+    def eventFilter(self, target, event):
+        if target == self and (event == QEvent.MouseMove or event == QHoverEvent): 
+            self.latestMousePos = mouseEvent.pos();
+        return False;
+    
+#    def mouseMoveEvent(self, mouseEvent):
+#        self.latestMousePos = mouseEvent.pos();
+#        super(GestureButton, self).mouseMoveEvent(mouseEvent);
     
     @Slot(QPushButton)
     def flickThresholdExceeded(self):
