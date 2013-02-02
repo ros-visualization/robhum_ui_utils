@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 
+# To do:
+# - Replace hardcoded icon file path with proper os calls
+# - Save settings, like window size in $HOME/.morse  
+# - Options dialog:
+#    * Morse speed
+#    * Use cursor constraint yes/no
+# - Generate keyboard events
+# - Publish package
+
+
 import sys
 import os
 
