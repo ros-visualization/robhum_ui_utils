@@ -1,0 +1,19 @@
+<package>
+  <description brief="virtual_keyboard">
+
+     Provides a Python based API for sending keyboard events
+     to the active X11 window, for obtaining the X11 mouse
+     pointer's absolute position, for moving the mouse cursor,
+     and for sending mouse click events to the X11 active window.
+
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/virtual_keyboard</url>
+  
+  <rosdep name="xdotool"/>
+
+</package>
+
+
