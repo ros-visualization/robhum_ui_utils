@@ -5,7 +5,7 @@ import os
 
 from gesture_buttons.gesture_button import GestureButton
 from gesture_buttons.gesture_button import CommChannel
-from gesture_buttons.gesture_button import  FlickDirection
+from gesture_buttons.gesture_button import FlickDirection
 
 from morseToneGeneration import MorseGenerator
 from morseToneGeneration import Morse
@@ -14,8 +14,12 @@ from python_qt_binding import loadUi;
 from python_qt_binding import QtGui;
 from python_qt_binding import QtCore;
 #from word_completion.word_collection import WordCollection;
-from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor, QHoverEvent;
+from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor, QHoverEvent, QSizePolicy;
 from QtCore import QPoint, Qt, QTimer, QEvent; 
+
+# Dot/Dash RGB: 0,179,240
+
+
 
 class Direction:
     HORIZONTAL = 0
@@ -26,6 +30,7 @@ class MorseInput(QMainWindow):
     commChannel = CommChannel.getInstance();
     MORSE_BUTTON_WIDTH = 100; #px
     MORSE_BUTTON_HEIGHT = 100; #px
+    SUPPORT_BUTTON_WIDTHS = 80; #px: The maximum Space and Backspace button widths.
     MOUSE_UNCONSTRAIN_TIMEOUT = 300; # msec
     
     def __init__(self):
@@ -46,6 +51,7 @@ class MorseInput(QMainWindow):
 
         self.insertGestureButtons();
         GestureButton.setFlicksEnabled(False);
+        self.constrainCursorInHotZone = False; #********
         
         self.connectWidgets();
         self.morseCursor = QCursor(Qt.OpenHandCursor);
@@ -69,27 +75,6 @@ class MorseInput(QMainWindow):
         self.centralWidget.installEventFilter(self);
         self.centralWidget.setMouseTracking(True)
         
-        #*****************
-        selfPoint00 = self.mapToParent(QPoint(0,0))
-        selfX00 = selfPoint00.x();
-        selfY00 = selfPoint00.y();
-        
-        selfPoint = self.mapToParent(self.pos())
-        selfX = selfPoint.x();
-        selfY = selfPoint.y();
-        
-        dashButtonFromGlobalPt = self.dashButtonWidget.mapFromGlobal(self.dashButtonWidget.pos());
-        dashButtonFromGlX = dashButtonFromGlobalPt.x()
-        dashButtonFromGlY = dashButtonFromGlobalPt.y()
-        selfFromGlobalPt = self.dashButtonWidget.mapFromGlobal(self.pos())
-        selfFromGlX = dashButtonFromGlobalPt.x()
-        selfFromGlY = dashButtonFromGlobalPt.y()
-        2+3
-        
-        #*****************
-        
-        
-        
     def findFile(self, path, matchFunc=os.path.isfile):
         if path is None:
             return None
@@ -100,33 +85,24 @@ class MorseInput(QMainWindow):
         return None;
 
     def insertGestureButtons(self):
-        self.dotButton = GestureButton('dot', parent=self.dotButtonWidget);
-        self.dashButton = GestureButton('dash', parent=self.dashButtonWidget);
-        self.eowButton = GestureButton('End of Word', parent=self.endOfWordButtonWidget);
-        self.backspaceButton = GestureButton('Backspace', parent=self.backspaceButtonWidget);
-        
-        self.dotButton.setMinimumWidth(MorseInput.MORSE_BUTTON_WIDTH);
+
+        self.dotButton = GestureButton('dot');
         self.dotButton.setMinimumHeight(MorseInput.MORSE_BUTTON_HEIGHT);
-        #**********************8
-        dotButtonPoint = self.dotButton.mapToGlobal(QPoint(0,0));
+        self.dotAndDashHLayout.addWidget(self.dotButton);
+
+        self.dotAndDashHLayout.addStretch();
         
-        self.dashButton.setMinimumWidth(MorseInput.MORSE_BUTTON_WIDTH);
+        self.dashButton = GestureButton('dash');
         self.dashButton.setMinimumHeight(MorseInput.MORSE_BUTTON_HEIGHT);
-        dashButtonGlobalPoint = self.dashButtonWidget.mapToGlobal(QPoint(0,0));
+        self.dotAndDashHLayout.addWidget(self.dashButton);
         
-        dashButtonFromGlobalPt = self.dashButtonWidget.mapFromGlobal(self.dashButtonWidget.pos());
-        dashButtonFromGlX = dashButtonFromGlobalPt.x()
-        dashButtonFromGlY = dashButtonFromGlobalPt.y()
-        selfFromGlobalPt = self.dashButtonWidget.mapFromGlobal(self.pos())
-        selfFromGlX = dashButtonFromGlobalPt.x()
-        selfFromGlY = dashButtonFromGlobalPt.y()
+        self.eowButton = GestureButton('Space');
+        self.endOfWordButtonHLayout.addWidget(self.eowButton);
+
+        self.backspaceButton = GestureButton('Backspace');
+        self.backspaceButton.setMaximumWidth(MorseInput.SUPPORT_BUTTON_WIDTHS)
+        self.backspaceHLayout.addWidget(self.backspaceButton);
         
-        dashButtonRect = self.dashButton.rect();
-        self.dashButtonLeftX  = dashButtonGlobalPoint.x();
-        self.dashButtonRightX = self.dashButtonLeftX + dashButtonRect.width();
-        self.dashButtonTopY   = dashButtonGlobalPoint.y();
-        self.dashButtonBottomY   = self.dashButtonTopY + dashButtonRect.height();
-        #**********************8        
         
     def connectWidgets(self):
         MorseInput.commChannel.buttonEnteredSig.connect(self.buttonEntered);
@@ -153,10 +129,10 @@ class MorseInput(QMainWindow):
             self.morseGenerator.stopMorseSeq();
 
     def eventFilter(self, target, event):
-        #if target == self.centralWidget and event.type() == QEvent.MouseMove:
         if (event.type() == QEvent.MouseMove) or (event.type == QHoverEvent):
-            self.mouseUnconstrainTimer.stop();
-            self.handleCursorConstraint(event);
+            if self.constrainCursorInHotZone:
+                self.mouseUnconstrainTimer.stop();
+                self.handleCursorConstraint(event);
         # Pass this event on to its destination (rather than filtering it):
         return False;
         
@@ -205,6 +181,7 @@ class MorseInput(QMainWindow):
             self.mouseUnconstrainTimer.start();
             return
         self.currentMouseDirection = None;
+        self.recentMousePos = None;
         
     def exit(self):
         self.morseGenerator.stopMorseGenerator();

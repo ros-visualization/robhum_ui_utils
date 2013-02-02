@@ -252,7 +252,7 @@ class GestureButton(QPushButton):
         '''
         Retrieves current mouse position, which is assumed to have been
         saved in the gesture button's lastMousePos instance variable by 
-        a mouseMove signal handler. Compares this mouse position with the 
+        a mouseMove signal handler or event filter. Compares this mouse position with the 
         four button borders. Returns a FlickDirection to indicate which
         border is closest to the mouse. All this uses global coordinates.
         @return: FlickDirection member.

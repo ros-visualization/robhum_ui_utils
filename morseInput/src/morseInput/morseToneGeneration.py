@@ -5,6 +5,7 @@ import time;
 import os;
 import signal;
 import threading;
+from datetime import datetime;
 
 class Morse:
     DOT  = 0;
@@ -128,8 +129,8 @@ class MorseGenerator(object):
         self.dotDuration = 1.0/(2*dotsPlusPausePerSec);
         #self.dashDuration = 3*self.dotDuration;
         self.dashDuration = 2*self.dotDuration;
-        self.interSigPauseDots = 1.5 * self.dotDuration;
-        self.interSigPauseDashes = 1.5 * self.dotDuration;
+        self.interSigPauseDots = self.dotDuration;
+        self.interSigPauseDashes = self.dotDuration;
         
         self.interLetterTime = 3.0*self.dotDuration;
         self.interWordTime   = 7.0*self.dotDuration;
@@ -149,6 +150,22 @@ class MorseGenerator(object):
         I.e.: end-of-word pause.
         '''
         return self.interWordTime;
+    
+    def reallySleep(self, secs):
+        '''
+        Truly return only after specified time. Just using
+        time.sleep() sleeps shorter if any interrupts occur during
+        the sleep period.
+        @param secs: fractional seconds to sleep
+        @type secs: float
+        '''
+        sleepStop  = time.time() + secs; 
+        while True:
+            timeLeft = sleepStop - time.time();
+            if timeLeft <= 0:
+                return
+            time.sleep(timeLeft)
+            
 
     # ------------------------------ Private ---------------------
 
@@ -195,7 +212,7 @@ class MorseGenerator(object):
                     else:
                         # Auto dot generation: pause for
                         # the inter-dot period:
-                        time.sleep(self.parent.interSigPauseDots);
+                        self.parent.reallySleep(self.parent.interSigPauseDots);
                         
                 self.parent.recentDots = numDots;
                 # Get ready for the next request for dot sequences:
@@ -243,7 +260,7 @@ class MorseGenerator(object):
                     else:
                         # Auto dot generation: pause for
                         # the inter-dash period:
-                        time.sleep(self.parent.interSigPauseDashes);
+                        self.parent.reallySleep(self.parent.interSigPauseDashes);
                     
                 self.parent.recentDashes = numDashes;
                 # Get ready for the next request for dashes sequences:
