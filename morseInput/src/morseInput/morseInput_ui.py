@@ -110,7 +110,8 @@ class MorseInput(QMainWindow):
     def insertGestureButtons(self):
 
         self.dotButton = GestureButton('dot');
-        self.dotButton.setIcon(QIcon("/home/paepcke/fuerte/stacks/robhum_ui_utils/morseInput/src/morseInput/icons/dot.png"));
+        iconDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons')
+        self.dotButton.setIcon(QIcon(os.path.join(iconDir, 'dot.png'))); 
         self.dotButton.setText("");
         # Don't have button assume the pressed-down color when 
         # clicked:
@@ -122,7 +123,7 @@ class MorseInput(QMainWindow):
         self.dotAndDashHLayout.addStretch();
         
         self.dashButton = GestureButton('dash');
-        self.dashButton.setIcon(QIcon("/home/paepcke/fuerte/stacks/robhum_ui_utils/morseInput/src/morseInput/icons/dash.png"));
+        self.dashButton.setIcon(QIcon(os.path.join(iconDir, 'dash.png')));
         self.dashButton.setText("");
         # Don't have button assume the pressed-down color when 
         # clicked:
