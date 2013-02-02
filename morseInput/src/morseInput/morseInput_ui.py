@@ -14,11 +14,10 @@ from python_qt_binding import loadUi;
 from python_qt_binding import QtGui;
 from python_qt_binding import QtCore;
 #from word_completion.word_collection import WordCollection;
-from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor, QHoverEvent, QSizePolicy;
+from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor, QHoverEvent, QColor, QIcon;
 from QtCore import QPoint, Qt, QTimer, QEvent; 
 
 # Dot/Dash RGB: 0,179,240
-
 
 
 class Direction:
@@ -30,7 +29,10 @@ class MorseInput(QMainWindow):
     commChannel = CommChannel.getInstance();
     MORSE_BUTTON_WIDTH = 100; #px
     MORSE_BUTTON_HEIGHT = 100; #px
+    
     SUPPORT_BUTTON_WIDTHS = 80; #px: The maximum Space and Backspace button widths.
+    SUPPORT_BUTTON_HEIGHTS = 80; #px: The maximum Space and Backspace button heights.
+    
     MOUSE_UNCONSTRAIN_TIMEOUT = 300; # msec
     
     def __init__(self):
@@ -67,6 +69,9 @@ class MorseInput(QMainWindow):
         self.mouseUnconstrainTimer.setSingleShot(True);
         self.mouseUnconstrainTimer.timeout.connect(self.unconstrainTheCursor);
 
+        self.createColors();
+        self.setStyleSheet("QWidget{background-color: %s}" % self.offWhiteColor.name());
+
         self.show();
         # Monitor mouse, so that we can constrain mouse movement to
         # vertical and horizontal (must be set after the affected
@@ -74,6 +79,14 @@ class MorseInput(QMainWindow):
         #self.setMouseTracking(True)
         self.centralWidget.installEventFilter(self);
         self.centralWidget.setMouseTracking(True)
+        
+    def createColors(self):
+        self.grayBlueColor = QColor(89,120,137);  # Letter buttons
+        self.offWhiteColor = QColor(206,230,243); # Background
+        self.darkGray      = QColor(65,88,101);   # Central buttons
+        self.wordListFontColor = QColor(62,143,185); # Darkish blue.
+        self.purple        = QColor(147,124,195); # Gesture button pressed
+        
         
     def findFile(self, path, matchFunc=os.path.isfile):
         if path is None:
@@ -87,20 +100,41 @@ class MorseInput(QMainWindow):
     def insertGestureButtons(self):
 
         self.dotButton = GestureButton('dot');
+        self.dotButton.setIcon(QIcon("/home/paepcke/fuerte/stacks/robhum_ui_utils/morseInput/src/morseInput/icons/dot.png"));
+        self.dotButton.setText("");
+        # Don't have button assume the pressed-down color when 
+        # clicked:
+        self.dotButton.setFocusPolicy(Qt.NoFocus);
         self.dotButton.setMinimumHeight(MorseInput.MORSE_BUTTON_HEIGHT);
+        self.dotButton.setMinimumWidth(MorseInput.MORSE_BUTTON_WIDTH);
         self.dotAndDashHLayout.addWidget(self.dotButton);
 
         self.dotAndDashHLayout.addStretch();
         
         self.dashButton = GestureButton('dash');
+        self.dashButton.setIcon(QIcon("/home/paepcke/fuerte/stacks/robhum_ui_utils/morseInput/src/morseInput/icons/dash.png"));
+        self.dashButton.setText("");
+        # Don't have button assume the pressed-down color when 
+        # clicked:
+        self.dashButton.setFocusPolicy(Qt.NoFocus);
         self.dashButton.setMinimumHeight(MorseInput.MORSE_BUTTON_HEIGHT);
+        self.dashButton.setMinimumWidth(MorseInput.MORSE_BUTTON_WIDTH);
         self.dotAndDashHLayout.addWidget(self.dashButton);
         
         self.eowButton = GestureButton('Space');
+        # Don't have button assume the pressed-down color when 
+        # clicked:
+        self.eowButton.setFocusPolicy(Qt.NoFocus);
+        self.eowButton.setMaximumWidth(MorseInput.SUPPORT_BUTTON_WIDTHS)        
+        self.eowButton.setMinimumHeight(MorseInput.SUPPORT_BUTTON_HEIGHTS)        
         self.endOfWordButtonHLayout.addWidget(self.eowButton);
 
         self.backspaceButton = GestureButton('Backspace');
+        # Don't have button assume the pressed-down color when 
+        # clicked:
+        self.backspaceButton.setFocusPolicy(Qt.NoFocus);
         self.backspaceButton.setMaximumWidth(MorseInput.SUPPORT_BUTTON_WIDTHS)
+        self.backspaceButton.setMinimumHeight(MorseInput.SUPPORT_BUTTON_HEIGHTS)
         self.backspaceHLayout.addWidget(self.backspaceButton);
         
         
@@ -115,10 +149,12 @@ class MorseInput(QMainWindow):
             self.morseGenerator.startMorseSeq(Morse.DASH);
         elif buttonObj == self.eowButton:
             #****
+            buttonObj.animateClick();
             print "End of word"
             #****
         elif buttonObj == self.backspaceButton:
             #****
+            buttonObj.animateClick();
             print "Backspace"
             #****
         
