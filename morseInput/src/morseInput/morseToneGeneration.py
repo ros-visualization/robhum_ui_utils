@@ -6,14 +6,24 @@ import os;
 import signal;
 import threading;
 from datetime import datetime;
+from watchdogTimer import WatchdogTimer;
+from morseCodeTranslationKey import codeKey;
 
 class Morse:
     DOT  = 0;
     DASH = 1;
 
+class TimeoutReason:
+    END_OF_LETTER = 0
+    END_OF_WORD   = 1
+
 class MorseGenerator(object):
+    '''
+    Manages non-UI issues for Morse code generation: Interacts with the 
+    tone generator, regulates auto dot/dash generation speed.
+    '''
     
-    def __init__(self):
+    def __init__(self, callback=None):
         super(MorseGenerator, self).__init__();
         
         # ------ Instance Vars Available Through Getters/Setters ------------
@@ -21,10 +31,16 @@ class MorseGenerator(object):
         # Frequency of the tone:        
         self.frequency = 300; # Hz
         
+        self.callback = callback;
+        
         self.setSpeed(3.3);
         self.automaticMorse = True;
         self.recentDots = 0;
         self.recentDashes = 0;
+        # morseResult will accumulate the dots and dashes:
+        self.morseResult = '';
+        self.alphaStr = '';
+        self.watchdog = WatchdogTimer(timeout=self.interLetterTime);
         
         # ------ Private Instance Vars  ------------
         
@@ -60,6 +76,7 @@ class MorseGenerator(object):
         if not self.keepRunning:
             raise RuntimeError("Called Morse generator method after stopMorseGenerator() was called.");
 
+        self.watchdog.kick();
         # Set a thread event for which dot or dash generator are waiting:
         if morseElement == Morse.DASH:
             self.morseDashEvent.set();
@@ -70,30 +87,21 @@ class MorseGenerator(object):
         '''
         Stop a running sequence of dots or dashes. After this call,
         use getRecentDots() or getRecentDashes() to get a count of
-        signals that were emitted. If automatic Morse generation is
-        disabled, it is not necessary to call this method. See
-        setAutoMorse().
+        Morse elements (dots or dashes) that were emitted. If automatic 
+        Morse generation is disabled, it is not necessary to call this 
+        method. See setAutoMorse().
         '''
         if not self.keepRunning:
             raise RuntimeError("Called Morse generator method after stopMorseGenerator() was called.");
         # Clear dot and dash generation events so that the
-        # generator tasks will go into a wait state.
+        # generator threads will go into a wait state.
         self.morseDotEvent.clear();
         self.morseDashEvent.clear();
-
-    def stopMorseGenerator(self):
-        '''
-        Stop the entire generator. All threads are killed.
-        Subsequent calls to startMorseSeq() or stopMorseSeq() 
-        generate exceptions.
-        '''
-        self.keepRunning = False;
-        # Ensure that the dot and dash generators
-        # get out of the wait state to notice that
-        # they are supposed to terminate:
-        self.morseDashEvent.set();
-        self.morseDotEvent.set();
         
+    def abortCurrentMorseElement(self):
+        self.watchdog.stop();
+        self.morseResult = '';
+
     def setAutoMorse(self, yesNo):
         '''
         Determine whether dots and dashes are generated one at
@@ -135,6 +143,24 @@ class MorseGenerator(object):
         self.interLetterTime = 3.0*self.dotDuration;
         self.interWordTime   = 7.0*self.dotDuration;
         
+    def stopMorseGenerator(self):
+        '''
+        Stop the entire generator. All threads are killed.
+        Subsequent calls to startMorseSeq() or stopMorseSeq() 
+        generate exceptions.
+        '''
+        self.keepRunning = False;
+        # Ensure that the dot and dash generators
+        # get out of the wait state to notice that
+        # they are supposed to terminate:
+        self.morseDashEvent.set();
+        self.morseDotEvent.set();
+
+    def getAndRemoveAlpha():
+        res = self.alphaStr;
+        self.alphaStr = '';
+        return res;
+        
     def getInterLetterTime(self):
         '''
         Return the minimum amount of silence time required
@@ -169,6 +195,29 @@ class MorseGenerator(object):
 
     # ------------------------------ Private ---------------------
 
+    def addMorseElements(self, dotsOrDashes, numElements):
+        if dotsOrDashes == Morse.DASH:
+            self.morseResult += '-'*numElements;
+        else: # dots:
+            # Catch abort-letter:
+            if numElements > 6:
+                self.abortCurrentMorseElement();
+                return;
+            self.morseResult += '.'*numElements;
+
+    def watchdogExpired(self, reason):
+        if reason == TimeoutReason.END_OF_LETTER:
+            self.alphaStr += self.decodeMorseLetter();
+        elif reason == TimeoutReason.END_OF_WORD:
+            self.alphaStr += ' ';
+        self.morseResult = '';
+        if self.callback is not None:
+            self.callback(reason);
+
+    def decodeMorseLetter(self):
+        letter = codeKey[self.morseResult];
+        return letter;
+            
     #-----------------------------
     # DotGenerator Class
     #-------------------
@@ -214,7 +263,7 @@ class MorseGenerator(object):
                         # the inter-dot period:
                         self.parent.reallySleep(self.parent.interSigPauseDots);
                         
-                self.parent.recentDots = numDots;
+                self.parent.addMorseElements(Morse.DOT, numDots);
                 # Get ready for the next request for dot sequences:
                 numDots = 0;
                 self.parent.morseDotEvent.wait();
@@ -262,7 +311,7 @@ class MorseGenerator(object):
                         # the inter-dash period:
                         self.parent.reallySleep(self.parent.interSigPauseDashes);
                     
-                self.parent.recentDashes = numDashes;
+                self.parent.addMorseElements(Morse.DASH, numDashes);
                 # Get ready for the next request for dashes sequences:
                 numDashes = 0;
                 self.parent.morseDashEvent.wait();
@@ -274,49 +323,55 @@ if __name__ == "__main__":
     # Initially: not automatic:
     generator.setAutoMorse(False);
 
-    generator.startMorseSeq(Morse.DOT);
-    time.sleep(1);
-    generator.startMorseSeq(Morse.DASH);
-    time.sleep(1);
-    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDashes()));
-    
-    generator.setAutoMorse(True);
+#    generator.startMorseSeq(Morse.DOT);
+#    time.sleep(1);
+#    generator.startMorseSeq(Morse.DASH);
+#    time.sleep(1);
+#    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDashes()));
+#    
+#    generator.setAutoMorse(True);
+#
+#    generator.startMorseSeq(Morse.DOT);
+#    time.sleep(1);
+#    generator.stopMorseSeq();
+#    time.sleep(0.5);
+#
+#    generator.startMorseSeq(Morse.DASH);
+#    time.sleep(1);
+#    generator.stopMorseSeq();
+#    time.sleep(1.5);    
+#    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDashes()));
+#
+#    generator.setSpeed(6.0); #Hz
+#    generator.startMorseSeq(Morse.DOT);
+#    time.sleep(1);
+#    generator.stopMorseSeq();
+#    time.sleep(0.5);    
+#
+#    generator.startMorseSeq(Morse.DASH);
+#    time.sleep(1);
+#    generator.stopMorseSeq();
+#    time.sleep(0.5);    
+#    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDashes()));
+#    
+#    generator.setSpeed(12.0); #Hz
+#    generator.startMorseSeq(Morse.DOT);
+#    time.sleep(1);
+#    generator.stopMorseSeq();
+#    time.sleep(0.5);    
+#
+#    generator.startMorseSeq(Morse.DASH);
+#    time.sleep(1);
+#    generator.stopMorseSeq();
+#    time.sleep(0.5);    
+#    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDashes()));
 
-    generator.startMorseSeq(Morse.DOT);
-    time.sleep(1);
-    generator.stopMorseSeq();
-    time.sleep(0.5);
-
-    generator.startMorseSeq(Morse.DASH);
-    time.sleep(1);
-    generator.stopMorseSeq();
-    time.sleep(1.5);    
-    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDashes()));
-
-    generator.setSpeed(6.0); #Hz
-    generator.startMorseSeq(Morse.DOT);
-    time.sleep(1);
-    generator.stopMorseSeq();
-    time.sleep(0.5);    
-
-    generator.startMorseSeq(Morse.DASH);
-    time.sleep(1);
-    generator.stopMorseSeq();
-    time.sleep(0.5);    
-    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDashes()));
-    
-    generator.setSpeed(12.0); #Hz
-    generator.startMorseSeq(Morse.DOT);
-    time.sleep(1);
-    generator.stopMorseSeq();
-    time.sleep(0.5);    
-
-    generator.startMorseSeq(Morse.DASH);
-    time.sleep(1);
-    generator.stopMorseSeq();
-    time.sleep(0.5);    
-    print("Dots: %d. Dashes: %d" % (generator.numRecentDots(), generator.numRecentDashes()));
-    
-    generator.stopMorseGenerator();
-    
+#    generator.addMorseElements(Morse.DASH, 1)
+#    time.sleep(generator.interLetterTime + 0.1);
+#    letterLookup = generator.decodeMorseLetter();
+#    #for key in sorted(codeKey.keys()):
+#    #    print(str(key) + ':' + codeKey[key])
+#    if letterLookup != 't': 
+#        raise ValueError("Morse 't' not recognized")
+                
     

@@ -54,6 +54,7 @@ class CommChannel(QObject):
         if CommChannel.singletonInstance is not None:
             raise RuntimeError("Use getInstance() to obtain CommChannel instances.");
         CommChannel.singletonInstance = self;
+        self.userSignals = {};
         
     @staticmethod
     def getInstance():
@@ -61,7 +62,7 @@ class CommChannel(QObject):
             return CommChannel.singletonInstance;
         else:
             return CommChannel();
-
+        
 # Unused
 class FlickDeterminationDone(QEvent):
     

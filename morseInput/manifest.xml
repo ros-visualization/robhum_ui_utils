@@ -12,6 +12,8 @@
   <depend package="rospy" />
   <depend package="python_qt_binding"/>
   <depend package="gesture_buttons" />
+  <depend package="qt_comm_channel" />
+  <depend package="virtual_keyboard" />
 
   <rosdep name="python-qt4"/>
 

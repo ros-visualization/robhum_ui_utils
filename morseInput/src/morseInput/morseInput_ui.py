@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 # To do:
-# - Replace hardcoded icon file path with proper os calls
 # - Save settings, like window size in $HOME/.morse  
 # - Options dialog:
 #    * Morse speed
 #    * Use cursor constraint yes/no
-# - Generate keyboard events
+#    * Inter-letter and inter-word time
+#    * Speak vs. type
+#    * dwell-pause
 # - Publish package
 
 
@@ -14,11 +15,13 @@ import sys
 import os
 
 from gesture_buttons.gesture_button import GestureButton
-from gesture_buttons.gesture_button import CommChannel
 from gesture_buttons.gesture_button import FlickDirection
+
+from qt_comm_channel.commChannel import CommChannel
 
 from morseToneGeneration import MorseGenerator
 from morseToneGeneration import Morse
+from morseToneGeneration import TimeoutReason
 
 from python_qt_binding import loadUi;
 from python_qt_binding import QtGui;
@@ -35,8 +38,12 @@ class Direction:
     VERTICAL   = 1
 
 class MorseInput(QMainWindow):
+    '''
+    Manages all UI interactions with the Morse code generation.
+    '''
     
     commChannel = CommChannel.getInstance();
+    
     MORSE_BUTTON_WIDTH = 100; #px
     MORSE_BUTTON_HEIGHT = 100; #px
     
@@ -47,8 +54,10 @@ class MorseInput(QMainWindow):
     
     def __init__(self):
         super(MorseInput,self).__init__();
+
+        MorseInput.commChannel.registerSignal('letterDone',  Signal(int))
         
-        # Find QtCreator's XML file in the PYTHONPATH:
+        # Find QtCreator's XML file in the PYTHONPATH, and load it:
         currDir = os.path.realpath(__file__);
         relPathQtCreatorFile = "qt_files/morseInput/morseInput.ui";
         qtCreatorXMLFilePath = self.findFile(relPathQtCreatorFile);
@@ -56,19 +65,43 @@ class MorseInput(QMainWindow):
             raise ValueError("Can't find QtCreator user interface file %s" % relPathQtCreatorFile);
         # Make QtCreator generated UI a child if this instance:
         loadUi(qtCreatorXMLFilePath, self);
-        self.setWindowTitle("Morse Input");
+        self.setWindowTitle("Morser: Semi-automatic Morse code input");
         
-        self.morseGenerator = MorseGenerator();   
-        self.morseGenerator.setSpeed(1.7);   
+        # Get a morse generator that manages all Morse 
+        # generation and timing:
+        self.morseGenerator = MorseGenerator(MorseInput.letterCompleteNotification);
+        self.morseGenerator.setSpeed(1.7);
 
+        # Create the gesture buttons for dot/dash/space/backspace:
         self.insertGestureButtons();
         GestureButton.setFlicksEnabled(False);
-        self.constrainCursorInHotZone = False; #********
         
         self.connectWidgets();
+        
+        # Set cursor to hand icon while inside Morser:
         self.morseCursor = QCursor(Qt.OpenHandCursor);
         QApplication.setOverrideCursor(self.morseCursor);
         #QApplication.restoreOverrideCursor()
+        
+        # Init capability of constraining cursor to
+        # move only virtically and horizontally:
+        self.initCursorContrainer();
+        
+        # Styling:
+        self.createColors();
+        self.setStyleSheet("QWidget{background-color: %s}" % self.lightBlueColor.name());
+
+        self.show();
+
+        # Monitor mouse, so that we can constrain mouse movement to
+        # vertical and horizontal (must be set after the affected
+        # widget(s) are visible):
+        #self.setMouseTracking(True)
+        self.centralWidget.installEventFilter(self);
+        self.centralWidget.setMouseTracking(True)
+
+    def initCursorContrainer(self):
+        self.constrainCursorInHotZone = False; #********
         self.recentMousePos = None;
         self.currentMouseDirection = None;
         # Timer that frees the cursor from
@@ -79,20 +112,9 @@ class MorseInput(QMainWindow):
         self.mouseUnconstrainTimer.setSingleShot(True);
         self.mouseUnconstrainTimer.timeout.connect(self.unconstrainTheCursor);
 
-        self.createColors();
-        self.setStyleSheet("QWidget{background-color: %s}" % self.offWhiteColor.name());
-
-        self.show();
-        # Monitor mouse, so that we can constrain mouse movement to
-        # vertical and horizontal (must be set after the affected
-        # widget(s) are visible):
-        #self.setMouseTracking(True)
-        self.centralWidget.installEventFilter(self);
-        self.centralWidget.setMouseTracking(True)
-        
     def createColors(self):
         self.grayBlueColor = QColor(89,120,137);  # Letter buttons
-        self.offWhiteColor = QColor(206,230,243); # Background
+        self.lightBlueColor = QColor(206,230,243); # Background
         self.darkGray      = QColor(65,88,101);   # Central buttons
         self.wordListFontColor = QColor(62,143,185); # Darkish blue.
         self.purple        = QColor(147,124,195); # Gesture button pressed
@@ -152,6 +174,10 @@ class MorseInput(QMainWindow):
     def connectWidgets(self):
         MorseInput.commChannel.buttonEnteredSig.connect(self.buttonEntered);
         MorseInput.commChannel.buttonExitedSig.connect(self.buttonExited);
+        
+        MorseInput.commChannel['buttonEntered']
+        
+        
     
     def buttonEntered(self, buttonObj):
         if buttonObj == self.dotButton:
@@ -229,7 +255,18 @@ class MorseInput(QMainWindow):
             return
         self.currentMouseDirection = None;
         self.recentMousePos = None;
-        
+
+    @staticmethod
+    def letterCompleteNotification(reason):
+        self.letterCompleteSignal.emit(reason);
+
+    @QtCore.Slot(int)
+    def printLetter(self, reason):
+        alpha = self.morseGenerator.getAndRemoveAlpha()
+        if reason == TimeoutReason.END_OF_WORD:
+            alpha += ' '; 
+        print("Alpha:'%s'", alpha);
+
     def exit(self):
         self.morseGenerator.stopMorseGenerator();
 
