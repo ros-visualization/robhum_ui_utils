@@ -40,10 +40,10 @@ class CommChannel(QObject):
     def registerSignals(signalsClass):
         '''
         Add a new Qt Signal instance under a name. 
-        :param sigName: name under which signal object is known, and can be retrieved.
-        :type sigName: string
-        :param sigObj: the Qt Signal object to register
-        :type sigObj: QtCore.Signal
+        @param sigName: name under which signal object is known, and can be retrieved.
+        @type sigName: string
+        @param sigObj: the Qt Signal object to register
+        @type sigObj: QtCore.Signal
         '''
         if not issubclass(signalsClass, QObject):
             raise ValueError("Class passed to registerSignals must be a subclass of CommChannel.");
@@ -66,8 +66,10 @@ class CommChannel(QObject):
         '''
         Retrieve a previously added signal. Alternatively,
         use dict style syntaxs: commInstance[sigName].
-        :param sigName: name under which signal was registered.
-        :type sigName: string
+        @param sigName: name under which signal was registered.
+        @type sigName: string
+        @return: signal object, or None, if signal of given name was not registered.
+        @rtype: {QtCore.Signal | None}
         '''
         return CommChannel.userSigs[sigName];
     

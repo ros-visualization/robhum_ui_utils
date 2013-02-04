@@ -40,13 +40,16 @@ class MorseGenerator(object):
         # morseResult will accumulate the dots and dashes:
         self.morseResult = '';
         self.alphaStr = '';
-        self.watchdog = WatchdogTimer(timeout=self.interLetterTime);
+        self.watchdog = WatchdogTimer(timeout=self.interLetterTime, callback=self.watchdogExpired);
         
         # ------ Private Instance Vars  ------------
         
         self.morseDashEvent  = threading.Event();
         self.morseDotEvent   = threading.Event();
         self.morseStopEvent  = threading.Event();
+
+        # Lock for regulating write-access to alpha string:
+        self.alphaStrLock = threading.Lock();
 
         # Set to False to stop thread:        
         self.keepRunning = True;
@@ -75,8 +78,11 @@ class MorseGenerator(object):
         
         if not self.keepRunning:
             raise RuntimeError("Called Morse generator method after stopMorseGenerator() was called.");
-
-        self.watchdog.kick();
+        # We are starting a sequence of dots and dashes.
+        # The Morse element can't possibly be ended until
+        # stopMorseSeq() is called by mouse cursor leaving
+        # a gesture button:
+        self.watchdog.stop();
         # Set a thread event for which dot or dash generator are waiting:
         if morseElement == Morse.DASH:
             self.morseDashEvent.set();
@@ -89,7 +95,8 @@ class MorseGenerator(object):
         use getRecentDots() or getRecentDashes() to get a count of
         Morse elements (dots or dashes) that were emitted. If automatic 
         Morse generation is disabled, it is not necessary to call this 
-        method. See setAutoMorse().
+        method. See setAutoMorse(). Called when mouse cursor leaves
+        
         '''
         if not self.keepRunning:
             raise RuntimeError("Called Morse generator method after stopMorseGenerator() was called.");
@@ -97,6 +104,11 @@ class MorseGenerator(object):
         # generator threads will go into a wait state.
         self.morseDotEvent.clear();
         self.morseDashEvent.clear();
+        # If there will now be a pause long enough
+        # to indicate the end of a letter, this
+        # watchdog will go off:
+        self.watchdog.changeCallbackArg(TimeoutReason.END_OF_LETTER);
+        self.watchdog.kick();
         
     def abortCurrentMorseElement(self):
         self.watchdog.stop();
@@ -156,10 +168,14 @@ class MorseGenerator(object):
         self.morseDashEvent.set();
         self.morseDotEvent.set();
 
-    def getAndRemoveAlpha():
+    def getAndRemoveAlphaStr(self):
         res = self.alphaStr;
-        self.alphaStr = '';
+        self.setAlphaStr('');
         return res;
+
+    def setAlphaStr(self, newAlphaStr):
+        with self.alphaStrLock:
+            self.alphaStr = newAlphaStr
         
     def getInterLetterTime(self):
         '''
@@ -207,15 +223,23 @@ class MorseGenerator(object):
 
     def watchdogExpired(self, reason):
         if reason == TimeoutReason.END_OF_LETTER:
-            self.alphaStr += self.decodeMorseLetter();
+            newLetter = self.decodeMorseLetter();
+            # If Morse sequence was legal and recognized,
+            # append it:
+            if newLetter is not None:
+                self.setAlphaStr(self.alphaStr + newLetter);
         elif reason == TimeoutReason.END_OF_WORD:
-            self.alphaStr += ' ';
+            self.setAlphaStr(self.alphaStr + ' ');
         self.morseResult = '';
         if self.callback is not None:
             self.callback(reason);
 
     def decodeMorseLetter(self):
-        letter = codeKey[self.morseResult];
+        try:
+            letter = codeKey[self.morseResult];
+        except KeyError:
+            print("Bad morse seq: '%s'" % self.morseResult);
+            return None
         return letter;
             
     #-----------------------------

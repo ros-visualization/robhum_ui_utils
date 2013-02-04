@@ -16,6 +16,7 @@
   <depend package="virtual_keyboard" />
 
   <rosdep name="python-qt4"/>
+  <rosdep name="alsa-utils"/>
 
 
 </package>

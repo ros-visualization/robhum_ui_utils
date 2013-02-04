@@ -25,6 +25,8 @@ from morseToneGeneration import MorseGenerator
 from morseToneGeneration import Morse
 from morseToneGeneration import TimeoutReason
 
+from virtual_keyboard.virtual_keyboard import VirtualKeyboard
+
 from python_qt_binding import loadUi;
 from python_qt_binding import QtGui;
 from python_qt_binding import QtCore;
@@ -81,7 +83,7 @@ class MorseInput(QMainWindow):
         
         # Get a morse generator that manages all Morse 
         # generation and timing:
-        self.morseGenerator = MorseGenerator(MorseInput.letterCompleteNotification);
+        self.morseGenerator = MorseGenerator(callback=MorseInput.letterCompleteNotification);
         self.morseGenerator.setSpeed(1.7);
 
         # Create the gesture buttons for dot/dash/space/backspace:
@@ -204,7 +206,7 @@ class MorseInput(QMainWindow):
     def connectWidgets(self):
         CommChannel.getSignal('GestureSignals.buttonEnteredSig').connect(self.buttonEntered);
         CommChannel.getSignal('GestureSignals.buttonExitedSig').connect(self.buttonExited);
-        CommChannel.getSignal('MorseInputSignals.letterDone').connect(self.letterCompleteNotification);
+        CommChannel.getSignal('MorseInputSignals.letterDone').connect(self.printLetter);
     
     def showOptions(self):
         self.morserOptionsDialog.show();
@@ -288,14 +290,14 @@ class MorseInput(QMainWindow):
 
     @staticmethod
     def letterCompleteNotification(reason):
-        self.letterCompleteSignal.emit(reason);
+        MorseInputSignals.getSignal('MorseInputSignals.letterDone').emit(reason);
 
     @QtCore.Slot(int)
     def printLetter(self, reason):
-        alpha = self.morseGenerator.getAndRemoveAlpha()
+        alpha = self.morseGenerator.getAndRemoveAlphaStr()
         if reason == TimeoutReason.END_OF_WORD:
             alpha += ' '; 
-        print("Alpha:'%s'", alpha);
+        print("Alpha:'%s'" % alpha);
 
     def exit(self):
         self.morseGenerator.stopMorseGenerator();

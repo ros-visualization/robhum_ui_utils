@@ -17,6 +17,10 @@ class WatchdogTimer(object):
         self.timedout = True;
         self.stopped  = True;
         
+        self.timer = QTimer();
+        self.timer.setSingleShot(True);
+        self.timer.timeout.connect(self.timerExpiredHandler);
+                
         if selfTest:
             self.runSelfTest();
             #sys.exit();
@@ -30,9 +34,10 @@ class WatchdogTimer(object):
         self.stopped  = False;
         if timeout is None:
             timeout = self.timeout;
-        QTimer.singleShot(timeout, self.timerExpiredHandler);
+        self.timer.start(timeout);
         
     def stop(self):
+        self.timer.stop();
         self.timedout = False;
         self.stopped  = True;
     
@@ -41,6 +46,9 @@ class WatchdogTimer(object):
         
     def changeCallback(self, newCallback):
         self.callback = newCallback;
+        
+    def changeCallbackArg(self, newArg):
+        self.callbackArg = newArg;
     
     def timerExpiredHandler(self):
         if self.stopped:
