@@ -28,7 +28,7 @@ from python_qt_binding import QtGui;
 from python_qt_binding import QtCore;
 #from word_completion.word_collection import WordCollection;
 from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor, QHoverEvent, QColor, QIcon;
-from QtCore import QPoint, Qt, QTimer, QEvent; 
+from QtCore import QPoint, Qt, QTimer, QEvent, Signal; 
 
 # Dot/Dash RGB: 0,179,240
 
@@ -37,12 +37,13 @@ class Direction:
     HORIZONTAL = 0
     VERTICAL   = 1
 
+class MorseInputSignals(CommChannel):
+    letterDone = Signal(int);
+
 class MorseInput(QMainWindow):
     '''
     Manages all UI interactions with the Morse code generation.
     '''
-    
-    commChannel = CommChannel.getInstance();
     
     MORSE_BUTTON_WIDTH = 100; #px
     MORSE_BUTTON_HEIGHT = 100; #px
@@ -55,7 +56,7 @@ class MorseInput(QMainWindow):
     def __init__(self):
         super(MorseInput,self).__init__();
 
-        MorseInput.commChannel.registerSignal('letterDone',  Signal(int))
+        CommChannel.registerSignals(MorseInputSignals);
         
         # Find QtCreator's XML file in the PYTHONPATH, and load it:
         currDir = os.path.realpath(__file__);
@@ -172,12 +173,9 @@ class MorseInput(QMainWindow):
         
         
     def connectWidgets(self):
-        MorseInput.commChannel.buttonEnteredSig.connect(self.buttonEntered);
-        MorseInput.commChannel.buttonExitedSig.connect(self.buttonExited);
-        
-        MorseInput.commChannel['buttonEntered']
-        
-        
+        CommChannel.getSignal('GestureSignals.buttonEnteredSig').connect(self.buttonEntered);
+        CommChannel.getSignal('GestureSignals.buttonExitedSig').connect(self.buttonExited);
+        CommChannel.getSignal('MorseInputSignals.letterDone').connect(self.letterCompleteNotification);
     
     def buttonEntered(self, buttonObj):
         if buttonObj == self.dotButton:
