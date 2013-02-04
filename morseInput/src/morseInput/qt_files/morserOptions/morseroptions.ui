@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MorserOptionsDialog</class>
- <widget class="QDialog" name="MorserOptionsDialog">
+ <class>morserOptionsDialog</class>
+ <widget class="QDialog" name="morserOptionsDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>363</width>
-    <height>351</height>
+    <width>373</width>
+    <height>402</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,17 +27,23 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>341</width>
-     <height>371</height>
+     <width>351</width>
+     <height>381</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>80</y>
-      <width>321</width>
-      <height>191</height>
+      <y>160</y>
+      <width>331</width>
+      <height>135</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="speedControlVLayout">
@@ -71,6 +77,19 @@
         </widget>
        </item>
        <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <widget class="QSlider" name="horizontalSlider">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -94,7 +113,20 @@
         </widget>
        </item>
        <item>
-        <widget class="QScrollBar" name="keySpeedSlider">
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QSlider" name="horizontalSlider_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -117,7 +149,20 @@
         </widget>
        </item>
        <item>
-        <widget class="QScrollBar" name="interWordDelaySlider">
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QSlider" name="interWordDelaySlider">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -126,27 +171,6 @@
       </layout>
      </item>
     </layout>
-   </widget>
-   <widget class="QCheckBox" name="cursorConstraintCheckBox">
-    <property name="geometry">
-     <rect>
-      <x>1</x>
-      <y>51</y>
-      <width>161</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string>If set, cursor only moves either up/down, or left/right inside Morser window.</string>
-    </property>
-    <property name="text">
-     <string>Constrain cursor</string>
-    </property>
    </widget>
    <widget class="QLabel" name="morserOptionsLabel">
     <property name="geometry">
@@ -170,9 +194,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>270</y>
-      <width>331</width>
-      <height>61</height>
+      <y>330</y>
+      <width>341</width>
+      <height>31</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -202,11 +226,116 @@
      <item>
       <widget class="QPushButton" name="savePushButton">
        <property name="text">
-        <string>PushButton</string>
+        <string>Save</string>
        </property>
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_5">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>60</y>
+      <width>336</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QCheckBox" name="cursorConstraintCheckBox">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>If set, cursor only moves either up/down, or left/right inside Morser window.</string>
+       </property>
+       <property name="text">
+        <string>Constrain cursor</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="dwellSegmentationCheckBox">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>If checked, then pausing in the space between dot and dash terminates one Morse letter.</string>
+       </property>
+       <property name="text">
+        <string>Dwell segmentation</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>331</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="title">
+     <string>Output:</string>
+    </property>
+    <widget class="QRadioButton" name="typeOutputRadioButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>116</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Type</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="autoRepeat">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="speechOutputRadioButton">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>30</y>
+       <width>116</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Speech</string>
+     </property>
+    </widget>
    </widget>
   </widget>
  </widget>

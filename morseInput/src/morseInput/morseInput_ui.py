@@ -28,6 +28,7 @@ from python_qt_binding import QtGui;
 from python_qt_binding import QtCore;
 #from word_completion.word_collection import WordCollection;
 from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor, QHoverEvent, QColor, QIcon;
+from QtGui import QMenuBar;
 from QtCore import QPoint, Qt, QTimer, QEvent, Signal; 
 
 # Dot/Dash RGB: 0,179,240
@@ -60,13 +61,21 @@ class MorseInput(QMainWindow):
         
         # Find QtCreator's XML file in the PYTHONPATH, and load it:
         currDir = os.path.realpath(__file__);
-        relPathQtCreatorFile = "qt_files/morseInput/morseInput.ui";
-        qtCreatorXMLFilePath = self.findFile(relPathQtCreatorFile);
+        
+        relPathQtCreatorFileMainWin = "qt_files/morseInput/morseInput.ui";
+        qtCreatorXMLFilePath = self.findFile(relPathQtCreatorFileMainWin);
         if qtCreatorXMLFilePath is None:
-            raise ValueError("Can't find QtCreator user interface file %s" % relPathQtCreatorFile);
+            raise ValueError("Can't find QtCreator user interface file %s" % relPathQtCreatorFileMainWin);
         # Make QtCreator generated UI a child if this instance:
         loadUi(qtCreatorXMLFilePath, self);
         self.setWindowTitle("Morser: Semi-automatic Morse code input");
+        
+        relPathQtCreatorFileOptionsDialog = "qt_files/morserOptions/morseroptions.ui";
+        qtCreatorXMLFilePath = self.findFile(relPathQtCreatorFileOptionsDialog);
+        if qtCreatorXMLFilePath is None:
+            raise ValueError("Can't find QtCreator user interface file %s" % relPathQtCreatorFileOptionsDialog);
+        # Make QtCreator generated UI a child if this instance:
+        self.morserOptionsDialog = loadUi(qtCreatorXMLFilePath);
         
         # Get a morse generator that manages all Morse 
         # generation and timing:
@@ -76,6 +85,8 @@ class MorseInput(QMainWindow):
         # Create the gesture buttons for dot/dash/space/backspace:
         self.insertGestureButtons();
         GestureButton.setFlicksEnabled(False);
+        
+        self.installMenuBar();
         
         self.connectWidgets();
         
@@ -172,10 +183,29 @@ class MorseInput(QMainWindow):
         self.backspaceHLayout.addWidget(self.backspaceButton);
         
         
+    def installMenuBar(self):
+        exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(self.close)
+        
+        raiseOptionsDialogAction = QtGui.QAction(QtGui.QIcon('preferences-desktop-accessibility.png'), '&Options', self)
+        raiseOptionsDialogAction.setStatusTip('Show options and settings')
+        raiseOptionsDialogAction.triggered.connect(self.showOptions)
+  
+        fileMenu = self.menuBar.addMenu('&File')
+        fileMenu.addAction(exitAction)
+        
+        editMenu = self.menuBar.addMenu('&Edit')
+        editMenu.addAction(raiseOptionsDialogAction)      
+        
     def connectWidgets(self):
         CommChannel.getSignal('GestureSignals.buttonEnteredSig').connect(self.buttonEntered);
         CommChannel.getSignal('GestureSignals.buttonExitedSig').connect(self.buttonExited);
         CommChannel.getSignal('MorseInputSignals.letterDone').connect(self.letterCompleteNotification);
+    
+    def showOptions(self):
+        self.morserOptionsDialog.show();
     
     def buttonEntered(self, buttonObj):
         if buttonObj == self.dotButton:
