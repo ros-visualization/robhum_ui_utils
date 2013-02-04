@@ -8,6 +8,8 @@
 #    * Inter-letter and inter-word time
 #    * Speak vs. type
 #    * dwell-pause
+# - Saving prefs
+# - Catch window resize, and save it
 # - Publish package
 
 
