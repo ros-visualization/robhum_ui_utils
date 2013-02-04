@@ -25,11 +25,13 @@ class GestureSignals(CommChannel):
     # when return for a flick is possible.
     buttonExitedSig = Signal(QPushButton);
     
-    def __init__(self):
-        super(GestureSignals, self).__init__()
-        self.flickSig;
-        self.buttonEnteredSig;
-        self.buttonExitedSig;
+    #*********************
+#    def __init__(self):
+#        super(GestureSignals, self).__init__()
+#        self.flickSig;
+#        self.buttonEnteredSig;
+#        self.buttonExitedSig;
+    #*********************        
 
 class FlickDirection:
     NORTH = 0;
@@ -221,9 +223,14 @@ class GestureButton(QPushButton):
     # ------------------------ Private Methods -------------------------------    
 
     def initSignals(self):
-        #self.commChannel = CommChannel.getInstance();
-        self.signals = GestureSignals();        
-        CommChannel.getInstance().registerSignals(self.signals);
+        #*******************
+#        self.signals = GestureSignals();        
+#        CommChannel.getInstance().registerSignals(self.signals);
+        #CommChannel.getInstance().registerSignals(GestureSignals);
+        CommChannel.registerSignals(GestureSignals);
+
+        #*******************
+        
     
     def connectWidgets(self):
         #self.maxFlickDurationTimer.timeout.connect(self.flickThresholdExceeded);
@@ -320,7 +327,7 @@ class HotEntryTransition(QEventTransition):
             # It is supposed to be a QEvent, but sometimes comes as QListWidgetItem:
             #print "Type error in HotEntryXition: expected wrappedEventObj, got QListWidgetItem: " + str(wrappedEventObj.text())
             pass
-        CommChannel.getInstance()['GestureSignals.buttonEnteredSig'].emit(self.gestureButtonObj);
+        CommChannel.getSignal('GestureSignals.buttonEnteredSig').emit(self.gestureButtonObj);
 
 class HotExitTransition(QSignalTransition):
     
@@ -330,7 +337,7 @@ class HotExitTransition(QSignalTransition):
         
     def onTransition(self, wrappedEventObj):
         super(HotExitTransition, self).onTransition(wrappedEventObj);
-        CommChannel.getInstance()['GestureSignals.buttonExitedSig'].emit(self.gestureButtonObj); 
+        CommChannel.getSignal('GestureSignals.buttonExitedSig').emit(self.gestureButtonObj); 
 
 class TimeSettingStateTransition(QEventTransition):
     
@@ -372,7 +379,6 @@ class TimeReadingStateTransition(QEventTransition):
         super(TimeReadingStateTransition, self).__init__(gestureButtonObj, event, sourceState=sourceState);
         self.timeSettingTransition = timeSettingStateTransition;
         self.gestureButtonObj = gestureButtonObj;
-        self.commChannel = CommChannel.getInstance();
     
     def onTransition(self, eventEnumConstant):
         super(TimeReadingStateTransition, self).onTransition(eventEnumConstant);
@@ -384,13 +390,13 @@ class TimeReadingStateTransition(QEventTransition):
         else:
             #print "Fast enough"
             if self.timeSettingTransition.flickDirection == FlickDirection.NORTH:
-                self.commChannel['GestureSignals.flickSig'].emit(self.gestureButtonObj, FlickDirection.NORTH);
+                CommChannel.getSignal('GestureSignals.flickSig').emit(self.gestureButtonObj, FlickDirection.NORTH);
             elif self.timeSettingTransition.flickDirection == FlickDirection.SOUTH:
-                self.commChannel['GestureSignals.flickSig'].emit(self.gestureButtonObj, FlickDirection.SOUTH);
+                CommChannel.getSignal('GestureSignals.flickSig').emit(self.gestureButtonObj, FlickDirection.SOUTH);
             elif self.timeSettingTransition.flickDirection == FlickDirection.WEST:
-                self.commChannel['GestureSignals.flickSig'].emit(self.gestureButtonObj, FlickDirection.WEST);
+                CommChannel.getSignal('GestureSignals.flickSig').emit(self.gestureButtonObj, FlickDirection.WEST);
             elif self.timeSettingTransition.flickDirection == FlickDirection.EAST:
-                self.commChannel['GestureSignals.flickSig'].emit(self.gestureButtonObj, FlickDirection.EAST);
+                CommChannel.getSignal('GestureSignals.flickSig').emit(self.gestureButtonObj, FlickDirection.EAST);
                 
         # Signal that this transition is done determining whether 
         # a ReEntry event was quick enough to be a flick. 
@@ -421,10 +427,10 @@ if __name__ == "__main__":
     app = QApplication(sys.argv);
     b = GestureButton("Foo");
     b.setFixedSize(200,250);
-    enteredSig = CommChannel.getInstance()['GestureSignals.buttonEnteredSig']; 
+    enteredSig = CommChannel.getSignal('GestureSignals.buttonEnteredSig'); 
     enteredSig.connect(ackButtonEntered);
-    CommChannel.getInstance()['GestureSignals.buttonExitedSig'].connect(ackButtonExited);
-    CommChannel.getInstance()['GestureSignals.flickSig'].connect(ackButtonFlicked);
+    CommChannel.getSignal('GestureSignals.buttonExitedSig').connect(ackButtonExited);
+    CommChannel.getSignal('GestureSignals.flickSig').connect(ackButtonFlicked);
     b.show()
     app.exec_();
     sys.exit();

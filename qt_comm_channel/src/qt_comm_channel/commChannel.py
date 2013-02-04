@@ -6,31 +6,38 @@ from QtGui import QPushButton
 class CommChannel(QObject):
     '''
     Combines Qt signals into one place. Avoids error "... has no method 'emit'". 
-    This is a singleton class, which is enforced.
+    This is a static class. Usage:
+       * Subclass this class; without creating any methods, including __init__().
+       * The only active part in the subclass is to define Qt signals. Example:
+       
+             class MySignals(CommChannel):
+                quitSig      = QtCore.Signal(QPushButton)
+                taskDoneSig  = QtCore.Signal()
+                
+       * Before using the signals in your application, call registerSignals on CommChannel,
+         passing your subclass:
+         
+             CommChannel.registerSignals(MySignals)
+             
+       * After that call, access your signals like this:
+        
+            CommChannel.getSignal('MySignals.quitSig')
+            
+         Note that the signal ID is a string consisting of the name
+         of your subclass, followed by a dot, followed by the 
+         signal class attribute's name.
+         
+       * Other modules in the same application can access the signals the same way.
     
-    Use addSignal() and commChannelInstance[sigName] to retrieve a signal.
     '''
-    singletonInstance = None;
+    # Hold on to the CommChannel subclass instances that
+    # are created in registerSignals(), so that they are not
+    # GC'ed:
+    commInstances = [];
     userSigs = {}
 
-    def __init__(self):
-        super(CommChannel,self).__init__();
-        if CommChannel.singletonInstance is not None:
-            raise RuntimeError("Use getInstance() to obtain CommChannel instances.");
-        CommChannel.singletonInstance = self;
-        
     @staticmethod
-    def getInstance():
-        '''
-        Obtain the (only) instance of CommChannel. If none exists
-        yet, it is created. Else the existing instance is returned. 
-        '''
-        if CommChannel.singletonInstance:
-            return CommChannel.singletonInstance;
-        else:
-            return CommChannel();
-
-    def registerSignals(self, signalsClassInst):
+    def registerSignals(signalsClass):
         '''
         Add a new Qt Signal instance under a name. 
         :param sigName: name under which signal object is known, and can be retrieved.
@@ -38,9 +45,11 @@ class CommChannel(QObject):
         :param sigObj: the Qt Signal object to register
         :type sigObj: QtCore.Signal
         '''
-        if not issubclass(signalsClassInst.__class__, QObject):
+        if not issubclass(signalsClass, QObject):
             raise ValueError("Class passed to registerSignals must be a subclass of CommChannel.");
-        userSignalClassVars = self.getSignalsFromClass(signalsClassInst.__class__)
+        userSignalClassVars = CommChannel.getSignalsFromClass(signalsClass)
+        signalsClassInst = signalsClass();
+        CommChannel.commInstances.append(signalsClassInst);
         for classVarName in userSignalClassVars:
             try:
                 sigObj = getattr(signalsClassInst, classVarName);
@@ -49,32 +58,11 @@ class CommChannel(QObject):
                 # such as the signal in class var 'destroyed'. Ignore
                 # those:
                 continue;
-            CommChannel.userSigs[signalsClassInst.__class__.__name__ + '.' + classVarName] = sigObj;
+            CommChannel.userSigs[signalsClass.__name__ + '.' + classVarName] = sigObj;
 
-    
-#    def registerSignals(self, commChannelSubclass):
-#        '''
-#        Add a new Qt Signal instance under a name. 
-#        :param sigName: name under which signal object is known, and can be retrieved.
-#        :type sigName: string
-#        :param sigObj: the Qt Signal object to register
-#        :type sigObj: QtCore.Signal
-#        '''
-#        if not issubclass(commChannelSubclass, QObject):
-#            raise ValueError("Class passed to registerSignals must be a subclass of CommChannel.");
-#        userSignalClassVars = self.getSignalsFromClass(commChannelSubclass)
-#        userClass = commChannelSubclass();
-#        for classVarName in userSignalClassVars:
-#            try:
-#                sigObj = getattr(userClass, classVarName);
-#            except KeyError:
-#                # Some signals will have been inherited from Object,
-#                # such as the signal in class var 'destroyed'. Ignore
-#                # those:
-#                continue;
-#            CommChannel.userSigs[commChannelSubclass.__name__ + '.' + classVarName] = sigObj;
 
-    def getSignal(self, sigName):
+    @staticmethod
+    def getSignal(sigName):
         '''
         Retrieve a previously added signal. Alternatively,
         use dict style syntaxs: commInstance[sigName].
@@ -82,17 +70,20 @@ class CommChannel(QObject):
         :type sigName: string
         '''
         return CommChannel.userSigs[sigName];
-        
-    def __getitem__(self, sigName):
+    
+    @staticmethod    
+    def __getitem__(sigName):
         return CommChannel.userSigs[sigName];
     
-    def registeredSignals(self):
+    @staticmethod
+    def registeredSignals():
         '''
         Return list of all registered signal objects.
         '''
         return CommChannel.userSigs.values();
     
-    def registeredSignalNames(self):
+    @staticmethod
+    def registeredSignalNames():
         '''
         Return list of all registered signal registration names.
         '''
@@ -101,7 +92,8 @@ class CommChannel(QObject):
 
     # ----------------------------------------- Private ---------------------------
 
-    def getSignalsFromClass(self, cls):
+    @staticmethod
+    def getSignalsFromClass(cls):
         #base_attrs = dir(type('dummy', (object,), {}))
         this_cls_attrs = dir(cls)
         res = []
