@@ -9,6 +9,9 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/gesture_buttons</url>
 
+  <depend package="python_qt_binding"/>
+  <depend package="qt_comm_channel" />
+
 </package>
 
 

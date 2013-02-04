@@ -9,6 +9,28 @@ from python_qt_binding import QtCore, QtGui
 from QtCore import QCoreApplication, QEvent, QEventTransition, QObject, QPoint, QSignalTransition, QState, QStateMachine, QTimer, Signal, SIGNAL, Slot, Qt
 from QtGui import QApplication, QCursor, QPushButton, QWidget, QHoverEvent
 
+from qt_comm_channel.commChannel import CommChannel;
+
+
+class GestureSignals(QObject):
+
+    # Signals emitted when GestureButton user flicks up and down, left-right, etc:
+    flickSig = Signal(QPushButton, int);
+    
+    # Signal emitted when the button is first entered. Subsequent
+    # flicks will not re-send this signal.
+    buttonEnteredSig = Signal(QPushButton);  
+    
+    # Signal emitted when the button is left for good, that is
+    # when return for a flick is possible.
+    buttonExitedSig = Signal(QPushButton);
+    
+    def __init__(self):
+        super(GestureSignals, self).__init__()
+        self.flickSig;
+        self.buttonEnteredSig;
+        self.buttonExitedSig;
+
 class FlickDirection:
     NORTH = 0;
     SOUTH = 1;
@@ -30,38 +52,6 @@ class FlickDirection:
         else:
             raise ValueError("Value other than a FlickDirection passed to FlickDirection.toString()");
 
-class CommChannel(QObject):
-    '''
-    Combines signals into one place. All instances must share
-    the signals, so they are class vars.
-    '''
-    
-    singletonInstance = None;
-    
-	# Signals emitted when GestureButton user flicks up and down, left-right, etc:
-    flickSig = Signal(QPushButton, int);
-    
-    # Signal emitted when the button is first entered. Subsequent
-    # flicks will not re-send this signal.
-    buttonEnteredSig = Signal(QPushButton); 
-    
-    # Signal emitted when the button is left for good, that is
-    # when return for a flick is possible. 
-    buttonExitedSig = Signal(QPushButton); 
-
-    def __init__(self):
-        super(CommChannel,self).__init__();
-        if CommChannel.singletonInstance is not None:
-            raise RuntimeError("Use getInstance() to obtain CommChannel instances.");
-        CommChannel.singletonInstance = self;
-        self.userSignals = {};
-        
-    @staticmethod
-    def getInstance():
-        if CommChannel.singletonInstance:
-            return CommChannel.singletonInstance;
-        else:
-            return CommChannel();
         
 # Unused
 class FlickDeterminationDone(QEvent):
@@ -79,7 +69,7 @@ class FlickDeterminationDone(QEvent):
 
 class GestureButton(QPushButton):
     
-    FLICK_TIME_THRESHOLD_MASTER = 0.5; # seconds    
+    FLICK_TIME_THRESHOLD_MASTER = 0.5; # seconds
     
     def __init__(self, label, parent=None):
         super(GestureButton, self).__init__(label, parent=parent);
@@ -88,9 +78,7 @@ class GestureButton(QPushButton):
         #self.setStyleSheet(tmpStyle);
 
         self.setFlicksEnabled(True);
-        
-        self.commChannel = CommChannel.getInstance();
-        
+
         # Timer for deciding when mouse has left this
         # button long enough that even returning to this
         # button will not be counted as a flick, but as
@@ -113,6 +101,7 @@ class GestureButton(QPushButton):
         self.latestMousePos = QPoint(0,0);
         
         self.connectWidgets();
+        self.initSignals();
                 
         # ------------------  State Definitions ------------------
         
@@ -230,7 +219,12 @@ class GestureButton(QPushButton):
         return GestureButton.flickEnabled;
     
     # ------------------------ Private Methods -------------------------------    
-     
+
+    def initSignals(self):
+        #self.commChannel = CommChannel.getInstance();
+        self.signals = GestureSignals();        
+        CommChannel.getInstance().registerSignals(self.signals);
+    
     def connectWidgets(self):
         #self.maxFlickDurationTimer.timeout.connect(self.flickThresholdExceeded);
         pass;
@@ -324,7 +318,7 @@ class HotEntryTransition(QEventTransition):
             # It is supposed to be a QEvent, but sometimes comes as QListWidgetItem:
             #print "Type error in HotEntryXition: expected wrappedEventObj, got QListWidgetItem: " + str(wrappedEventObj.text())
             pass
-        CommChannel.getInstance().buttonEnteredSig.emit(self.gestureButtonObj);
+        CommChannel.getInstance()['GestureSignals.buttonEnteredSig'].emit(self.gestureButtonObj);
 
 class HotExitTransition(QSignalTransition):
     
@@ -334,7 +328,7 @@ class HotExitTransition(QSignalTransition):
         
     def onTransition(self, wrappedEventObj):
         super(HotExitTransition, self).onTransition(wrappedEventObj);
-        CommChannel.getInstance().buttonExitedSig.emit(self.gestureButtonObj); 
+        CommChannel.getInstance()['GestureSignals.buttonExitedSig'].emit(self.gestureButtonObj); 
 
 class TimeSettingStateTransition(QEventTransition):
     
@@ -388,13 +382,13 @@ class TimeReadingStateTransition(QEventTransition):
         else:
             #print "Fast enough"
             if self.timeSettingTransition.flickDirection == FlickDirection.NORTH:
-                self.commChannel.flickSig.emit(self.gestureButtonObj, FlickDirection.NORTH);
+                self.commChannel['GestureSignals.flickSig'].emit(self.gestureButtonObj, FlickDirection.NORTH);
             elif self.timeSettingTransition.flickDirection == FlickDirection.SOUTH:
-                self.commChannel.flickSig.emit(self.gestureButtonObj, FlickDirection.SOUTH);
+                self.commChannel['GestureSignals.flickSig'].emit(self.gestureButtonObj, FlickDirection.SOUTH);
             elif self.timeSettingTransition.flickDirection == FlickDirection.WEST:
-                self.commChannel.flickSig.emit(self.gestureButtonObj, FlickDirection.WEST);
+                self.commChannel['GestureSignals.flickSig'].emit(self.gestureButtonObj, FlickDirection.WEST);
             elif self.timeSettingTransition.flickDirection == FlickDirection.EAST:
-                self.commChannel.flickSig.emit(self.gestureButtonObj, FlickDirection.EAST);
+                self.commChannel['GestureSignals.flickSig'].emit(self.gestureButtonObj, FlickDirection.EAST);
                 
         # Signal that this transition is done determining whether 
         # a ReEntry event was quick enough to be a flick. 
@@ -409,8 +403,27 @@ class TimeReadingStateTransition(QEventTransition):
         
 if __name__ == "__main__":
     
+    @QtCore.Slot(QPushButton)
+    def ackButtonEntered(buttonObj):
+        print "Button entered."
+        
+    @QtCore.Slot(QPushButton)
+    def ackButtonExited(buttonObj):
+        print "Button exited."
+        
+    @QtCore.Slot(QPushButton,int)
+    def ackButtonFlicked(buttonObj, direction):
+        print "Button flicked: %s." % FlickDirection.toString(direction);
+        
+
     app = QApplication(sys.argv);
     b = GestureButton("Foo");
+    b.setFixedSize(200,250);
+    enteredSig = CommChannel.getInstance()['GestureSignals.buttonEnteredSig']; 
+    enteredSig.connect(ackButtonEntered);
+    CommChannel.getInstance()['GestureSignals.buttonExitedSig'].connect(ackButtonExited);
+    CommChannel.getInstance()['GestureSignals.flickSig'].connect(ackButtonFlicked);
+    b.show()
     app.exec_();
     sys.exit();
         
