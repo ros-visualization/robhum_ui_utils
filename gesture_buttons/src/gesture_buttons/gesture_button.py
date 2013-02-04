@@ -7,12 +7,12 @@ import math;
 
 from python_qt_binding import QtCore, QtGui
 from QtCore import QCoreApplication, QEvent, QEventTransition, QObject, QPoint, QSignalTransition, QState, QStateMachine, QTimer, Signal, SIGNAL, Slot, Qt
-from QtGui import QApplication, QCursor, QPushButton, QWidget, QHoverEvent
+from QtGui import QApplication, QCursor, QPushButton, QWidget, QHoverEvent, QMouseEvent
 
 from qt_comm_channel.commChannel import CommChannel;
 
 
-class GestureSignals(QObject):
+class GestureSignals(CommChannel):
 
     # Signals emitted when GestureButton user flicks up and down, left-right, etc:
     flickSig = Signal(QPushButton, int);
@@ -230,8 +230,8 @@ class GestureButton(QPushButton):
         pass;
     
     def eventFilter(self, target, event):
-        if target == self and (event == QEvent.MouseMove or event == QHoverEvent): 
-            self.latestMousePos = mouseEvent.pos();
+        if target == self and (event.__class__ == QMouseEvent):
+            self.latestMousePos = event.pos();
         return False;
     
 #    def mouseMoveEvent(self, mouseEvent):
@@ -259,8 +259,10 @@ class GestureButton(QPushButton):
         gestureButtonRect = self.geometry()
         # Recompute upper left and lower right in global coords
         # each time, b/c window may have moved:
-        topLeftPtGlobal = self.mapToGlobal(QPoint(gestureButtonRect.x(), gestureButtonRect.y()))
-        bottomRightPtGlobal = QPoint(topLeftPtGlobal.x() + gestureButtonRect.width(), topLeftPtGlobal.y() + gestureButtonRect.height())
+        #topLeftPtGlobal = self.mapToGlobal(QPoint(gestureButtonRect.x(), gestureButtonRect.y()))
+        topLeftPtGlobal = gestureButtonRect.topLeft()
+        #bottomRightPtGlobal = QPoint(topLeftPtGlobal.x() + gestureButtonRect.width(), topLeftPtGlobal.y() + gestureButtonRect.height())
+        bottomRightPtGlobal = gestureButtonRect.bottomRight()
         # Do mouse coord absolute value compare with button edges,
         # because the last recorded mouse event is often just still
         # inside the button when this 'mouse left' signal arrives:
