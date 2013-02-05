@@ -6,6 +6,10 @@
 # - Hook up virtual keyboard
 # - Catch window resize, and save it
 # - Word/letter dwell turn on/off, output type checkbox
+# - Speed meter
+# - Backspace and abort
+# - Morse table
+# - Status bar with running text??
 # - Publish package
 
 
