@@ -16,6 +16,13 @@ class VirtualKeyboard(object):
         # the number following x (here: 1893). The second group
         # will be called 'y'. See getMouseGlobalPos() for use:
         self.screenPosPattern = re.compile(r'x:(?P<x>[\d]+).*y:(?P<y>[\d]+)');
+        # Same for extracting the window ID only:
+        self.windowIDPattern  = re.compile(r'.*window:(?P<winID>[\d]+)');
+        
+        # Place for users to have window ids stored:
+        self.windowIDs = {};
+        
+        self.saveActiveWindowID();
 
     def typeToActiveWindow(self, theStr):
         '''
@@ -24,8 +31,8 @@ class VirtualKeyboard(object):
 		Generally, any valid X Keysym string will work. Multiple keys are
 		separated by '+'. Aliases exist for "alt", "ctrl", "shift", "super",
 		and "meta" which all map to Foo_L, such as Alt_L and Control_L, etc.        
-        :param theStr: string to send to active window
-        :type theStr: string
+        @param theStr: string to send to active window
+        @type theStr: string
         '''
         resCode = subprocess.call(['xdotool', 'getactivewindow', 'type', str(theStr)]);
         
@@ -33,8 +40,8 @@ class VirtualKeyboard(object):
         '''
 		Buttons map this way: Left mouse is 1, middle is 2, right is 3,
 		wheel up is 4, wheel down is 5.
-        :param buttonNum: which mouse button to click
-        :type buttonNum: int
+        @param buttonNum: which mouse button to click
+        @type buttonNum: int
         '''
         if buttonNum < 1 or buttonNum > 5:
             raise ValueError("Mouse buttons are 1-3; mouse wheel up is 4; mouse wheel down is 5. Called with %d" % buttonNum)
@@ -44,8 +51,8 @@ class VirtualKeyboard(object):
         '''
 		Buttons map this way: Left mouse is 1, middle is 2, right is 3,
 		wheel up is 4, wheel down is 5.
-        :param buttonNum: which mouse button to hold down
-        :type buttonNum: int
+        @param buttonNum: which mouse button to hold down
+        @type buttonNum: int
         '''
         if buttonNum < 1 or buttonNum > 5:
             raise ValueError("Mouse buttons are 1-3; mouse wheel up is 4; mouse wheel down is 5. Called with %d" % buttonNum)
@@ -55,8 +62,8 @@ class VirtualKeyboard(object):
         '''
 		Buttons map this way: Left mouse is 1, middle is 2, right is 3,
 		wheel up is 4, wheel down is 5.
-        :param buttonNum: which mouse button to hold down
-        :type buttonNum: int
+        @param buttonNum: which mouse button to hold down
+        @type buttonNum: int
         '''
         if buttonNum < 1 or buttonNum > 5:
             raise ValueError("Mouse buttons are 1-3; mouse wheel up is 4; mouse wheel down is 5. Called with %d" % buttonNum)
@@ -87,10 +94,10 @@ class VirtualKeyboard(object):
         '''
         Move mouse cursor to absolute position relative to upper left 
         corner of display.
-        :param x: horizontal coordinate
-        :type x: int
-        :param y: vertical coordinate
-        :type y: int
+        @param x: horizontal coordinate
+        @type x: int
+        @param y: vertical coordinate
+        @type y: int
         '''
         resCode = subprocess.call(['xdotool', 'mousemove', '--sync', str(x), str(y)]);
 
@@ -99,12 +106,62 @@ class VirtualKeyboard(object):
         Move mouse cursor new position relative to where
         it is currently located. It is legal to use negative 
         offsets for x and/or y.
-        :param x: horizontal coordinate
-        :type x: int
-        :param y: vertical coordinate
-        :type y: int
+        @param x: horizontal coordinate
+        @type x: int
+        @param y: vertical coordinate
+        @type y: int
         '''
         resCode = subprocess.call(['xdotool', 'mousemove_relative', '--sync', '--', str(x), str(y)]);
+
+    def saveActiveWindowID(self,retrievalKey):
+        '''
+        Internally saves the currently active X11 window's ID.
+        Use getRecentWindow() to retrieve the ID for use with
+        later xdotool commands.
+        @param retrievalKey: key under which caller will ask for the ID later on.
+        @type retrievalKey: string
+        '''
+        #*********8
+        winid = subprocess.check_output(['xdotool', 'getactivewindow']).strip();
+        #*********8
+        self.windowIDs[retrievalKey] = subprocess.check_output(['xdotool', 'getactivewindow']).strip();
+        
+    def getWindowID(self, retrievalKey):
+        '''
+        Return window ID that was most recently saved. That is the
+        active window when this VirtualKeyboard instance was created,
+        or the window that was active during the most recent
+        call to saveActiveWindowID();
+        @param retrievalKey: key under which caller asked to associate with window in earlier call to saveActiveWindowID
+        @type retrievalKey: string
+        '''
+        return self.windowIDs[retrievalKey];
+    
+    def activateWindow(self, retrievalKey):
+        '''
+        Activates the X11 window with the given window ID.
+        If windowID is omitted, the most recently active
+        window is activated (see getRecentWindow()).
+        @param retrievalKey: key under which caller asked to associate with window in earlier call to saveActiveWindowID
+        @type retrievalKey: string
+        '''
+        resCode = subprocess.call(['xdotool', 'windowactivate', str(windowID)]);
+
+    def activateWindowUnderMouse(self):
+        winID = self.windowUnderMouseCursor();
+        self.activateWindow(windowID=winID);
+        
+    def windowUnderMouseCursor(self):
+        '''
+        Returns the ID of the X11 window under the mouse cursor.
+        '''
+        stdoutData = subprocess.check_output(['xdotool', 'getmouselocation'], stderr=file("/dev/null", 'w'));
+        xdotoolOutputMatch = re.match(self.windowIDPattern, stdoutData);
+        if xdotoolOutputMatch is None:
+            raise ValueError("Call to xdotool for obtaining mouse cursor position did not return output of expected format. It returned '%s'" % stdoutData)
+        # Get at dict from the group: {winID:winID}, where winID is of string type:
+        resDict = xdotoolOutputMatch.groupdict();
+        return resDict['winID'];
 
 if __name__ == '__main__':
     
@@ -122,7 +179,34 @@ if __name__ == '__main__':
     
 #    vBoard.moveMouseAbsolute(100, 100);
         
-    vBoard.moveMouseRelative(-100, 100);
+#    vBoard.moveMouseRelative(-100, 100);
+
+    currentWinID = vBoard.windowUnderMouseCursor();
+    print("Move cursor to a different window; it will be activated.");
+    while True:
+        winIDNow = vBoard.windowUnderMouseCursor() 
+        if winIDNow != currentWinID:
+            break;
+        time.sleep(1);
+    vBoard.activateWindow(winIDNow);
+    print("Done.")
+
+
+    # The following test doesn't work, because
+    # 'xdotool selectwindow' doesn't select the clicked-on window
+    # in the X11 sense. It only indicates to xdotools which window
+    # will be talked about in the remainder of a command chain:
+#    print("Select a window to save.");
+#    winID = subprocess.check_output(['xdotool', 'selectwindow'])
+#    print("winid was: %s" % winID);
+#    vBoard.saveActiveWindowID();
+#    print("Click another window and then wait 3 seconds for original window to regain focus.");
+#    newWinID = subprocess.check_output(['xdotool', 'selectwindow'])
+#    time.sleep(3);
+#    vBoard.activateWindow();
+    
+    
+     
     
     
 

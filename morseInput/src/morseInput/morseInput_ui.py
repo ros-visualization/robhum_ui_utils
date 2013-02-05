@@ -10,6 +10,8 @@
 # - Backspace and abort
 # - Morse table
 # - Status bar with running text??
+# - Volume control
+# - Running tooltip with slider values
 # - Publish package
 
 
@@ -36,7 +38,7 @@ from python_qt_binding import QtCore;
 #from word_completion.word_collection import WordCollection;
 from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor, QHoverEvent, QColor, QIcon;
 from QtGui import QMenuBar;
-from QtCore import QPoint, Qt, QTimer, QEvent, Signal; 
+from QtCore import QPoint, Qt, QTimer, QEvent, Signal, QCoreApplication; 
 
 # Dot/Dash RGB: 0,179,240
 
@@ -67,6 +69,12 @@ class MorseInput(QMainWindow):
     def __init__(self):
         super(MorseInput,self).__init__();
 
+        # Disallow focus acquisition for the morse window.
+        # Needed to prevent preserve focus on window that
+        # is supposed to receive the clear text of the 
+        # morse:
+        self.setFocusPolicy(Qt.NoFocus);
+
         CommChannel.registerSignals(MorseInputSignals);
         
         # Find QtCreator's XML file in the PYTHONPATH, and load it:
@@ -92,6 +100,10 @@ class MorseInput(QMainWindow):
         # Get a morse generator that manages all Morse 
         # generation and timing:
         self.morseGenerator = MorseGenerator(callback=MorseInput.letterCompleteNotification);
+        
+        # Get virtual keyboard that can 'fake' X11 keyboard inputs:
+        self.virtKeyboard = VirtualKeyboard();
+        
         # setOptions() needs to be called after instantiation
         # of morseGenerator, so that we can obtain the generator's
         # defaults for timings:
@@ -215,6 +227,7 @@ class MorseInput(QMainWindow):
         editMenu.addAction(raiseOptionsDialogAction)      
         
     def connectWidgets(self):
+        
         CommChannel.getSignal('GestureSignals.buttonEnteredSig').connect(self.buttonEntered);
         CommChannel.getSignal('GestureSignals.buttonExitedSig').connect(self.buttonExited);
         CommChannel.getSignal('MorseInputSignals.letterDone').connect(self.deliverInput);
@@ -329,7 +342,17 @@ class MorseInput(QMainWindow):
             self.morseGenerator.setInterWordDelay(valInSecs);
         
     def optionsSaveButton(self):
-        self.cfgParser.write(self.optionsFilePath);
+        try:
+            # Does the config dir already exist? If not
+            # create it:
+            optionsDir = os.path.dirname(self.optionsFilePath);
+            if not os.path.isdir(optionsDir):
+                os.makedirs(optionsDir, 0777);
+            with open(self.optionsFilePath, 'wb') as outFd:
+                self.cfgParser.write(outFd);
+        except IOError as e:
+            self.dialogService.showErrorMsg("Could not save options: %s" % `e`);
+            
         self.morserOptionsDialog.hide();
         
     def optionsCancelButton(self):
@@ -348,13 +371,11 @@ class MorseInput(QMainWindow):
             self.morseGenerator.startMorseSeq(Morse.DASH);
         elif buttonObj == self.eowButton:
             buttonObj.animateClick();
-            print "End of word"
+            self.outputLetters(' ');
 
         elif buttonObj == self.backspaceButton:
-            #****
             buttonObj.animateClick();
-            print "Backspace"
-            #****
+            self.outputLetters('BackSpace');
         
     def buttonExited(self, buttonObj):
         if buttonObj == self.dotButton:
@@ -363,12 +384,35 @@ class MorseInput(QMainWindow):
             self.morseGenerator.stopMorseSeq();
 
     def eventFilter(self, target, event):
-        if (event.type() == QEvent.MouseMove) or (event.type == QHoverEvent):
+        eventType = event.type();
+        if eventType == QEvent.Enter:
+            # Remember X11 window that is active as we
+            # enter the application window, but don't remember
+            # this morse code window, if that was active:
+            morseWinID = self.virtKeyboard.windowUnderMouseCursor(); 
+            formerlyActiveWinID = self.virtKeyboard.getRecentWindow(); 
+            #***********
+            print("Curr win: %s. Prev win: %s" % (morseWinID, formerlyActiveWinID))
+            #***********
+            if morseWinID != formerlyActiveWinID:
+                self.virtKeyboard.saveActiveWindowID();
+        elif eventType == QEvent.Leave:
+            self.virtKeyboard.activateWindowUnderMouse();
+        #if (eventType == QEvent.MouseMove) or (event == QHoverEvent):
+        elif eventType == QEvent.MouseMove:
             if self.constrainCursorInHotZone:
                 self.mouseUnconstrainTimer.stop();
                 self.handleCursorConstraint(event);
         # Pass this event on to its destination (rather than filtering it):
         return False;
+
+    def mousePressEvent(self, mouseEvent):
+        # Re-activate the most recently active X11 window
+        # to ensure the letters are directed to the 
+        # proper window, and not this morse window:
+        self.virtKeyboard.activateWindow();
+        mouseEvent.accept();
+
         
     def handleCursorConstraint(self, mouseEvent):
         
@@ -438,18 +482,28 @@ class MorseInput(QMainWindow):
 
     def outputLetters(self, letters):
         if self.outputDevice == OutputType.TYPE:
-            #************
-            # Change to use virtual keyboard:
-            print(letters);
-            #************
+            #print(letters);
+            self.virtKeyboard.typeToActiveWindow(letters);
         elif self.outputDevice == OutputType.SPEAK:
             print("Speech not yet implemented.");
 
+    def exit(self):
+        self.cleanup();
+        QApplication.quit();
 
-    def close(self):
-        super(MorseGenerator,self).close();
-        self.morseGenerator.stopMorseGenerator();
-        self.morserOptionsDialog.close();
+    def closeEvent(self, event):
+        self.cleanup();
+        QApplication.quit();
+        # Bubble event up:
+        event.ignore();
+
+    def cleanup(self):
+        try:
+            self.morserOptionsDialog.close();
+            self.morseGenerator.stopMorseGenerator();
+        except:
+            # Best effort:
+            pass
 
 if __name__ == '__main__':
 
