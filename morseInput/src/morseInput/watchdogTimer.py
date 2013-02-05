@@ -9,13 +9,13 @@ from QtGui import QApplication;
 
 class WatchdogTimer(QTimer):
     
-    def __init__(self, timeout=1000, callback=None, callbackArg=None, selfTest=False):
+    def __init__(self, timeout=1, callback=None, callbackArg=None, selfTest=False):
         super(WatchdogTimer,self).__init__();
         # Use leading underscore to avoid
         # overwriting parent's 'timeout' signal:
-        self._timeout = timeout
-        self.callback = callback
-        self.callbackArg = callbackArg
+        self._timeout = int(1000 * timeout);
+        self.callback = callback;
+        self.callbackArg = callbackArg;
 
         self.timedout = True;
         self.stopped  = True;
@@ -26,16 +26,21 @@ class WatchdogTimer(QTimer):
         if selfTest:
             self.runSelfTest();
             #sys.exit();
-            
 
     def timedOut(self):
         return self.timedout;
 
-    def kick(self, _timeout=None):
+    def kick(self, _timeout=None, callback=None, callbackArg=None):
         self.timedout = False;
-        self.stopped  = False;
         if _timeout is None:
             _timeout = self._timeout;
+        else:
+            _timeout = int(1000 * _timeout);
+        if callback is not None:
+            self.callback = callback;
+        if callbackArg is not None:
+            self.callbackArg = callbackArg;
+        self.stopped  = False;
         self.start(_timeout);
         
     def stop(self):
@@ -44,7 +49,7 @@ class WatchdogTimer(QTimer):
         self.stopped  = True;
     
     def changeTimeout(self, newTimeout):
-        self._timeout = newTimeout;
+        self._timeout = int(1000 * newTimeout);
         
     def changeCallback(self, newCallback):
         self.callback = newCallback;
@@ -53,8 +58,7 @@ class WatchdogTimer(QTimer):
         self.callbackArg = newArg;
     
     def timerExpiredHandler(self):
-        if self.stopped:
-            return;
+        self.stop();
         self.timedout = True;
         if self.callback is not None:
             if self.callbackArg is None:

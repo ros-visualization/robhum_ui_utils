@@ -1,0 +1,14 @@
+<package>
+  <description brief="qt_dialog_service">
+
+     qt_dialog_service
+
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/qt_dialog_service</url>
+
+</package>
+
+

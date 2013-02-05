@@ -33,6 +33,8 @@ class MorseGenerator(object):
         
         self.callback = callback;
         
+        # setSpeed() must be called before setting up
+        # watchdog timer below:
         self.setSpeed(3.3);
         self.automaticMorse = True;
         self.recentDots = 0;
@@ -50,13 +52,16 @@ class MorseGenerator(object):
 
         # Lock for regulating write-access to alpha string:
         self.alphaStrLock = threading.Lock();
+        # Lock for regulating write-access to mores elements
+        # delivered from the dot and dash threads:
+        self.morseResultLock = threading.Lock();
 
         # Set to False to stop thread:        
         self.keepRunning = True;
         
         self.dotGenerator  = MorseGenerator.DotGenerator(self).start();
         self.DashGenerator = MorseGenerator.DashGenerator(self).start();
-
+        
     # ------------------------------ Public Methods ---------------------
 
     def startMorseSeq(self, morseElement):
@@ -112,7 +117,7 @@ class MorseGenerator(object):
         
     def abortCurrentMorseElement(self):
         self.watchdog.stop();
-        self.morseResult = '';
+        self.setMorseResult('');
 
     def setAutoMorse(self, yesNo):
         '''
@@ -149,11 +154,32 @@ class MorseGenerator(object):
         self.dotDuration = 1.0/(2*dotsPlusPausePerSec);
         #self.dashDuration = 3*self.dotDuration;
         self.dashDuration = 2*self.dotDuration;
+        # Times between the automatically generated
+        # dots and dashes:
         self.interSigPauseDots = self.dotDuration;
         self.interSigPauseDashes = self.dotDuration;
         
-        self.interLetterTime = 3.0*self.dotDuration;
-        self.interWordTime   = 7.0*self.dotDuration;
+        self.interLetterTime = 7.0*self.dotDuration;
+        self.interWordTime   = 9.0*self.dotDuration;
+        self.waitDashDotThreadsIdleTime = 0.5 * self.interLetterTime;
+    
+    def setInterLetterDelay(self, secs):
+        '''
+        Sets the time that must elapse between two letters.
+        @param secs: fractional seconds
+        @type secs: float
+        '''
+        self.interLetterTime = secs;
+        self.watchdog.changeTimeout(self.interLetterTime);
+        self.waitDashDotThreadsIdleTime = 0.5 * self.interLetterTime;
+        
+    def setInterWordDelay(self, secs):
+        '''
+        Sets the time that must elapse between two words.
+        @param secs: fractional seconds
+        @type secs: float
+        '''
+        self.interWordTime = secs;
         
     def stopMorseGenerator(self):
         '''
@@ -176,6 +202,10 @@ class MorseGenerator(object):
     def setAlphaStr(self, newAlphaStr):
         with self.alphaStrLock:
             self.alphaStr = newAlphaStr
+
+    def setMorseResult(self, newMorseResult):
+        with self.morseResultLock:
+            self.morseResult = newMorseResult;
         
     def getInterLetterTime(self):
         '''
@@ -213,16 +243,24 @@ class MorseGenerator(object):
 
     def addMorseElements(self, dotsOrDashes, numElements):
         if dotsOrDashes == Morse.DASH:
-            self.morseResult += '-'*numElements;
+            self.setMorseResult(self.morseResult + '-'*numElements); 
         else: # dots:
             # Catch abort-letter:
             if numElements > 6:
                 self.abortCurrentMorseElement();
                 return;
-            self.morseResult += '.'*numElements;
+            self.setMorseResult(self.morseResult + '.'*numElements);
 
     def watchdogExpired(self, reason):
+
         if reason == TimeoutReason.END_OF_LETTER:
+            # If no Morse elements are in self.morseResult,
+            # it could be because the dash or dot thread are
+            # not done delivering their result. In that case,
+            # set the timer again to get them idle:
+            if len(self.morseResult) == 0:
+                self.watchdog.kick(self.waitDashDotThreadsIdleTime);
+                return;
             newLetter = self.decodeMorseLetter();
             # If Morse sequence was legal and recognized,
             # append it:
@@ -230,9 +268,24 @@ class MorseGenerator(object):
                 self.setAlphaStr(self.alphaStr + newLetter);
         elif reason == TimeoutReason.END_OF_WORD:
             self.setAlphaStr(self.alphaStr + ' ');
-        self.morseResult = '';
+        self.setMorseResult('');
         if self.callback is not None:
             self.callback(reason);
+
+
+
+#    def watchdogExpired(self, reason):
+#        if reason == TimeoutReason.END_OF_LETTER:
+#            newLetter = self.decodeMorseLetter();
+#            # If Morse sequence was legal and recognized,
+#            # append it:
+#            if newLetter is not None:
+#                self.setAlphaStr(self.alphaStr + newLetter);
+#        elif reason == TimeoutReason.END_OF_WORD:
+#            self.setAlphaStr(self.alphaStr + ' ');
+#        self.morseResult = '';
+#        if self.callback is not None:
+#            self.callback(reason);
 
     def decodeMorseLetter(self):
         try:
@@ -251,6 +304,10 @@ class MorseGenerator(object):
         def __init__(self, parent):
             super(MorseGenerator.DotGenerator,self).__init__();
             self.parent = parent;
+            self.idle = True;
+        
+        def isIdle(self):
+            return self.idle;
         
         def run(self):
             self.genDots();
@@ -264,7 +321,9 @@ class MorseGenerator(object):
                         
             while self.parent.keepRunning:
             
-                while self.parent.morseDotEvent.is_set():    
+                while self.parent.morseDotEvent.is_set():
+                    
+                    self.idle = False;    
                 
                     # Use Alsa utils speaker tester to produce sound:
                     proc = subprocess.Popen(['speaker-test', 
@@ -286,10 +345,11 @@ class MorseGenerator(object):
                         # Auto dot generation: pause for
                         # the inter-dot period:
                         self.parent.reallySleep(self.parent.interSigPauseDots);
-                        
+                    
                 self.parent.addMorseElements(Morse.DOT, numDots);
                 # Get ready for the next request for dot sequences:
                 numDots = 0;
+                self.idle = True;
                 self.parent.morseDotEvent.wait();
         
     #-----------------------------
@@ -301,6 +361,10 @@ class MorseGenerator(object):
         def __init__(self, parent):
             super(MorseGenerator.DashGenerator,self).__init__();
             self.parent = parent;
+            self.idle = True;
+
+        def isIdle(self):
+            return self.idle;
         
         def run(self):
             self.genDashes();
@@ -314,6 +378,9 @@ class MorseGenerator(object):
             
             while self.parent.keepRunning:
                 while self.parent.morseDashEvent.is_set():
+                    
+                    self.idle = False;
+                    
                     # Speaker-test subprocess will run until we kill it:
                     proc = subprocess.Popen(['speaker-test', 
                                              "--test", "sine", 
@@ -338,6 +405,7 @@ class MorseGenerator(object):
                 self.parent.addMorseElements(Morse.DASH, numDashes);
                 # Get ready for the next request for dashes sequences:
                 numDashes = 0;
+                self.idle = True;
                 self.parent.morseDashEvent.wait();
                     
 if __name__ == "__main__":

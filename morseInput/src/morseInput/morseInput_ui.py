@@ -2,24 +2,23 @@
 
 # To do:
 # - Save settings, like window size in $HOME/.morse  
-# - Options dialog:
-#    * Morse speed
-#    * Use cursor constraint yes/no
-#    * Inter-letter and inter-word time
-#    * Speak vs. type
-#    * dwell-pause
 # - Saving prefs
+# - Hook up virtual keyboard
 # - Catch window resize, and save it
+# - Word/letter dwell turn on/off, output type checkbox
 # - Publish package
 
 
 import sys
 import os
+import ConfigParser
+from functools import partial
 
 from gesture_buttons.gesture_button import GestureButton
 from gesture_buttons.gesture_button import FlickDirection
 
 from qt_comm_channel.commChannel import CommChannel
+from qt_dialog_service.qt_dialog_service import DialogService
 
 from morseToneGeneration import MorseGenerator
 from morseToneGeneration import Morse
@@ -37,6 +36,9 @@ from QtCore import QPoint, Qt, QTimer, QEvent, Signal;
 
 # Dot/Dash RGB: 0,179,240
 
+class OutputType:
+    TYPE  = 0
+    SPEAK = 1
 
 class Direction:
     HORIZONTAL = 0
@@ -81,10 +83,16 @@ class MorseInput(QMainWindow):
         # Make QtCreator generated UI a child if this instance:
         self.morserOptionsDialog = loadUi(qtCreatorXMLFilePath);
         
+        self.dialogService = DialogService();
+
         # Get a morse generator that manages all Morse 
         # generation and timing:
         self.morseGenerator = MorseGenerator(callback=MorseInput.letterCompleteNotification);
-        self.morseGenerator.setSpeed(1.7);
+        # setOptions() needs to be called after instantiation
+        # of morseGenerator, so that we can obtain the generator's
+        # defaults for timings:
+        self.optionsFilePath = os.path.join(os.getenv('HOME'), '.morser/morser.cfg');
+        self.setOptions();
 
         # Create the gesture buttons for dot/dash/space/backspace:
         self.insertGestureButtons();
@@ -117,7 +125,6 @@ class MorseInput(QMainWindow):
         self.centralWidget.setMouseTracking(True)
 
     def initCursorContrainer(self):
-        self.constrainCursorInHotZone = False; #********
         self.recentMousePos = None;
         self.currentMouseDirection = None;
         # Timer that frees the cursor from
@@ -206,10 +213,129 @@ class MorseInput(QMainWindow):
     def connectWidgets(self):
         CommChannel.getSignal('GestureSignals.buttonEnteredSig').connect(self.buttonEntered);
         CommChannel.getSignal('GestureSignals.buttonExitedSig').connect(self.buttonExited);
-        CommChannel.getSignal('MorseInputSignals.letterDone').connect(self.printLetter);
+        CommChannel.getSignal('MorseInputSignals.letterDone').connect(self.deliverInput);
     
+        self.morserOptionsDialog.cursorConstraintCheckBox.stateChanged.connect(partial(self.checkboxStateChanged,
+                                                                                       self.morserOptionsDialog.cursorConstraintCheckBox));
+        self.morserOptionsDialog.letterStopSegmentationCheckBox.stateChanged.connect(partial(self.checkboxStateChanged,
+                                                                                             self.morserOptionsDialog.letterStopSegmentationCheckBox));
+        self.morserOptionsDialog.wordStopSegmentationCheckBox.stateChanged.connect(partial(self.checkboxStateChanged,
+                                                                                           self.morserOptionsDialog.wordStopSegmentationCheckBox));
+        self.morserOptionsDialog.typeOutputRadioButton.toggled.connect(partial(self.checkboxStateChanged,
+                                                                               self.morserOptionsDialog.typeOutputRadioButton));
+        self.morserOptionsDialog.speechOutputRadioButton.toggled.connect(partial(self.checkboxStateChanged,
+                                                                                 self.morserOptionsDialog.speechOutputRadioButton));
+
+        self.morserOptionsDialog.keySpeedSlider.valueChanged.connect(partial(self.sliderStateChanged,
+                                                                             self.morserOptionsDialog.keySpeedSlider));
+        self.morserOptionsDialog.interLetterDelaySlider.valueChanged.connect(partial(self.sliderStateChanged,
+                                                                                     self.morserOptionsDialog.interLetterDelaySlider));
+        self.morserOptionsDialog.interWordDelaySlider.valueChanged.connect(partial(self.sliderStateChanged,
+                                                                                   self.morserOptionsDialog.interWordDelaySlider));
+
+        self.morserOptionsDialog.savePushButton.clicked.connect(self.optionsSaveButton);
+        self.morserOptionsDialog.cancelPushButton.clicked.connect(self.optionsCancelButton);
+        
     def showOptions(self):
         self.morserOptionsDialog.show();
+    
+    def setOptions(self):
+        
+        self.optionsDefaultDict = {
+                    'outputDevice'             : str(OutputType.TYPE),
+                    'letterDwellSegmentation'  : str(True),
+                    'wordDwellSegmentation'    : str(True),
+                    'constrainCursorInHotZone' : str(False),
+                    'keySpeed'                 : str(1.7),
+                    'interLetterDwellDelay'    : str(self.morseGenerator.getInterLetterTime()),
+                    'interWordDwellDelay'      : str(self.morseGenerator.getInterWordTime()),
+                    }
+
+        self.cfgParser = ConfigParser.SafeConfigParser(self.optionsDefaultDict);
+        self.cfgParser.add_section('Morse generation');
+        self.cfgParser.add_section('Output');
+        self.cfgParser.add_section('Appearance');
+        self.cfgParser.read(self.optionsFilePath);
+        
+        self.morseGenerator.setInterLetterDelay(self.cfgParser.getfloat('Morse generation', 'interLetterDwellDelay'));
+        self.morseGenerator.setInterWordDelay(self.cfgParser.getfloat('Morse generation', 'interWordDwellDelay'));
+        self.morseGenerator.setSpeed(self.cfgParser.getfloat('Morse generation', 'keySpeed'));
+        
+        self.constrainCursorInHotZone = self.cfgParser.getboolean('Morse generation', 'constrainCursorInHotZone');
+        self.outputDevice = self.cfgParser.getint('Output', 'outputDevice');
+        self.letterDwellSegmentation = self.cfgParser.getboolean('Morse generation', 'letterDwellSegmentation');
+        self.letterDwellSegmentation = self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation');
+
+        # Make the options dialog reflect the options we just established:
+        self.initOptionsDialogFromOptions();
+
+    def initOptionsDialogFromOptions(self):
+        self.morserOptionsDialog.cursorConstraintCheckBox.setChecked(self.cfgParser.getboolean('Morse generation', 'constrainCursorInHotZone'));
+        self.morserOptionsDialog.letterStopSegmentationCheckBox.setChecked(self.cfgParser.getboolean('Morse generation', 'letterDwellSegmentation'));
+        self.morserOptionsDialog.wordStopSegmentationCheckBox.setChecked(self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation'));
+        self.morserOptionsDialog.typeOutputRadioButton.setChecked(self.cfgParser.getint('Output', 'outputDevice')==OutputType.TYPE);
+        self.morserOptionsDialog.speechOutputRadioButton.setChecked(not self.cfgParser.getint('Output', 'outputDevice'));
+        self.morserOptionsDialog.keySpeedSlider.setValue(self.cfgParser.getfloat('Morse generation', 'keySpeed'));
+        interLetterSecs = self.cfgParser.getfloat('Morse generation', 'interLetterDwellDelay');
+        self.morserOptionsDialog.interLetterDelaySlider.setValue(int(interLetterSecs*1000.)); # inter-letter dwell is in msecs
+        interWordSecs = self.cfgParser.getfloat('Morse generation', 'interWordDwellDelay');
+        self.morserOptionsDialog.interWordDelaySlider.setValue(int(interWordSecs*1000.));     # inter-word dwell is in msecs
+        
+    def checkboxStateChanged(self, checkbox, newState):
+        '''
+        Called when any of the option dialog's checkboxes change:
+        @param checkbox:
+        @type checkbox:
+        @param newState:
+        @type newState:
+        '''
+        if checkbox == self.morserOptionsDialog.cursorConstraintCheckBox:
+            self.cfgParser.set('Morse generation','constrainCursorInHotZone',str(newState));
+            self.constrainCursorInHotZone = newState; 
+        elif checkbox == self.morserOptionsDialog.letterStopSegmentationCheckBox:
+            self.cfgParser.set('Morse generation', 'letterDwellSegmentation', str(newState));
+            #**************
+            pass
+            #**************
+        elif checkbox == self.morserOptionsDialog.wordStopSegmentationCheckBox:
+            self.cfgParser.set('Morse generation', 'wordDwellSegmentation', str(newState));
+            #**************
+            pass
+            #**************
+        elif checkbox == self.morserOptionsDialog.typeOutputRadioButton:
+            self.cfgParser.set('Morse generation', 'outputDevice', str(newState));
+            #**************
+            pass
+            #**************
+        else:
+            raise ValueError('Unknown checkbox: %s' % str(checkbox));
+
+
+    def sliderStateChanged(self, slider, newValue):
+        if slider == self.morserOptionsDialog.keySpeedSlider:
+            self.cfgParser.set('Morse generation', 'keySpeed', str(newValue));
+            self.morseGenerator.setSpeed(newValue);
+        elif  slider == self.morserOptionsDialog.interLetterDelaySlider:
+            valInSecs = newValue/1000.;
+            self.cfgParser.set('Morse generation', 'interLetterDwellDelay', str(valInSecs));
+            self.morseGenerator.setInterLetterDelay(valInSecs);
+        elif  slider == self.morserOptionsDialog.interWordDelaySlider:
+            valInSecs = newValue/1000.;
+            self.cfgParser.set('Morse generation', 'interWordDwellDelay', str(valInSecs));
+            self.morseGenerator.setInterWordDelay(valInSecs);
+        
+    def optionsSaveButton(self):
+        self.cfgParser.write(self.optionsFilePath);
+        self.morserOptionsDialog.hide();
+        
+    def optionsCancelButton(self):
+        '''
+        Undo option changes user played with while
+        option box was open.
+        '''
+        self.morserOptionsDialog.hide();
+        self.cfgParser.read(self.optionsFilePath);
+        self.initOptionsDialogFromOptions();
     
     def buttonEntered(self, buttonObj):
         if buttonObj == self.dotButton:
@@ -217,10 +343,9 @@ class MorseInput(QMainWindow):
         elif buttonObj == self.dashButton:
             self.morseGenerator.startMorseSeq(Morse.DASH);
         elif buttonObj == self.eowButton:
-            #****
             buttonObj.animateClick();
             print "End of word"
-            #****
+
         elif buttonObj == self.backspaceButton:
             #****
             buttonObj.animateClick();
@@ -290,17 +415,37 @@ class MorseInput(QMainWindow):
 
     @staticmethod
     def letterCompleteNotification(reason):
+        '''
+        Called from MorseGenerator when one letter has
+        become available, or when a dwell end-of-letter,
+        or dwell end-of-word was detected. Sends a signal
+        and returns right away.
+        @param reason: indicator whether regular letter, or end of word.
+        @type reason: TimeoutReason
+        '''
         MorseInputSignals.getSignal('MorseInputSignals.letterDone').emit(reason);
 
     @QtCore.Slot(int)
-    def printLetter(self, reason):
+    def deliverInput(self, reason):
         alpha = self.morseGenerator.getAndRemoveAlphaStr()
         if reason == TimeoutReason.END_OF_WORD:
             alpha += ' '; 
-        print("Alpha:'%s'" % alpha);
+        self.outputLetters(alpha);
 
-    def exit(self):
+    def outputLetters(self, letters):
+        if self.outputDevice == OutputType.TYPE:
+            #************
+            # Change to use virtual keyboard:
+            print(letters);
+            #************
+        elif self.outputDevice == OutputType.SPEAK:
+            print("Speech not yet implemented.");
+
+
+    def close(self):
+        super(MorseGenerator,self).close();
         self.morseGenerator.stopMorseGenerator();
+        self.morserOptionsDialog.close();
 
 if __name__ == '__main__':
 
