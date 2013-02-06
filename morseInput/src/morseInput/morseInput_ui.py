@@ -9,6 +9,8 @@
 # - Morse table
 # - Status bar with running text??
 # - Volume control
+# - Somewhere (moveEvent()?_: ensure that no overlap of morse win with active window.
+#   If so, show error msg.  
 # - Running tooltip with slider values
 # - Publish package
 
@@ -133,7 +135,7 @@ class MorseInput(QMainWindow):
         
         # Init capability of constraining cursor to
         # move only virtically and horizontally:
-        self.initCursorContrainer();
+        self.initCursorConstrainer();
         
         # Styling:
         self.createColors();
@@ -141,6 +143,10 @@ class MorseInput(QMainWindow):
 
         self.show();
 
+        # Compute global x positions of dash/dot buttons facing
+        # towards the rest area:
+        self.computeInnerButtonEdges();
+        
         # Monitor mouse, so that we can constrain mouse movement to
         # vertical and horizontal (must be set after the affected
         # widget(s) are visible):
@@ -148,9 +154,17 @@ class MorseInput(QMainWindow):
         self.centralWidget.installEventFilter(self);
         self.centralWidget.setMouseTracking(True)
 
-    def initCursorContrainer(self):
+    def initCursorConstrainer(self):
         self.recentMousePos = None;
         self.currentMouseDirection = None;
+        # Holding left mouse button inside the Morse
+        # window will suspend cursor constraining,
+        # if it is enabled. Letting go of the button
+        # will re-enable constraints. This var
+        # keeps track of suspension so mouse-button-up
+        # knows whether to re-instate constraining:
+        self.cursorContraintSuspended = False;
+        
         # Timer that frees the cursor from
         # vertical/horizontal constraint every few
         # milliseconds, unless mouse keeps moving:
@@ -158,6 +172,27 @@ class MorseInput(QMainWindow):
         self.mouseUnconstrainTimer.setInterval(MorseInput.MOUSE_UNCONSTRAIN_TIMEOUT);
         self.mouseUnconstrainTimer.setSingleShot(True);
         self.mouseUnconstrainTimer.timeout.connect(self.unconstrainTheCursor);
+
+    def computeInnerButtonEdges(self):
+        # Remember the X position of the global-screen right 
+        # edge of the dot button for reference in the event filter:
+        localGeo = self.dotButton.geometry();
+        dotButtonGlobalPos = self.mapToGlobal(QPoint(localGeo.x() + localGeo.width(),
+                                                     localGeo.y()));
+        self.dotButtonGlobalRight = dotButtonGlobalPos.x(); 
+        # Remember the X position of the global-screen left 
+        # edge of the dash button for reference in the event filter:
+        localGeo = self.dashButton.geometry();
+        dashButtonGlobalPos = self.mapToGlobal(QPoint(localGeo.x(), localGeo.y()));
+        self.dashButtonGlobalLeft = dashButtonGlobalPos.x(); 
+        
+
+    def startCursorConstraint(self):
+        self.constrainCursorInHotZone = True;
+        
+    def stopCursorConstraint(self):
+        self.constrainCursorInHotZone = False;
+        self.mouseUnconstrainTimer.stop();
 
     def createColors(self):
         self.grayBlueColor = QColor(89,120,137);  # Letter buttons
@@ -188,7 +223,7 @@ class MorseInput(QMainWindow):
         self.dotButton.setMinimumHeight(MorseInput.MORSE_BUTTON_HEIGHT);
         self.dotButton.setMinimumWidth(MorseInput.MORSE_BUTTON_WIDTH);
         self.dotAndDashHLayout.addWidget(self.dotButton);
-
+                                                
         self.dotAndDashHLayout.addStretch();
         
         self.dashButton = GestureButton('dash');
@@ -202,6 +237,7 @@ class MorseInput(QMainWindow):
         self.dotAndDashHLayout.addWidget(self.dashButton);
         
         self.eowButton = GestureButton('Space');
+        self.eowButton.setAutoRepeat(True);
         # Don't have button assume the pressed-down color when 
         # clicked:
         self.eowButton.setFocusPolicy(Qt.NoFocus);
@@ -210,6 +246,7 @@ class MorseInput(QMainWindow):
         self.endOfWordButtonHLayout.addWidget(self.eowButton);
 
         self.backspaceButton = GestureButton('Backspace');
+        self.backspaceButton.setAutoRepeat(True);
         # Don't have button assume the pressed-down color when 
         # clicked:
         self.backspaceButton.setFocusPolicy(Qt.NoFocus);
@@ -319,26 +356,27 @@ class MorseInput(QMainWindow):
     def checkboxStateChanged(self, checkbox, newState):
         '''
         Called when any of the option dialog's checkboxes change:
-        @param checkbox:
-        @type checkbox:
-        @param newState:
-        @type newState:
+        @param checkbox: the affected checkbox
+        @type checkbox: QCheckBox
+        @param newState: the new state, though Qt docs are cagey about what this means: an int of some kind.
+        @type newState: QCheckState
         '''
+        checkboxNowChecked = checkbox.isChecked();
         if checkbox == self.morserOptionsDialog.cursorConstraintCheckBox:
-            self.cfgParser.set('Morse generation','constrainCursorInHotZone',str(newState));
-            self.constrainCursorInHotZone = newState; 
+            self.cfgParser.set('Morse generation','constrainCursorInHotZone',str(checkboxNowChecked));
+            self.constrainCursorInHotZone = checkboxNowChecked; 
         elif checkbox == self.morserOptionsDialog.letterStopSegmentationCheckBox:
-            self.cfgParser.set('Morse generation', 'letterDwellSegmentation', str(newState)); #********** Checked state is 2? Use isChecked
+            self.cfgParser.set('Morse generation', 'letterDwellSegmentation', str(checkboxNowChecked)); #********** Checked state is 2? Use isChecked
             #**************
             pass
             #**************
         elif checkbox == self.morserOptionsDialog.wordStopSegmentationCheckBox:
-            self.cfgParser.set('Morse generation', 'wordDwellSegmentation', str(newState));
+            self.cfgParser.set('Morse generation', 'wordDwellSegmentation', str(checkboxNowChecked));
             #**************
             pass
             #**************
         elif checkbox == self.morserOptionsDialog.typeOutputRadioButton:
-            self.cfgParser.set('Morse generation', 'outputDevice', str(newState));
+            self.cfgParser.set('Morse generation', 'outputDevice', str(checkboxNowChecked));
             #**************
             pass
             #**************
@@ -420,7 +458,7 @@ class MorseInput(QMainWindow):
                 
             # Remember X11 window that is active as we
             # enter the application window, but don't remember
-            # this morse code window, if that was active:
+            # this morse code window, if that was the active one:
             self.virtKeyboard.saveActiveWindowID('currentActiveWindow');
             #***********
             # For testing cursor enter/leave focus changes:
@@ -434,6 +472,7 @@ class MorseInput(QMainWindow):
             #print("Keyboard target: %s" % self.virtKeyboard._getWinIDSafely_('keyboardTarget'));
             #***************
             self.virtKeyboard.activateWindow(retrievalKey='keyboardTarget');
+
         elif eventType == QEvent.Leave:
             self.virtKeyboard.activateWindow(retrievalKey='morseWinID');
         #if (eventType == QEvent.MouseMove) or (event == QHoverEvent):
@@ -443,6 +482,17 @@ class MorseInput(QMainWindow):
                 self.handleCursorConstraint(event);
         # Pass this event on to its destination (rather than filtering it):
         return False;
+
+    def moveEvent(self, event):
+        '''
+        Called when window is repositioned. Need to 
+        recompute the cashed global-x positions of 
+        the right-side dot button, and the left-side
+        dash button.
+        @param event: move event
+        @type event: QMoveEvent 
+        '''
+        self.computeInnerButtonEdges();
 
     def mousePressEvent(self, mouseEvent):
         # Re-activate the most recently active X11 window
@@ -454,9 +504,15 @@ class MorseInput(QMainWindow):
         
         # Release cursor constraint when mouse button is pressed down.
         if self.constrainCursorInHotZone:    
-            self.mouseUnconstrainTimer.stop();
+            self.stopCursorConstraint();
+            self.cursorContraintSuspended = True;
 
         mouseEvent.accept();
+
+    def mouseReleaseEvent(self, event):
+        if self.cursorContraintSuspended:
+            self.cursorContraintSuspended = False;
+            self.startCursorConstraint();
 
     def resizeEvent(self, event):
         newMorseWinRect = self.geometry();
@@ -469,14 +525,38 @@ class MorseInput(QMainWindow):
         self.optionsSaveButton();
 
     def cursorInRestZone(self, pos):
+        # Button geometries are local, so convert the
+        # given global position:
+        localPos = self.mapFromGlobal(pos);
+        
         dotButtonGeo  = self.dotButton.geometry();
         dashButtonGeo = self.dashButton.geometry();
-        return pos.x() > dotButtonGeo.right() and\
-               pos.x() < dashButtonGeo.left() and\
-               pos.y() > dotButtonGeo.top()   and\
-               pos.y() < dotButtonGeo.bottom();
+        return localPos.x() > dotButtonGeo.right() and\
+               localPos.x() < dashButtonGeo.left() and\
+               localPos.y() > dotButtonGeo.top()   and\
+               localPos.y() < dotButtonGeo.bottom();
+    
+    def cursorInButton(self, buttonObj, pos):
+        '''
+        Return True if given position is within the given button object.
+        @param buttonObj: QPushButton or derivative to check.
+        @type buttonObj: QPushButton
+        @param pos: x/y coordinate to test
+        @type pos: QPoint
+        '''
+        # Button geometries are local, so convert the
+        # given global position:
+        localPos = self.mapFromGlobal(pos);
+        return buttonObj.geometry().contains(localPos.x(), localPos.y());
         
     def handleCursorConstraint(self, mouseEvent):
+        '''
+        Manages constraining the cursor to vertical/horizontal. Caller is
+        responsible for checking that cursor constraining is wanted. This
+        method assumes so.
+        @param mouseEvent: mouse move event that needs to be addressed
+        @type mouseEvent: QMouseEvent
+        '''
         
         try:
             if self.recentMousePos is None:
@@ -486,6 +566,39 @@ class MorseInput(QMainWindow):
                 
             globalPosX = mouseEvent.globalX()
             globalPosY = mouseEvent.globalY()
+            globalPos  = QPoint(globalPosX, globalPosY);
+            localPos   = mouseEvent.pos();
+            
+            # If we were already within the dot or dash button
+            # before this new mouse move, and the new mouse
+            # position is still inside that button, then keep
+            # the mouse at the inner edge of the respective button.
+            # ('Inner edge' means facing the resting zone):
+            oldInDot  = self.cursorInButton(self.dotButton, self.recentMousePos);
+            oldInDash = self.cursorInButton(self.dashButton, self.recentMousePos);
+            newInDot  = self.cursorInButton(self.dotButton, globalPos);
+            newInDash = self.cursorInButton(self.dashButton, globalPos);
+            
+            oldInButton = oldInDot or oldInDash;
+            newInButton = newInDot or newInDash;
+            
+            if oldInButton and newInButton:
+                if newInDot:
+                    # The '-1' moves the cursor slightly left into
+                    # the Dot button, rather than keeping it right on
+                    # the edge. This is to avoid the cursor seemingej
+                    # To 'bounce' off the right dot button border back
+                    # into the dead zone. The pixel is the drop shadow
+                    # on the right side of the dot button.
+                    self.morseCursor.setPos(self.dotButtonGlobalRight-1, self.recentMousePos.y());
+                elif newInDash:
+                    self.morseCursor.setPos(self.dashButtonGlobalLeft, self.recentMousePos.y());
+                return;
+            
+            # Only constrain while in rest zone (central empty space), or
+            # inside the dot or dash buttons:
+            if not (self.cursorInRestZone(globalPos) or newInButton):
+                return;
             
             # If cursor moved while we are constraining motion 
             # vertically or horizontally, enforce that constraint now:
@@ -499,7 +612,7 @@ class MorseInput(QMainWindow):
                 self.morseCursor.setPos(correctedCurPos);
                 return;
 
-            # Not currently constraining mouse move. Check which 
+            # Not currently constraining mouse move. To init, check which 
             # movement larger compared to the most recent position: x or y:
             if abs(globalPosX - self.recentMousePos.x()) > abs(globalPosY - self.recentMousePos.y()):
                 self.currentMouseDirection = Direction.HORIZONTAL;

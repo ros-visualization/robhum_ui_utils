@@ -19,6 +19,13 @@ class VirtualKeyboard(object):
         # Same for extracting the window ID only:
         self.windowIDPattern  = re.compile(r'.*window:(?P<winID>[\d]+)');
         
+        # Pattern to extract x,y,width,height from the xdotool getwindowgeometry command:
+        #   Window 46137569
+        #     Position: 2765,628 (screen: 0)
+        #     Geometry: 1244x848
+        # The '.DOTALL' ensures that '.*' matches the newlines:
+        self.winGeometryPattern = re.compile('.*Position: (?P<x>[\d]+)[,]+(?P<y>[\d]+).*Geometry: (?P<width>[\d]+)x(?P<height>[\d]+)', re.DOTALL);
+        
         # Place for users to have window ids stored:
         self.windowIDs = {};
         
@@ -34,7 +41,7 @@ class VirtualKeyboard(object):
         @param theStr: control-char string to send to active window
         @type theStr: string
         '''
-        resCode = subprocess.call(['xdotool', 'getactivewindow', 'key', str(theStr)]);
+        resCode = subprocess.call(['xdotool', 'key', str(theStr)]);
         
     def typeTextToActiveWindow(self, theStr):
         '''
@@ -43,7 +50,7 @@ class VirtualKeyboard(object):
         @param theStr: control-char string to send to active window
         @type theStr: string
         '''
-        resCode = subprocess.call(['xdotool', 'getactivewindow', 'type', str(theStr)]);
+        resCode = subprocess.call(['xdotool', 'type', str(theStr)]);
         
     def mouseClick(self, buttonNum):
         '''
@@ -154,7 +161,28 @@ class VirtualKeyboard(object):
             resCode = subprocess.call(['xdotool', 'windowactivate', '--sync', str(self._getWinIDSafely_(retrievalKey))]);
         else:
             resCode = subprocess.call(['xdotool', 'search', '--name', '--sync', windowTitle, 'windowactivate']);
+            
+    def getWindowGeometry(self, retrievalKey=None):
+        if retrievalKey is None:
+            geo = subprocess.check_output(['xdotool', 'getactivewindow', 'getwindowgeometry']);
+        else:
+            geo = subprocess.check_output(['xdotool', 'getwindowgeometry', str(self._getWinIDSafely_(retrievalKey))]);
+        theMatch = self.winGeometryPattern.match(geo);
+        if theMatch is None:
+            return None;
+        resDict  = theMatch.groupdict();
+        return resDict;
 
+    def raiseWindow(self, retrievalKey=None):
+        '''
+        Flakey; don't rely on it.
+        @param retrievalKey:
+        @type retrievalKey:
+        '''
+        if retrievalKey is None:
+            rescode = subprocess.call(['xdotool', 'getactivewindow', 'windowraise']);
+        else:
+            rescode = subprocess.call(['xdotool', 'windowraise', str(self._getWinIDSafely_(retrievalKey))]);
 
 #    def activateWindowUnderMouse(self):
 #        winID = self.windowUnderMouseCursor();
@@ -200,15 +228,25 @@ if __name__ == '__main__':
         
 #    vBoard.moveMouseRelative(-100, 100);
 
-    currentWinID = vBoard.windowUnderMouseCursor();
-    print("Move cursor to a different window; it will be activated.");
-    while True:
-        winIDNow = vBoard.windowUnderMouseCursor() 
-        if winIDNow != currentWinID:
-            break;
-        time.sleep(1);
-    vBoard.activateWindow(winIDNow);
-    print("Done.")
+#    currentWinID = vBoard.windowUnderMouseCursor();
+#    print("Move cursor to a different window; it will be activated.");
+#    while True:
+#        winIDNow = vBoard.windowUnderMouseCursor() 
+#        if winIDNow != currentWinID:
+#            break;
+#        time.sleep(1);
+#    vBoard.activateWindow(winIDNow);
+#    print("Done.")
+
+#    geometryDict = vBoard.getWindowGeometry();
+#    print(str(geometryDict));
+#    
+#    vBoard.saveActiveWindowID('testWindow');
+#    geometryDict = vBoard.getWindowGeometry(retrievalKey='testWindow');
+#    print(str(geometryDict));
+
+    vBoard.windowIDs['test'] = str(46137569);
+    vBoard.raiseWindow(retrievalKey='test')
 
 
     # The following test doesn't work, because
@@ -223,10 +261,5 @@ if __name__ == '__main__':
 #    newWinID = subprocess.check_output(['xdotool', 'selectwindow'])
 #    time.sleep(3);
 #    vBoard.activateWindow();
-    
-    
-     
-    
-    
 
         
