@@ -22,7 +22,7 @@ class VirtualKeyboard(object):
         # Place for users to have window ids stored:
         self.windowIDs = {};
         
-        self.saveActiveWindowID();
+        self.saveActiveWindowID('__startup_win_id__');
 
     def typeToActiveWindow(self, theStr):
         '''
@@ -125,19 +125,11 @@ class VirtualKeyboard(object):
         winid = subprocess.check_output(['xdotool', 'getactivewindow']).strip();
         #*********8
         self.windowIDs[retrievalKey] = subprocess.check_output(['xdotool', 'getactivewindow']).strip();
+
+    def windowsEqual(self, retrievalKey1, retrievalKey2):
+        return self._getWinIDSafely_(retrievalKey1) == self._getWinIDSafely_(retrievalKey2);
         
-    def getWindowID(self, retrievalKey):
-        '''
-        Return window ID that was most recently saved. That is the
-        active window when this VirtualKeyboard instance was created,
-        or the window that was active during the most recent
-        call to saveActiveWindowID();
-        @param retrievalKey: key under which caller asked to associate with window in earlier call to saveActiveWindowID
-        @type retrievalKey: string
-        '''
-        return self.windowIDs[retrievalKey];
-    
-    def activateWindow(self, retrievalKey):
+    def activateWindow(self, retrievalKey=None, windowTitle=None):
         '''
         Activates the X11 window with the given window ID.
         If windowID is omitted, the most recently active
@@ -145,23 +137,41 @@ class VirtualKeyboard(object):
         @param retrievalKey: key under which caller asked to associate with window in earlier call to saveActiveWindowID
         @type retrievalKey: string
         '''
-        resCode = subprocess.call(['xdotool', 'windowactivate', str(windowID)]);
-
-    def activateWindowUnderMouse(self):
-        winID = self.windowUnderMouseCursor();
-        self.activateWindow(windowID=winID);
+        if ((retrievalKey is None) and (windowTitle is None)) or\
+            ((retrievalKey is not None) and (windowTitle is not None)):
+            raise ValueError('Either retrievalKey or windowTitle must be provided (but not both)');
         
-    def windowUnderMouseCursor(self):
-        '''
-        Returns the ID of the X11 window under the mouse cursor.
-        '''
-        stdoutData = subprocess.check_output(['xdotool', 'getmouselocation'], stderr=file("/dev/null", 'w'));
-        xdotoolOutputMatch = re.match(self.windowIDPattern, stdoutData);
-        if xdotoolOutputMatch is None:
-            raise ValueError("Call to xdotool for obtaining mouse cursor position did not return output of expected format. It returned '%s'" % stdoutData)
-        # Get at dict from the group: {winID:winID}, where winID is of string type:
-        resDict = xdotoolOutputMatch.groupdict();
-        return resDict['winID'];
+        if retrievalKey is not None:  
+            resCode = subprocess.call(['xdotool', 'windowactivate', '--sync', str(self._getWinIDSafely_(retrievalKey))]);
+        else:
+            resCode = subprocess.call(['xdotool', 'search', '--name', '--sync', windowTitle, 'windowactivate']);
+
+
+#    def activateWindowUnderMouse(self):
+#        winID = self.windowUnderMouseCursor();
+#        self.activateWindow(windowID=winID);
+        
+#    def windowUnderMouseCursor(self):
+#        '''
+#        Returns the ID of the X11 window under the mouse cursor.
+#        '''
+#        stdoutData = subprocess.check_output(['xdotool', 'getmouselocation'], stderr=file("/dev/null", 'w'));
+#        xdotoolOutputMatch = re.match(self.windowIDPattern, stdoutData);
+#        if xdotoolOutputMatch is None:
+#            raise ValueError("Call to xdotool for obtaining mouse cursor position did not return output of expected format. It returned '%s'" % stdoutData)
+#        # Get at dict from the group: {winID:winID}, where winID is of string type:
+#        resDict = xdotoolOutputMatch.groupdict();
+#        return resDict['winID'];
+
+
+    #----------------------------------------   Private Methods  ----------------------------
+    
+    def _getWinIDSafely_(self, retrievalKey):
+        try:
+            return self.windowIDs[retrievalKey];
+        except KeyError as e:
+            raise ValueError("No retrieval key %s is known to virtual keyboard." % `e`);
+        
 
 if __name__ == '__main__':
     

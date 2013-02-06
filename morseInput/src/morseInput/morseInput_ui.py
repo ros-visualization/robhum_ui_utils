@@ -86,7 +86,8 @@ class MorseInput(QMainWindow):
             raise ValueError("Can't find QtCreator user interface file %s" % relPathQtCreatorFileMainWin);
         # Make QtCreator generated UI a child if this instance:
         loadUi(qtCreatorXMLFilePath, self);
-        self.setWindowTitle("Morser: Semi-automatic Morse code input");
+        self.windowTitle = "Morser: Semi-automatic Morse code input";
+        self.setWindowTitle(self.windowTitle);
         
         relPathQtCreatorFileOptionsDialog = "qt_files/morserOptions/morseroptions.ui";
         qtCreatorXMLFilePath = self.findFile(relPathQtCreatorFileOptionsDialog);
@@ -117,6 +118,7 @@ class MorseInput(QMainWindow):
         self.installMenuBar();
         
         self.connectWidgets();
+        self.cursorEnteredOnce = False;
         
         # Set cursor to hand icon while inside Morser:
         self.morseCursor = QCursor(Qt.OpenHandCursor);
@@ -384,20 +386,41 @@ class MorseInput(QMainWindow):
             self.morseGenerator.stopMorseSeq();
 
     def eventFilter(self, target, event):
+
         eventType = event.type();
+        
         if eventType == QEvent.Enter:
+            # The first time cursor ever enters the Morse
+            # window do the following:
+            if not self.cursorEnteredOnce:
+                # Get the Morse windows X11 window ID saved,
+                # so that we can later activate it whenever
+                # the cursor leaves the Morse window.
+                # First, make the Morse window active:
+                self.virtKeyboard.activateWindow(windowTitle=self.windowTitle);
+                self.virtKeyboard.saveActiveWindowID('morseWinID');
+                # Also, initialize the keyboard destination:
+                self.virtKeyboard.saveActiveWindowID('keyboardTarget');
+                self.cursorEnteredOnce = True;
+                
             # Remember X11 window that is active as we
             # enter the application window, but don't remember
             # this morse code window, if that was active:
-            morseWinID = self.virtKeyboard.windowUnderMouseCursor(); 
-            formerlyActiveWinID = self.virtKeyboard.getRecentWindow(); 
+            self.virtKeyboard.saveActiveWindowID('currentActiveWindow');
             #***********
-            print("Curr win: %s. Prev win: %s" % (morseWinID, formerlyActiveWinID))
+            # For testing cursor enter/leave focus changes:
+            #currentlyActiveWinID = self.virtKeyboard._getWinIDSafely_('currentActiveWindow');
+            #morseWinID = self.virtKeyboard._getWinIDSafely_('morseWinID');
+            #print("Morse win: %s. Curr-active win: %s" % (morseWinID, currentlyActiveWinID))
             #***********
-            if morseWinID != formerlyActiveWinID:
-                self.virtKeyboard.saveActiveWindowID();
+            if not self.virtKeyboard.windowsEqual('morseWinID', 'currentActiveWindow'):
+                self.virtKeyboard.saveActiveWindowID('keyboardTarget');
+            #***************
+            #print("Keyboard target: %s" % self.virtKeyboard._getWinIDSafely_('keyboardTarget'));
+            #***************
+            self.virtKeyboard.activateWindow(retrievalKey='keyboardTarget');
         elif eventType == QEvent.Leave:
-            self.virtKeyboard.activateWindowUnderMouse();
+            self.virtKeyboard.activateWindow(retrievalKey='morseWinID');
         #if (eventType == QEvent.MouseMove) or (event == QHoverEvent):
         elif eventType == QEvent.MouseMove:
             if self.constrainCursorInHotZone:
@@ -410,7 +433,7 @@ class MorseInput(QMainWindow):
         # Re-activate the most recently active X11 window
         # to ensure the letters are directed to the 
         # proper window, and not this morse window:
-        self.virtKeyboard.activateWindow();
+        self.virtKeyboard.activateWindow('keyboardTarget');
         mouseEvent.accept();
 
         
