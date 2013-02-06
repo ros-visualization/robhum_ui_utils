@@ -2,21 +2,27 @@
 
 # To do:
 # - Save settings, like window size in $HOME/.morse  
-# - Saving prefs
-# - Hook up virtual keyboard
 # - Catch window resize, and save it
 # - Word/letter dwell turn on/off, output type checkbox
 # - Speed meter
-# - Backspace and abort
+# - Backspace
 # - Morse table
 # - Status bar with running text??
 # - Volume control
 # - Running tooltip with slider values
 # - Publish package
 
+# Doc:
+#   - Abort if mouse click in rest zone.
+#   - Left click to suspend beeping
+#   - Prefs in $HOME/.morser/morser.cfg
+
+
+
 
 import sys
 import os
+import re
 import ConfigParser
 from functools import partial
 
@@ -38,7 +44,7 @@ from python_qt_binding import QtCore;
 #from word_completion.word_collection import WordCollection;
 from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor, QHoverEvent, QColor, QIcon;
 from QtGui import QMenuBar;
-from QtCore import QPoint, Qt, QTimer, QEvent, Signal, QCoreApplication; 
+from QtCore import QPoint, Qt, QTimer, QEvent, Signal, QCoreApplication, QRect; 
 
 # Dot/Dash RGB: 0,179,240
 
@@ -268,6 +274,7 @@ class MorseInput(QMainWindow):
                     'keySpeed'                 : str(1.7),
                     'interLetterDwellDelay'    : str(self.morseGenerator.getInterLetterTime()),
                     'interWordDwellDelay'      : str(self.morseGenerator.getInterWordTime()),
+                    'winGeometry'              : '100,100,350,350',
                     }
 
         self.cfgParser = ConfigParser.SafeConfigParser(self.optionsDefaultDict);
@@ -275,6 +282,15 @@ class MorseInput(QMainWindow):
         self.cfgParser.add_section('Output');
         self.cfgParser.add_section('Appearance');
         self.cfgParser.read(self.optionsFilePath);
+        
+        mainWinGeometry = self.cfgParser.get('Appearance', 'winGeometry');
+        # Get four ints from the comma-separated string of upperLeftX, upperLeftY,
+        # Width,Height numbers:
+        try:
+            nums = mainWinGeometry.split(',');
+            self.setGeometry(QRect(int(nums[0].strip()),int(nums[1].strip()),int(nums[2].strip()),int(nums[3].strip())));
+        except Exception as e:
+            self.dialogService.showErrorMsg("Could not set window size; config file spec not grammatical: %s. (%s" % (mainWinGeometry, `e`));
         
         self.morseGenerator.setInterLetterDelay(self.cfgParser.getfloat('Morse generation', 'interLetterDwellDelay'));
         self.morseGenerator.setInterWordDelay(self.cfgParser.getfloat('Morse generation', 'interWordDwellDelay'));
@@ -312,7 +328,7 @@ class MorseInput(QMainWindow):
             self.cfgParser.set('Morse generation','constrainCursorInHotZone',str(newState));
             self.constrainCursorInHotZone = newState; 
         elif checkbox == self.morserOptionsDialog.letterStopSegmentationCheckBox:
-            self.cfgParser.set('Morse generation', 'letterDwellSegmentation', str(newState));
+            self.cfgParser.set('Morse generation', 'letterDwellSegmentation', str(newState)); #********** Checked state is 2? Use isChecked
             #**************
             pass
             #**************
@@ -374,10 +390,9 @@ class MorseInput(QMainWindow):
         elif buttonObj == self.eowButton:
             buttonObj.animateClick();
             self.outputLetters(' ');
-
         elif buttonObj == self.backspaceButton:
             buttonObj.animateClick();
-            self.outputLetters('BackSpace');
+            self.outputBackspace();
         
     def buttonExited(self, buttonObj):
         if buttonObj == self.dotButton:
@@ -434,8 +449,32 @@ class MorseInput(QMainWindow):
         # to ensure the letters are directed to the 
         # proper window, and not this morse window:
         self.virtKeyboard.activateWindow('keyboardTarget');
+        if self.cursorInRestZone(mouseEvent.pos()):
+            self.morseGenerator.abortCurrentMorseElement();
+        
+        # Release cursor constraint when mouse button is pressed down.
+        if self.constrainCursorInHotZone:    
+            self.mouseUnconstrainTimer.stop();
+
         mouseEvent.accept();
 
+    def resizeEvent(self, event):
+        newMorseWinRect = self.geometry();
+        self.cfgParser.set('Appearance', 
+                           'winGeometry', 
+                           str(newMorseWinRect.x()) 	+ ',' +
+                           str(newMorseWinRect.y()) 	+ ',' +
+                           str(newMorseWinRect.width()) + ',' +
+                           str(newMorseWinRect.height()));
+        self.optionsSaveButton();
+
+    def cursorInRestZone(self, pos):
+        dotButtonGeo  = self.dotButton.geometry();
+        dashButtonGeo = self.dashButton.geometry();
+        return pos.x() > dotButtonGeo.right() and\
+               pos.x() < dashButtonGeo.left() and\
+               pos.y() > dotButtonGeo.top()   and\
+               pos.y() < dotButtonGeo.bottom();
         
     def handleCursorConstraint(self, mouseEvent):
         
@@ -503,12 +542,18 @@ class MorseInput(QMainWindow):
             alpha += ' '; 
         self.outputLetters(alpha);
 
-    def outputLetters(self, letters):
+    def outputLetters(self, lettersToSend):
         if self.outputDevice == OutputType.TYPE:
             #print(letters);
-            self.virtKeyboard.typeToActiveWindow(letters);
+            self.virtKeyboard.typeTextToActiveWindow(lettersToSend);
         elif self.outputDevice == OutputType.SPEAK:
             print("Speech not yet implemented.");
+
+    def outputBackspace(self):
+        self.virtKeyboard.typeControlCharToActiveWindow('BackSpace');
+        
+    def outputNewline(self):
+        self.virtKeyboard.typeControlCharToActiveWindow('Linefeed');
 
     def exit(self):
         self.cleanup();

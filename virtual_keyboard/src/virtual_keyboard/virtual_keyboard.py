@@ -24,14 +24,23 @@ class VirtualKeyboard(object):
         
         self.saveActiveWindowID('__startup_win_id__');
 
-    def typeToActiveWindow(self, theStr):
+    def typeControlCharToActiveWindow(self, theStr):
         '''
 		Type a given keystroke. Examples being "alt+r", "Control_L+J",
-		"ctrl+alt+n", "BackSpace".
-		Generally, any valid X Keysym string will work. Multiple keys are
+		"ctrl+alt+n", "BackSpace", "Linefeed".
+		Generally, any valid X Keysym string will work. Composited control keys are
 		separated by '+'. Aliases exist for "alt", "ctrl", "shift", "super",
-		and "meta" which all map to Foo_L, such as Alt_L and Control_L, etc.        
-        @param theStr: string to send to active window
+		and "meta" which all map to Foo_L, such as Alt_L and Control_L, etc.
+        @param theStr: control-char string to send to active window
+        @type theStr: string
+        '''
+        resCode = subprocess.call(['xdotool', 'getactivewindow', 'key', str(theStr)]);
+        
+    def typeTextToActiveWindow(self, theStr):
+        '''
+		Type a given string, which must not contain control chars.
+		For sending individual control chars, use typeControlCharToActiveWindow().
+        @param theStr: control-char string to send to active window
         @type theStr: string
         '''
         resCode = subprocess.call(['xdotool', 'getactivewindow', 'type', str(theStr)]);
