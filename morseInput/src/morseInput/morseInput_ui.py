@@ -1,24 +1,20 @@
 #!/usr/bin/env python
 
 # To do:
-# - Save settings, like window size in $HOME/.morse  
-# - Catch window resize, and save it
 # - Word/letter dwell turn on/off, output type checkbox
 # - Speed meter
-# - Backspace
-# - Morse table
-# - Status bar with running text??
 # - Volume control
 # - Somewhere (moveEvent()?_: ensure that no overlap of morse win with active window.
-#   If so, show error msg.  
+#      If so, show error msg.  
 # - Running tooltip with slider values
 # - Publish package
 
 # Doc:
 #   - Abort if mouse click in rest zone.
-#   - Left click to suspend beeping
+#   - Left click to suspend beeping and cursor contraint
 #   - Prefs in $HOME/.morser/morser.cfg
 #   - Cheat sheet (Menu)
+#   - Options window
 
 
 
