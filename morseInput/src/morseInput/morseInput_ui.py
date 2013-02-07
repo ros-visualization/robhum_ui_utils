@@ -18,7 +18,7 @@
 #   - Abort if mouse click in rest zone.
 #   - Left click to suspend beeping
 #   - Prefs in $HOME/.morser/morser.cfg
-
+#   - Cheat sheet (Menu)
 
 
 
@@ -131,6 +131,7 @@ class MorseInput(QMainWindow):
         GestureButton.setFlicksEnabled(False);
         
         self.installMenuBar();
+        self.installStatusBar();
         
         self.connectWidgets();
         self.cursorEnteredOnce = False;
@@ -160,10 +161,6 @@ class MorseInput(QMainWindow):
         #self.setMouseTracking(True)
         self.centralWidget.installEventFilter(self);
         self.centralWidget.setMouseTracking(True)
-        
-        #******************
-        self.morseCheatSheet.show();
-        #******************
         
     def initCursorConstrainer(self):
         self.recentMousePos = None;
@@ -276,11 +273,26 @@ class MorseInput(QMainWindow):
         raiseOptionsDialogAction.setStatusTip('Show options and settings')
         raiseOptionsDialogAction.triggered.connect(self.showOptions)
   
+        raiseCheatSheetAction = QtGui.QAction(QtGui.QIcon('preferences-desktop-accessibility.png'), '&Cheat sheet', self)
+        raiseCheatSheetAction.setShortcut('Ctrl+M')
+        raiseCheatSheetAction.setStatusTip('Show Morse code cheat sheet')
+        raiseCheatSheetAction.triggered.connect(self.showCheatSheet)
+        
         fileMenu = self.menuBar.addMenu('&File')
         fileMenu.addAction(exitAction)
         
         editMenu = self.menuBar.addMenu('&Edit')
-        editMenu.addAction(raiseOptionsDialogAction)      
+        editMenu.addAction(raiseOptionsDialogAction)
+        
+        viewMenu = self.menuBar.addMenu('&View')
+        viewMenu.addAction(raiseCheatSheetAction)
+        # When showing table the first time, we move it left so that it 
+        # does not totally obscure the Morse window:
+        self.shownCheatSheetBefore = False;      
+    
+    def installStatusBar(self):
+        self.statusBar.showMessage("Foo"); 
+    
         
     def connectWidgets(self):
         
@@ -311,6 +323,14 @@ class MorseInput(QMainWindow):
         
     def showOptions(self):
         self.morserOptionsDialog.show();
+    
+    def showCheatSheet(self):
+        self.morseCheatSheet.show();
+        if not self.shownCheatSheetBefore:
+            cheatSheetGeo = self.morseCheatSheet.geometry();
+            cheatSheetGeo.moveLeft(200);
+            self.morseCheatSheet.setGeometry(cheatSheetGeo);
+            self.shownCheatSheetBefore = True;
     
     def setOptions(self):
         

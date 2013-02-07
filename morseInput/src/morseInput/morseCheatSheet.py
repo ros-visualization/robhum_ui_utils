@@ -32,12 +32,18 @@ class MorseCheatSheet(QDialog):
         for keyValue in codeKey.items():
             morseSheetDict[keyValue[1]] = keyValue[0];
                 
+        # Get string with just the punctuation letters for which we
+        # have Morse:
+        punctuation = '';
+        for punctLetter in string.punctuation:
+            if morseSheetDict.has_key(punctLetter):
+                punctuation += punctLetter;
+        
         # Fill the text labels:
-        morseSorted = sorted(morseSheetDict.keys());
         colCount = self.morseCodeGrid.columnCount();
         rowCount = self.morseCodeGrid.rowCount();
         keyIndex = 0;
-        letterLists = [string.lowercase, string.digits, string.punctuation];
+        letterLists = [string.lowercase, string.digits, punctuation];
         currentList = 0;
         for col in range(colCount):
             for row in range(rowCount):
