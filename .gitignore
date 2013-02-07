@@ -7,3 +7,6 @@ cmake_install.cmake
 *.pyc
 *~
 *.pro.user
+*.cpp
+*.h
+*.pro
