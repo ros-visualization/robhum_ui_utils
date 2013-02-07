@@ -61,7 +61,7 @@ class Direction:
     VERTICAL   = 1
 
 class MorseInputSignals(CommChannel):
-    letterDone = Signal(int);
+    letterDone = Signal(int,str);
 
 class MorseInput(QMainWindow):
     '''
@@ -291,7 +291,7 @@ class MorseInput(QMainWindow):
         self.shownCheatSheetBefore = False;      
     
     def installStatusBar(self):
-        self.statusBar.showMessage("Foo"); 
+        self.statusBar.showMessage("Ready to go... Remember to set focus"); 
     
         
     def connectWidgets(self):
@@ -377,7 +377,7 @@ class MorseInput(QMainWindow):
         self.morserOptionsDialog.letterStopSegmentationCheckBox.setChecked(self.cfgParser.getboolean('Morse generation', 'letterDwellSegmentation'));
         self.morserOptionsDialog.wordStopSegmentationCheckBox.setChecked(self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation'));
         self.morserOptionsDialog.typeOutputRadioButton.setChecked(self.cfgParser.getint('Output', 'outputDevice')==OutputType.TYPE);
-        self.morserOptionsDialog.speechOutputRadioButton.setChecked(not self.cfgParser.getint('Output', 'outputDevice'));
+        self.morserOptionsDialog.speechOutputRadioButton.setChecked(self.cfgParser.getint('Output', 'outputDevice')==OutputType.SPEAK);
         self.morserOptionsDialog.keySpeedSlider.setValue(self.cfgParser.getfloat('Morse generation', 'keySpeed'));
         interLetterSecs = self.cfgParser.getfloat('Morse generation', 'interLetterDwellDelay');
         self.morserOptionsDialog.interLetterDelaySlider.setValue(int(interLetterSecs*1000.)); # inter-letter dwell is in msecs
@@ -407,7 +407,12 @@ class MorseInput(QMainWindow):
             pass
             #**************
         elif checkbox == self.morserOptionsDialog.typeOutputRadioButton:
-            self.cfgParser.set('Morse generation', 'outputDevice', str(checkboxNowChecked));
+            self.cfgParser.set('Output', 'outputDevice', str(OutputType.TYPE));
+            #**************
+            pass
+            #**************
+        elif checkbox == self.morserOptionsDialog.speechOutputRadioButton:
+            self.cfgParser.set('Output', 'outputDevice', str(OutputType.SPEAK));
             #**************
             pass
             #**************
@@ -623,7 +628,7 @@ class MorseInput(QMainWindow):
                     # on the right side of the dot button.
                     self.morseCursor.setPos(self.dotButtonGlobalRight-1, self.recentMousePos.y());
                 elif newInDash:
-                    self.morseCursor.setPos(self.dashButtonGlobalLeft, self.recentMousePos.y());
+                    self.morseCursor.setPos(self.dashButtonGlobalLeft+1, self.recentMousePos.y());
                 return;
             
             # Only constrain while in rest zone (central empty space), or
@@ -668,7 +673,7 @@ class MorseInput(QMainWindow):
         self.recentMousePos = None;
 
     @staticmethod
-    def letterCompleteNotification(reason):
+    def letterCompleteNotification(reason, details=''):
         '''
         Called from MorseGenerator when one letter has
         become available, or when a dwell end-of-letter,
@@ -677,14 +682,17 @@ class MorseInput(QMainWindow):
         @param reason: indicator whether regular letter, or end of word.
         @type reason: TimeoutReason
         '''
-        MorseInputSignals.getSignal('MorseInputSignals.letterDone').emit(reason);
+        MorseInputSignals.getSignal('MorseInputSignals.letterDone').emit(reason, details);
 
-    @QtCore.Slot(int)
-    def deliverInput(self, reason):
+    @QtCore.Slot(int,str)
+    def deliverInput(self, reason, detail):
         alpha = self.morseGenerator.getAndRemoveAlphaStr()
         if reason == TimeoutReason.END_OF_WORD:
             alpha += ' '; 
-        self.outputLetters(alpha);
+        elif reason == TimeoutReason.END_OF_LETTER:
+            self.outputLetters(alpha);
+        elif reason == TimeoutReason.BAD_MORSE_INPUT:
+            self.statusBar.showMessage("Bad Morse input: '%s'" % detail, 4000); # milliseconds
 
     def outputLetters(self, lettersToSend):
         if self.outputDevice == OutputType.TYPE:

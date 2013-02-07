@@ -16,6 +16,7 @@ class Morse:
 class TimeoutReason:
     END_OF_LETTER = 0
     END_OF_WORD   = 1
+    BAD_MORSE_INPUT = 2
 
 class MorseGenerator(object):
     '''
@@ -253,6 +254,7 @@ class MorseGenerator(object):
 
     def watchdogExpired(self, reason):
 
+        detail = '';
         if reason == TimeoutReason.END_OF_LETTER:
             # If no Morse elements are in self.morseResult,
             # it could be because the dash or dot thread are
@@ -266,11 +268,14 @@ class MorseGenerator(object):
             # append it:
             if newLetter is not None:
                 self.setAlphaStr(self.alphaStr + newLetter);
+            else:
+                reason = TimeoutReason.BAD_MORSE_INPUT;
+                detail = self.morseResult;
         elif reason == TimeoutReason.END_OF_WORD:
             self.setAlphaStr(self.alphaStr + ' ');
         self.setMorseResult('');
         if self.callback is not None:
-            self.callback(reason);
+            self.callback(reason, detail);
 
 
 
@@ -291,7 +296,7 @@ class MorseGenerator(object):
         try:
             letter = codeKey[self.morseResult];
         except KeyError:
-            print("Bad morse seq: '%s'" % self.morseResult);
+            #print("Bad morse seq: '%s'" % self.morseResult);
             return None
         return letter;
             

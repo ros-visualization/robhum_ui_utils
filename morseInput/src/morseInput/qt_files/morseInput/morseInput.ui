@@ -63,7 +63,13 @@
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="styleSheet">
+    <string notr="true">background:rgb(1, 79, 131);
+p{font-family: &quot;Monospace&quot;, Times, serif};
+color:rgb(220, 220, 220)</string>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
