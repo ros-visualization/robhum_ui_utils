@@ -15,7 +15,9 @@
 #   - Prefs in $HOME/.morser/morser.cfg
 #   - Cheat sheet (Menu)
 #   - Options window
-
+#
+# Needed PYTHONPATH:
+#   /opt/ros/fuerte/lib/python2.7/dist-packages:/home/paepcke/fuerte/stacks/robhum_ui_utils:/home/paepcke/fuerte/stacks/robhum_ui_utils/gesture_buttons/src:/opt/ros/fuerte/stacks/python_qt_binding/src:/home/paepcke/fuerte/stacks/robhum_ui_utils/qt_comm_channel/src:/home/paepcke/fuerte/stacks/robhum_ui_utils/qt_dialog_service/src:/home/paepcke/fuerte/stacks/robhum_ui_utils/virtual_keyboard/src:
 
 
 import sys
