@@ -38,6 +38,8 @@ from morseToneGeneration import MorseGenerator
 from morseToneGeneration import Morse
 from morseToneGeneration import TimeoutReason
 
+from morseCheatSheet import MorseCheatSheet;
+
 from virtual_keyboard.virtual_keyboard import VirtualKeyboard
 
 from python_qt_binding import loadUi;
@@ -88,6 +90,7 @@ class MorseInput(QMainWindow):
         # Find QtCreator's XML file in the PYTHONPATH, and load it:
         currDir = os.path.realpath(__file__);
         
+        # Load UI for Morse input:
         relPathQtCreatorFileMainWin = "qt_files/morseInput/morseInput.ui";
         qtCreatorXMLFilePath = self.findFile(relPathQtCreatorFileMainWin);
         if qtCreatorXMLFilePath is None:
@@ -97,12 +100,16 @@ class MorseInput(QMainWindow):
         self.windowTitle = "Morser: Semi-automatic Morse code input";
         self.setWindowTitle(self.windowTitle);
         
+        # Load UI for Morse options dialog:
         relPathQtCreatorFileOptionsDialog = "qt_files/morserOptions/morseroptions.ui";
         qtCreatorXMLFilePath = self.findFile(relPathQtCreatorFileOptionsDialog);
         if qtCreatorXMLFilePath is None:
             raise ValueError("Can't find QtCreator user interface file %s" % relPathQtCreatorFileOptionsDialog);
         # Make QtCreator generated UI a child if this instance:
         self.morserOptionsDialog = loadUi(qtCreatorXMLFilePath);
+        
+        # Load UI for Morse Cheat Sheet:
+        self.morseCheatSheet = MorseCheatSheet(self);
         
         self.dialogService = DialogService();
 
@@ -153,7 +160,11 @@ class MorseInput(QMainWindow):
         #self.setMouseTracking(True)
         self.centralWidget.installEventFilter(self);
         self.centralWidget.setMouseTracking(True)
-
+        
+        #******************
+        self.morseCheatSheet.show();
+        #******************
+        
     def initCursorConstrainer(self):
         self.recentMousePos = None;
         self.currentMouseDirection = None;
