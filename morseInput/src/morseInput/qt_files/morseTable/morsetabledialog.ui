@@ -76,6 +76,22 @@
     </item>
     <item>
      <layout class="QGridLayout" name="morseCodeGrid">
+      <item row="3" column="2">
+       <widget class="QLabel" name="label_12">
+        <property name="font">
+         <font>
+          <family>Monospace</family>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Spare</string>
+        </property>
+        <property name="indent">
+         <number>13</number>
+        </property>
+       </widget>
+      </item>
       <item row="4" column="0">
        <widget class="QLabel" name="label_13">
         <property name="font">
@@ -316,8 +332,8 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
-       <widget class="QLabel" name="label_12">
+      <item row="6" column="2">
+       <widget class="QLabel" name="label_21">
         <property name="font">
          <font>
           <family>Monospace</family>
@@ -636,22 +652,6 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="2">
-       <widget class="QLabel" name="label_21">
-        <property name="font">
-         <font>
-          <family>Monospace</family>
-          <pointsize>14</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Spare</string>
-        </property>
-        <property name="indent">
-         <number>13</number>
-        </property>
-       </widget>
-      </item>
       <item row="6" column="0">
        <widget class="QLabel" name="label_19">
         <property name="font">
@@ -782,6 +782,54 @@
       </item>
       <item row="14" column="2">
        <widget class="QLabel" name="label_45">
+        <property name="font">
+         <font>
+          <family>Monospace</family>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Spare</string>
+        </property>
+        <property name="indent">
+         <number>13</number>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="0">
+       <widget class="QLabel" name="label_46">
+        <property name="font">
+         <font>
+          <family>Monospace</family>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Spare</string>
+        </property>
+        <property name="indent">
+         <number>13</number>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="1">
+       <widget class="QLabel" name="label_47">
+        <property name="font">
+         <font>
+          <family>Monospace</family>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Spare</string>
+        </property>
+        <property name="indent">
+         <number>13</number>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="2">
+       <widget class="QLabel" name="label_48">
         <property name="font">
          <font>
           <family>Monospace</family>

@@ -247,7 +247,7 @@ class MorseGenerator(object):
             self.setMorseResult(self.morseResult + '-'*numElements); 
         else: # dots:
             # Catch abort-letter:
-            if numElements > 6:
+            if numElements > 7:
                 self.abortCurrentMorseElement();
                 return;
             self.setMorseResult(self.morseResult + '.'*numElements);

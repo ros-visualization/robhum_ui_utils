@@ -7,6 +7,9 @@
 # - Somewhere (moveEvent()?_: ensure that no overlap of morse win with active window.
 #      If so, show error msg.  
 # - Running tooltip with slider values
+# - Speed slider: change to range 10-60, and divide by 10 when reading
+# - Take out vertical constraint; add option in options menu
+# - Get new morse codes to show up in Morse list.
 # - Publish package
 
 # Doc:
@@ -45,7 +48,7 @@ from python_qt_binding import QtGui;
 from python_qt_binding import QtCore;
 #from word_completion.word_collection import WordCollection;
 from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor, QHoverEvent, QColor, QIcon;
-from QtGui import QMenuBar;
+from QtGui import QMenuBar, QToolTip;
 from QtCore import QPoint, Qt, QTimer, QEvent, Signal, QCoreApplication, QRect; 
 
 # Dot/Dash RGB: 0,179,240
@@ -419,6 +422,8 @@ class MorseInput(QMainWindow):
 
 
     def sliderStateChanged(self, slider, newValue):
+        #slider.setToolTip(str(newValue));
+        #QToolTip.showText(slider.pos(), str(newValue), slider, slider.geometry())
         if slider == self.morserOptionsDialog.keySpeedSlider:
             self.cfgParser.set('Morse generation', 'keySpeed', str(newValue));
             self.morseGenerator.setSpeed(newValue);
@@ -483,7 +488,7 @@ class MorseInput(QMainWindow):
                 # Get the Morse windows X11 window ID saved,
                 # so that we can later activate it whenever
                 # the cursor leaves the Morse window.
-                # First, make the Morse window active:
+                # First, make the Morse window active: 
                 self.virtKeyboard.activateWindow(windowTitle=self.windowTitle);
                 self.virtKeyboard.saveActiveWindowID('morseWinID');
                 # Also, initialize the keyboard destination:
@@ -694,8 +699,14 @@ class MorseInput(QMainWindow):
 
     def outputLetters(self, lettersToSend):
         if self.outputDevice == OutputType.TYPE:
-            #print(letters);
-            self.virtKeyboard.typeTextToActiveWindow(lettersToSend);
+            for letter in lettersToSend:
+                if letter == '\b':
+                    self.outputBackspace();
+                elif letter == '\r':
+                    self.outputNewline();
+                else:
+                    #print(letter);
+                    self.virtKeyboard.typeTextToActiveWindow(letter);
         elif self.outputDevice == OutputType.SPEAK:
             print("Speech not yet implemented.");
 
