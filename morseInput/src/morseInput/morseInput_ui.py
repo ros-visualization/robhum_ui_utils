@@ -166,7 +166,7 @@ class MorseInput(QMainWindow):
     def initCursorConstrainer(self):
         self.recentMousePos = None;
         self.currentMouseDirection = None;
-        self.constrainVertical = True;
+        self.constrainVertical = False;
         # Holding left mouse button inside the Morse
         # window will suspend cursor constraining,
         # if it is enabled. Letting go of the button
@@ -647,9 +647,6 @@ class MorseInput(QMainWindow):
                     correctedCurPos = QPoint(globalPosX, self.recentMousePos.y());
                     self.recentMousePos.setX(globalPosX);
                 else:
-                    # Only constraining horizontally?
-                    if not self.constrainVertical:
-                        return;
                     correctedCurPos = QPoint(self.recentMousePos.x(), globalPosY);
                     self.recentMousePos.setY(globalPosY);
                 self.morseCursor.setPos(correctedCurPos);
@@ -668,9 +665,12 @@ class MorseInput(QMainWindow):
             self.recentMousePos = mouseEvent.globalPos();
         finally:
             # Set timer to unconstrain the mouse if it is
-            # not moved for a while (interval is set in __init__()):
-            self.mouseUnconstrainTimer.setInterval(MorseInput.MOUSE_UNCONSTRAIN_TIMEOUT);
-            self.mouseUnconstrainTimer.start();
+            # not moved for a while (interval is set in __init__()).
+            # If we are not constraining horizontally and vertically
+            # then don't set the timeout:
+            if self.constrainVertical:
+                self.mouseUnconstrainTimer.setInterval(MorseInput.MOUSE_UNCONSTRAIN_TIMEOUT);
+                self.mouseUnconstrainTimer.start();
             return
 
     def unconstrainTheCursor(self):
