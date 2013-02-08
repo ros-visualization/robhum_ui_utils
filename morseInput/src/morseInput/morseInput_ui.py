@@ -166,6 +166,7 @@ class MorseInput(QMainWindow):
     def initCursorConstrainer(self):
         self.recentMousePos = None;
         self.currentMouseDirection = None;
+        self.constrainVertical = True;
         # Holding left mouse button inside the Morse
         # window will suspend cursor constraining,
         # if it is enabled. Letting go of the button
@@ -646,6 +647,9 @@ class MorseInput(QMainWindow):
                     correctedCurPos = QPoint(globalPosX, self.recentMousePos.y());
                     self.recentMousePos.setX(globalPosX);
                 else:
+                    # Only constraining horizontally?
+                    if not self.constrainVertical:
+                        return;
                     correctedCurPos = QPoint(self.recentMousePos.x(), globalPosY);
                     self.recentMousePos.setY(globalPosY);
                 self.morseCursor.setPos(correctedCurPos);
@@ -653,6 +657,10 @@ class MorseInput(QMainWindow):
 
             # Not currently constraining mouse move. To init, check which 
             # movement larger compared to the most recent position: x or y:
+            # Only constraining horizontally?
+            if not self.constrainVertical:
+                # Constraint is horizontal, even if there is any initial vertical movement.
+                self.currentMouseDirection = Direction.HORIZONTAL;
             if abs(globalPosX - self.recentMousePos.x()) > abs(globalPosY - self.recentMousePos.y()):
                 self.currentMouseDirection = Direction.HORIZONTAL;
             else:
