@@ -166,7 +166,8 @@ class MorseInput(QMainWindow):
     def initCursorConstrainer(self):
         self.recentMousePos = None;
         self.currentMouseDirection = None;
-        self.constrainVertical = False;
+        self.enableConstrainVertical = False;
+        self.centerGravity = True;
         # Holding left mouse button inside the Morse
         # window will suspend cursor constraining,
         # if it is enabled. Letting go of the button
@@ -189,13 +190,16 @@ class MorseInput(QMainWindow):
         localGeo = self.dotButton.geometry();
         dotButtonGlobalPos = self.mapToGlobal(QPoint(localGeo.x() + localGeo.width(),
                                                      localGeo.y()));
-        self.dotButtonGlobalRight = dotButtonGlobalPos.x(); 
+        self.dotButtonGlobalRight = dotButtonGlobalPos.x();
         # Remember the X position of the global-screen left 
         # edge of the dash button for reference in the event filter:
         localGeo = self.dashButton.geometry();
         dashButtonGlobalPos = self.mapToGlobal(QPoint(localGeo.x(), localGeo.y()));
-        self.dashButtonGlobalLeft = dashButtonGlobalPos.x(); 
+        self.dashButtonGlobalLeft = dashButtonGlobalPos.x();
         
+        # Remember global location of the central point in the rest zone:
+        self.centralRestGlobalPos = QPoint(int(self.dotButtonGlobalRight + int((self.dashButtonGlobalLeft - self.dotButtonGlobalRight)/2.0)),
+                                           int(dotButtonGlobalPos.y() + int((localGeo.height()/2.0))));
 
     def startCursorConstraint(self):
         self.constrainCursorInHotZone = True;
@@ -586,8 +590,15 @@ class MorseInput(QMainWindow):
         '''
         # Button geometries are local, so convert the
         # given global position:
-        localPos = self.mapFromGlobal(pos);
-        return buttonObj.geometry().contains(localPos.x(), localPos.y());
+        buttonGeo = buttonObj.geometry();
+        globalButtonPos = self.mapToGlobal(QPoint(buttonGeo.x(),
+                                                  buttonGeo.y()));
+        globalGeo = QRect(globalButtonPos.x(), globalButtonPos.y(), buttonGeo.width(), buttonGeo.height());
+        #******************
+        if buttonObj == self.dotButton:
+            print('In dash: ' + str(globalGeo.contains(pos)))
+        #******************
+        return globalGeo.contains(pos);
         
     def handleCursorConstraint(self, mouseEvent):
         '''
@@ -622,6 +633,9 @@ class MorseInput(QMainWindow):
             oldInButton = oldInDot or oldInDash;
             newInButton = newInDot or newInDash;
             
+            # Mouse moving within one of the buttons? If
+            # so, keep mouse at the button's inner edge
+            # (facing the rest zone):
             if oldInButton and newInButton:
                 if newInDot:
                     # The '-1' moves the cursor slightly left into
@@ -632,7 +646,7 @@ class MorseInput(QMainWindow):
                     # on the right side of the dot button.
                     self.morseCursor.setPos(self.dotButtonGlobalRight-1, self.recentMousePos.y());
                 elif newInDash:
-                    self.morseCursor.setPos(self.dashButtonGlobalLeft+1, self.recentMousePos.y());
+                    self.morseCursor.setPos(self.dashButtonGlobalLeft, self.recentMousePos.y());
                 return;
             
             # Only constrain while in rest zone (central empty space), or
@@ -649,16 +663,22 @@ class MorseInput(QMainWindow):
                 else:
                     correctedCurPos = QPoint(self.recentMousePos.x(), globalPosY);
                     self.recentMousePos.setY(globalPosY);
-                self.morseCursor.setPos(correctedCurPos);
+                # If we have gravity-to-center turned o
+                # and mouse has moved from inside to outside
+                # of dot or dash button, then jump back to center point
+                # of rest area:
+                if self.centerGravity and oldInButton and not newInButton:
+                    self.morseCursor.setPos(self.centralRestGlobalPos);
+                    self.recentMousePos = self.centralRestGlobalPos;
+                else:
+                    self.morseCursor.setPos(correctedCurPos);
                 return;
 
             # Not currently constraining mouse move. To init, check which 
             # movement larger compared to the most recent position: x or y:
             # Only constraining horizontally?
-            if not self.constrainVertical:
-                # Constraint is horizontal, even if there is any initial vertical movement.
-                self.currentMouseDirection = Direction.HORIZONTAL;
-            if abs(globalPosX - self.recentMousePos.x()) > abs(globalPosY - self.recentMousePos.y()):
+            # Constraint is horizontal, even if there is any initial vertical movement.
+            if (not self.enableConstrainVertical) or abs(globalPosX - self.recentMousePos.x()) > abs(globalPosY - self.recentMousePos.y()):
                 self.currentMouseDirection = Direction.HORIZONTAL;
             else:
                 self.currentMouseDirection = Direction.VERTICAL;
@@ -667,10 +687,9 @@ class MorseInput(QMainWindow):
             # Set timer to unconstrain the mouse if it is
             # not moved for a while (interval is set in __init__()).
             # If we are not constraining horizontally and vertically
-            # then don't set the timeout:
-            if self.constrainVertical:
-                self.mouseUnconstrainTimer.setInterval(MorseInput.MOUSE_UNCONSTRAIN_TIMEOUT);
-                self.mouseUnconstrainTimer.start();
+            # then don't set the timeout:            if self.enableConstrainVertical:
+            self.mouseUnconstrainTimer.setInterval(MorseInput.MOUSE_UNCONSTRAIN_TIMEOUT);
+            self.mouseUnconstrainTimer.start();
             return
 
     def unconstrainTheCursor(self):
