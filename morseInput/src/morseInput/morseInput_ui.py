@@ -252,10 +252,10 @@ class MorseInput(QMainWindow):
         self.dotAndDashHLayout.addStretch();
         
         # Crosshair:
-        self.crosshairPixmapClear  = QPixmap(os.path.join(self.iconDir, Crosshairs.CLEAR));
-        self.crosshairPixmapGreen  =  QPixmap(os.path.join(self.iconDir, Crosshairs.GREEN));
-        self.crosshairPixmapYellow =  QPixmap(os.path.join(self.iconDir, Crosshairs.YELLOW));
-        self.crosshairPixmapRED    =  QPixmap(os.path.join(self.iconDir, Crosshairs.RED));
+        self.crosshairPixmapClear  = QPixmap(os.path.join(self.iconDir, 'crosshair.Empty.py'));
+        self.crosshairPixmapGreen  =  QPixmap(os.path.join(self.iconDir, 'crosshair.Green.py'));
+        self.crosshairPixmapYellow =  QPixmap(os.path.join(self.iconDir, 'crosshair.Yellow.py'));
+        self.crosshairPixmapRED    =  QPixmap(os.path.join(self.iconDir, 'crosshair.Red.py'));
         self.crosshairLabel = QLabel();
         self.crosshairLabel.setPixmap(self.crosshairPixmapClear);
         self.crosshairLabel.setText("");
