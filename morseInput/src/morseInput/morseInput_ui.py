@@ -62,6 +62,12 @@ class Direction:
     HORIZONTAL = 0
     VERTICAL   = 1
 
+class Crosshairs:
+    CLEAR    = 0
+    Yellow   = 1
+    GREEN    = 2
+    RED      = 3
+    
 class MorseInputSignals(CommChannel):
     letterDone = Signal(int,str);
 
@@ -233,8 +239,8 @@ class MorseInput(QMainWindow):
     def insertGestureButtons(self):
 
         self.dotButton = GestureButton('dot');
-        iconDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons')
-        self.dotButton.setIcon(QIcon(os.path.join(iconDir, 'dot.png'))); 
+        self.iconDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons')
+        self.dotButton.setIcon(QIcon(os.path.join(self.iconDir, 'dot.png'))); 
         self.dotButton.setText("");
         # Don't have button assume the pressed-down color when 
         # clicked:
@@ -246,15 +252,19 @@ class MorseInput(QMainWindow):
         self.dotAndDashHLayout.addStretch();
         
         # Crosshair:
+        self.crosshairPixmapClear  = QPixmap(os.path.join(self.iconDir, Crosshairs.CLEAR));
+        self.crosshairPixmapGreen  =  QPixmap(os.path.join(self.iconDir, Crosshairs.GREEN));
+        self.crosshairPixmapYellow =  QPixmap(os.path.join(self.iconDir, Crosshairs.YELLOW));
+        self.crosshairPixmapRED    =  QPixmap(os.path.join(self.iconDir, Crosshairs.RED));
         self.crosshairLabel = QLabel();
-        self.crosshairLabel.setPixmap(QPixmap(os.path.join(iconDir, 'crosshairEmpty.png')));
+        self.crosshairLabel.setPixmap(self.crosshairPixmapClear);
         self.crosshairLabel.setText("");
         self.dotAndDashHLayout.addWidget(self.crosshairLabel);
         
         self.dotAndDashHLayout.addStretch();
         
         self.dashButton = GestureButton('dash');
-        self.dashButton.setIcon(QIcon(os.path.join(iconDir, 'dash.png')));
+        self.dashButton.setIcon(QIcon(os.path.join(self.iconDir, 'dash.png')));
         self.dashButton.setText("");
         # Don't have button assume the pressed-down color when 
         # clicked:
@@ -743,7 +753,19 @@ class MorseInput(QMainWindow):
         
     def outputNewline(self):
         self.virtKeyboard.typeControlCharToActiveWindow('Linefeed');
-
+        
+    def showCrossHair(self, crossHairColor):
+        if crossHairColor == Crosshairs.CLEAR:
+            self.crosshairLabel.setPixmap(self.crosshairPixmapClear);
+        elif crossHairColor == Crosshairs.GREEN:
+            self.crosshairLabel.setPixmap(self.crosshairPixmapGreen);
+        elif crossHairColor == Crosshairs.YELLOW:
+            self.crosshairLabel.setPixmap(self.crosshairPixmapYellow);
+        elif crossHairColor == Crosshairs.RED:
+            self.crosshairLabel.setPixmap(self.crosshairPixmapRed);
+        else:
+            raise ValueError("Crosshairs are available in clear, green, yellow, and red.")
+                                      
     def exit(self):
         self.cleanup();
         QApplication.quit();
