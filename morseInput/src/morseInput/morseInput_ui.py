@@ -22,6 +22,7 @@
 # Needed PYTHONPATH:
 #   /opt/ros/fuerte/lib/python2.7/dist-packages:/home/paepcke/fuerte/stacks/robhum_ui_utils:/home/paepcke/fuerte/stacks/robhum_ui_utils/gesture_buttons/src:/opt/ros/fuerte/stacks/python_qt_binding/src:/home/paepcke/fuerte/stacks/robhum_ui_utils/qt_comm_channel/src:/home/paepcke/fuerte/stacks/robhum_ui_utils/qt_dialog_service/src:/home/paepcke/fuerte/stacks/robhum_ui_utils/virtual_keyboard/src:
 
+# Dash/Dot blue value: 35,60,149
 
 import sys
 import os
@@ -48,7 +49,7 @@ from python_qt_binding import QtGui;
 from python_qt_binding import QtCore;
 #from word_completion.word_collection import WordCollection;
 from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor, QHoverEvent, QColor, QIcon;
-from QtGui import QMenuBar, QToolTip;
+from QtGui import QMenuBar, QToolTip, QLabel, QPixmap;
 from QtCore import QPoint, Qt, QTimer, QEvent, Signal, QCoreApplication, QRect; 
 
 # Dot/Dash RGB: 0,179,240
@@ -167,7 +168,6 @@ class MorseInput(QMainWindow):
         self.recentMousePos = None;
         self.currentMouseDirection = None;
         self.enableConstrainVertical = False;
-        self.centerGravity = True;
         # Holding left mouse button inside the Morse
         # window will suspend cursor constraining,
         # if it is enabled. Letting go of the button
@@ -198,8 +198,13 @@ class MorseInput(QMainWindow):
         self.dashButtonGlobalLeft = dashButtonGlobalPos.x();
         
         # Remember global location of the central point in the rest zone:
-        self.centralRestGlobalPos = QPoint(int(self.dotButtonGlobalRight + int((self.dashButtonGlobalLeft - self.dotButtonGlobalRight)/2.0)),
-                                           int(dotButtonGlobalPos.y() + int((localGeo.height()/2.0))));
+        self.crosshairLabel.setMaximumHeight(11); # Height of crosshair icon
+        self.crosshairLabel.setMaximumWidth(11);  # Width of crosshair icon
+        # Compute the location of the crosshair in the center of
+        # the rest area. The addition of 20 pixels to the Y-coordinate
+        # accounts for Ubuntu's title bar at the top of the display,
+        # which mapToGlobal() does not account for:
+        self.centralRestGlobalPos = self.mapToGlobal(self.crosshairLabel.pos() + QPoint(0,20)); 
 
     def startCursorConstraint(self):
         self.constrainCursorInHotZone = True;
@@ -240,6 +245,14 @@ class MorseInput(QMainWindow):
                                                 
         self.dotAndDashHLayout.addStretch();
         
+        # Crosshair:
+        self.crosshairLabel = QLabel();
+        self.crosshairLabel.setPixmap(QPixmap(os.path.join(iconDir, 'crosshairEmpty.png')));
+        self.crosshairLabel.setText("");
+        self.dotAndDashHLayout.addWidget(self.crosshairLabel);
+        
+        self.dotAndDashHLayout.addStretch();
+        
         self.dashButton = GestureButton('dash');
         self.dashButton.setIcon(QIcon(os.path.join(iconDir, 'dash.png')));
         self.dashButton.setText("");
@@ -267,7 +280,6 @@ class MorseInput(QMainWindow):
         self.backspaceButton.setMaximumWidth(MorseInput.SUPPORT_BUTTON_WIDTHS)
         self.backspaceButton.setMinimumHeight(MorseInput.SUPPORT_BUTTON_HEIGHTS)
         self.backspaceHLayout.addWidget(self.backspaceButton);
-        
         
     def installMenuBar(self):
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
@@ -594,10 +606,6 @@ class MorseInput(QMainWindow):
         globalButtonPos = self.mapToGlobal(QPoint(buttonGeo.x(),
                                                   buttonGeo.y()));
         globalGeo = QRect(globalButtonPos.x(), globalButtonPos.y(), buttonGeo.width(), buttonGeo.height());
-        #******************
-        if buttonObj == self.dotButton:
-            print('In dash: ' + str(globalGeo.contains(pos)))
-        #******************
         return globalGeo.contains(pos);
         
     def handleCursorConstraint(self, mouseEvent):
@@ -644,9 +652,9 @@ class MorseInput(QMainWindow):
                     # To 'bounce' off the right dot button border back
                     # into the dead zone. The pixel is the drop shadow
                     # on the right side of the dot button.
-                    self.morseCursor.setPos(self.dotButtonGlobalRight-1, self.recentMousePos.y());
+                    self.morseCursor.setPos(self.dotButtonGlobalRight-1, self.centralRestGlobalPos.y());
                 elif newInDash:
-                    self.morseCursor.setPos(self.dashButtonGlobalLeft, self.recentMousePos.y());
+                    self.morseCursor.setPos(self.dashButtonGlobalLeft, self.centralRestGlobalPos.y());
                 return;
             
             # Only constrain while in rest zone (central empty space), or
@@ -658,20 +666,12 @@ class MorseInput(QMainWindow):
             # vertically or horizontally, enforce that constraint now:
             if self.currentMouseDirection is not None:
                 if self.currentMouseDirection == Direction.HORIZONTAL:
-                    correctedCurPos = QPoint(globalPosX, self.recentMousePos.y());
+                    correctedCurPos = QPoint(globalPosX, self.centralRestGlobalPos.y());
                     self.recentMousePos.setX(globalPosX);
                 else:
                     correctedCurPos = QPoint(self.recentMousePos.x(), globalPosY);
                     self.recentMousePos.setY(globalPosY);
-                # If we have gravity-to-center turned o
-                # and mouse has moved from inside to outside
-                # of dot or dash button, then jump back to center point
-                # of rest area:
-                if self.centerGravity and oldInButton and not newInButton:
-                    self.morseCursor.setPos(self.centralRestGlobalPos);
-                    self.recentMousePos = self.centralRestGlobalPos;
-                else:
-                    self.morseCursor.setPos(correctedCurPos);
+                self.morseCursor.setPos(correctedCurPos);
                 return;
 
             # Not currently constraining mouse move. To init, check which 
@@ -688,8 +688,9 @@ class MorseInput(QMainWindow):
             # not moved for a while (interval is set in __init__()).
             # If we are not constraining horizontally and vertically
             # then don't set the timeout:            if self.enableConstrainVertical:
-            self.mouseUnconstrainTimer.setInterval(MorseInput.MOUSE_UNCONSTRAIN_TIMEOUT);
-            self.mouseUnconstrainTimer.start();
+            if self.enableConstrainVertical:
+                self.mouseUnconstrainTimer.setInterval(MorseInput.MOUSE_UNCONSTRAIN_TIMEOUT);
+                self.mouseUnconstrainTimer.start();
             return
 
     def unconstrainTheCursor(self):
