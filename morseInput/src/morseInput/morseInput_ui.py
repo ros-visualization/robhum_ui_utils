@@ -51,8 +51,8 @@ from python_qt_binding import QtGui;
 from python_qt_binding import QtCore;
 #from word_completion.word_collection import WordCollection;
 from QtGui import QApplication, QMainWindow, QMessageBox, QWidget, QCursor, QHoverEvent, QColor, QIcon;
-from QtGui import QMenuBar, QToolTip, QLabel, QPixmap;
-from QtCore import QPoint, Qt, QTimer, QEvent, Signal, QCoreApplication, QRect; 
+from QtGui import QMenuBar, QToolTip, QLabel, QPixmap, QRegExpValidator;
+from QtCore import QPoint, Qt, QTimer, QEvent, Signal, QCoreApplication, QRect, QRegExp; 
 
 # Dot/Dash RGB: 0,179,240
 
@@ -155,7 +155,11 @@ class MorseInput(QMainWindow):
         # move only virtically and horizontally:
         self.initCursorConstrainer();
         
-        self.tickerTapeScrollArea.setFocusPolicy(Qt.NoFocus)
+        # Don't allow editing of the ticker tape:
+        self.tickerTapeLineEdit.setFocusPolicy(Qt.NoFocus)
+        tickerTapeRegExp = QRegExp('.*');
+        tickerTapeValidator = QRegExpValidator(tickerTapeRegExp);
+        self.tickerTapeLineEdit.setValidator(tickerTapeValidator);
         
         # Styling:
         self.createColors();
@@ -786,7 +790,7 @@ class MorseInput(QMainWindow):
         self.virtKeyboard.typeControlCharToActiveWindow('Linefeed');
         
     def tickerTapeSet(self, text):
-        self.tickerTapeScrollArea.setText(text);
+        self.tickerTapeLineEdit.setText(text);
         
     def tickerTapeClear(self, dummy):
         self.tickerTapeSet('');
@@ -795,14 +799,11 @@ class MorseInput(QMainWindow):
         if not self.useTickerTape:
             return;
         if text == '\b':
-            self.tickerTapeScrollArea.backspace();
+            self.tickerTapeLineEdit.backspace();
         elif text == '\r':
-            self.tickerTapeSet(self.tickerTapeScrollArea.text() + '\\n');
+            self.tickerTapeSet(self.tickerTapeLineEdit.text() + '\\n');
         else:
-            #******************
-            print("text: '%s'. Len: %d" % (text, len(text)))   
-            #******************
-            self.tickerTapeSet(self.tickerTapeScrollArea.text() + text);
+            self.tickerTapeSet(self.tickerTapeLineEdit.text() + text);
     
     def showCrossHair(self, crossHairColor):
         if crossHairColor == Crosshairs.CLEAR:
