@@ -42,7 +42,7 @@
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>461</width>
+      <width>488</width>
       <height>356</height>
      </rect>
     </property>
@@ -205,8 +205,11 @@
          <property name="text">
           <string>Letter stop</string>
          </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
          <property name="checked">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -220,8 +223,11 @@
          <property name="text">
           <string>Word stop</string>
          </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
          <property name="checked">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -312,6 +318,16 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="useTickerCheckBox">
+         <property name="text">
+          <string>Use ticker</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

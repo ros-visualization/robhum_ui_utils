@@ -46,9 +46,9 @@
     <item>
      <layout class="QHBoxLayout" name="tickerTapeHLayout">
       <item>
-       <widget class="QLabel" name="tickerTapeLabel">
+       <widget class="QLabel" name="tickerTapeScrollArea">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -60,7 +60,7 @@
          <enum>QFrame::Sunken</enum>
         </property>
         <property name="text">
-         <string>ticker tape</string>
+         <string/>
         </property>
        </widget>
       </item>
@@ -102,7 +102,7 @@
           <item>
            <layout class="QHBoxLayout" name="wpmInfoHLayout">
             <item>
-             <widget class="QPushButton" name="speedMeasureToggle">
+             <widget class="QPushButton" name="timeMeButton">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -200,7 +200,7 @@
                <string>Letters:</string>
               </property>
               <property name="indent">
-               <number>27</number>
+               <number>23</number>
               </property>
              </widget>
             </item>

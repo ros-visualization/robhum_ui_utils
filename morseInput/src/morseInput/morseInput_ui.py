@@ -42,6 +42,8 @@ from morseToneGeneration import TimeoutReason
 
 from morseCheatSheet import MorseCheatSheet;
 
+from morseSpeedTimer import MorseSpeedTimer;
+
 from virtual_keyboard.virtual_keyboard import VirtualKeyboard
 
 from python_qt_binding import loadUi;
@@ -153,10 +155,15 @@ class MorseInput(QMainWindow):
         # move only virtically and horizontally:
         self.initCursorConstrainer();
         
+        self.tickerTapeScrollArea.setFocusPolicy(Qt.NoFocus)
+        
         # Styling:
         self.createColors();
         self.setStyleSheet("QWidget{background-color: %s}" % self.lightBlueColor.name());
 
+        # Get a speed measurer:
+        self.speedMeasurer = MorseSpeedTimer(self);
+        
         self.show();
 
         # Compute global x positions of dash/dot buttons facing
@@ -252,10 +259,10 @@ class MorseInput(QMainWindow):
         self.dotAndDashHLayout.addStretch();
         
         # Crosshair:
-        self.crosshairPixmapClear  = QPixmap(os.path.join(self.iconDir, 'crosshair.Empty.py'));
-        self.crosshairPixmapGreen  =  QPixmap(os.path.join(self.iconDir, 'crosshair.Green.py'));
-        self.crosshairPixmapYellow =  QPixmap(os.path.join(self.iconDir, 'crosshair.Yellow.py'));
-        self.crosshairPixmapRED    =  QPixmap(os.path.join(self.iconDir, 'crosshair.Red.py'));
+        self.crosshairPixmapClear  = QPixmap(os.path.join(self.iconDir, 'crosshairEmpty.png'));
+        self.crosshairPixmapGreen  =  QPixmap(os.path.join(self.iconDir, 'crosshairGreen.png'));
+        self.crosshairPixmapYellow =  QPixmap(os.path.join(self.iconDir, 'crosshairYellow.png'));
+        self.crosshairPixmapRED    =  QPixmap(os.path.join(self.iconDir, 'crosshairRed.png'));
         self.crosshairLabel = QLabel();
         self.crosshairLabel.setPixmap(self.crosshairPixmapClear);
         self.crosshairLabel.setText("");
@@ -324,10 +331,16 @@ class MorseInput(QMainWindow):
         
     def connectWidgets(self):
         
+        # Signal connections:
         CommChannel.getSignal('GestureSignals.buttonEnteredSig').connect(self.buttonEntered);
         CommChannel.getSignal('GestureSignals.buttonExitedSig').connect(self.buttonExited);
         CommChannel.getSignal('MorseInputSignals.letterDone').connect(self.deliverInput);
-    
+
+        # Main window:
+        self.timeMeButton.toggled.connect(self.timeMeToggled);
+        self.tickerTapeClearButton.clicked.connect(self.tickerTapeClear);
+        
+        # Options dialog:
         self.morserOptionsDialog.cursorConstraintCheckBox.stateChanged.connect(partial(self.checkboxStateChanged,
                                                                                        self.morserOptionsDialog.cursorConstraintCheckBox));
         self.morserOptionsDialog.letterStopSegmentationCheckBox.stateChanged.connect(partial(self.checkboxStateChanged,
@@ -371,6 +384,7 @@ class MorseInput(QMainWindow):
                     'interLetterDwellDelay'    : str(self.morseGenerator.getInterLetterTime()),
                     'interWordDwellDelay'      : str(self.morseGenerator.getInterWordTime()),
                     'winGeometry'              : '100,100,350,350',
+                    'useTickerTape'            : str(True),
                     }
 
         self.cfgParser = ConfigParser.SafeConfigParser(self.optionsDefaultDict);
@@ -397,6 +411,8 @@ class MorseInput(QMainWindow):
         self.letterDwellSegmentation = self.cfgParser.getboolean('Morse generation', 'letterDwellSegmentation');
         self.letterDwellSegmentation = self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation');
 
+        self.useTickerTape = self.cfgParser.getboolean('Output', 'useTickerTape');
+
         # Make the options dialog reflect the options we just established:
         self.initOptionsDialogFromOptions();
 
@@ -411,6 +427,7 @@ class MorseInput(QMainWindow):
         self.morserOptionsDialog.interLetterDelaySlider.setValue(int(interLetterSecs*1000.)); # inter-letter dwell is in msecs
         interWordSecs = self.cfgParser.getfloat('Morse generation', 'interWordDwellDelay');
         self.morserOptionsDialog.interWordDelaySlider.setValue(int(interWordSecs*1000.));     # inter-word dwell is in msecs
+        self.morserOptionsDialog.useTickerCheckBox.setChecked(self.cfgParser.getboolean('Output', 'useTickerTape'));
         
     def checkboxStateChanged(self, checkbox, newState):
         '''
@@ -485,6 +502,12 @@ class MorseInput(QMainWindow):
         self.morserOptionsDialog.hide();
         self.cfgParser.read(self.optionsFilePath);
         self.initOptionsDialogFromOptions();
+        
+    def timeMeToggled(self, isChecked):
+        if isChecked:
+            self.speedMeasurer.startTiming();
+        else:
+            self.speedMeasurer.stopTiming();
     
     def buttonEntered(self, buttonObj):
         if buttonObj == self.dotButton:
@@ -568,10 +591,13 @@ class MorseInput(QMainWindow):
         if self.cursorInRestZone(mouseEvent.pos()):
             self.morseGenerator.abortCurrentMorseElement();
         
-        # Release cursor constraint when mouse button is pressed down.
+        # Release cursor constraint while mouse button is pressed down.
         if self.constrainCursorInHotZone:    
             self.stopCursorConstraint();
             self.cursorContraintSuspended = True;
+            
+        # Pause speed timing, if it's running:
+        self.speedMeasurer.pauseTiming();
 
         mouseEvent.accept();
 
@@ -579,6 +605,8 @@ class MorseInput(QMainWindow):
         if self.cursorContraintSuspended:
             self.cursorContraintSuspended = False;
             self.startCursorConstraint();
+        # Resume speed timing, (if it was paused:
+        self.speedMeasurer.resumeTiming();
 
     def resizeEvent(self, event):
         newMorseWinRect = self.geometry();
@@ -664,7 +692,7 @@ class MorseInput(QMainWindow):
                     # on the right side of the dot button.
                     self.morseCursor.setPos(self.dotButtonGlobalRight-1, self.centralRestGlobalPos.y());
                 elif newInDash:
-                    self.morseCursor.setPos(self.dashButtonGlobalLeft, self.centralRestGlobalPos.y());
+                    self.morseCursor.setPos(self.dashButtonGlobalLeft+1, self.centralRestGlobalPos.y());
                 return;
             
             # Only constrain while in rest zone (central empty space), or
@@ -738,6 +766,9 @@ class MorseInput(QMainWindow):
     def outputLetters(self, lettersToSend):
         if self.outputDevice == OutputType.TYPE:
             for letter in lettersToSend:
+                # Write to the local ticker tape:
+                self.tickerTapeAppend(letter);
+                # Then write to the X11 window in focus:
                 if letter == '\b':
                     self.outputBackspace();
                 elif letter == '\r':
@@ -754,6 +785,25 @@ class MorseInput(QMainWindow):
     def outputNewline(self):
         self.virtKeyboard.typeControlCharToActiveWindow('Linefeed');
         
+    def tickerTapeSet(self, text):
+        self.tickerTapeScrollArea.setText(text);
+        
+    def tickerTapeClear(self, dummy):
+        self.tickerTapeSet('');
+
+    def tickerTapeAppend(self, text):
+        if not self.useTickerTape:
+            return;
+        if text == '\b':
+            self.tickerTapeScrollArea.backspace();
+        elif text == '\r':
+            self.tickerTapeSet(self.tickerTapeScrollArea.text() + '\\n');
+        else:
+            #******************
+            print("text: '%s'. Len: %d" % (text, len(text)))   
+            #******************
+            self.tickerTapeSet(self.tickerTapeScrollArea.text() + text);
+    
     def showCrossHair(self, crossHairColor):
         if crossHairColor == Crosshairs.CLEAR:
             self.crosshairLabel.setPixmap(self.crosshairPixmapClear);
@@ -765,6 +815,34 @@ class MorseInput(QMainWindow):
             self.crosshairLabel.setPixmap(self.crosshairPixmapRed);
         else:
             raise ValueError("Crosshairs are available in clear, green, yellow, and red.")
+        self.crosshairLabel.setVisible(True);
+       
+    def hideCrossHair(self):
+        self.crosshairLabel.hide();
+       
+    def blinkCrosshair(self, doBlink=True, crossHairColor=Crosshairs.CLEAR):
+        if doBlink == True:
+            self.blinkTimer = QTimer(self);
+            self.blinkTimer.setSingleShot(False);
+            self.blinkTimer.setInterval(500); # msecs
+            self.crosshairBlinkerOn = True;
+            self.blinkTimer.timeout.connect(partial(self.toggleBlink, crossHairColor));
+            self.blinkTimer.start();
+        else: 
+            try:
+                self.blinkTimer.stop();
+            except:
+                pass
+            self.blinkTimer = None;
+            self.showCrossHair(crossHairColor);
+
+    def toggleBlink(self, crossHairColor):
+        if self.crosshairBlinkerOn:
+            self.hideCrossHair();
+            self.crosshairBlinkerOn = False;
+        else:
+            self.showCrossHair(crossHairColor);
+            self.crosshairBlinkerOn = True;
                                       
     def exit(self):
         self.cleanup();
