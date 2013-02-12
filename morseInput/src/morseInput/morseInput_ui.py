@@ -2,14 +2,13 @@
 
 # To do:
 # - Word/letter dwell turn on/off, output type checkbox
-# - Speed meter
 # - Volume control
 # - Somewhere (moveEvent()?_: ensure that no overlap of morse win with active window.
 #      If so, show error msg.  
 # - Running tooltip with slider values
-# - Speed slider: change to range 10-60, and divide by 10 when reading
 # - Take out vertical constraint; add option in options menu
 # - Get new morse codes to show up in Morse list.
+# - Add cursor acceleration in options.
 # - Publish package
 
 # Doc:
@@ -142,10 +141,14 @@ class MorseInput(QMainWindow):
         
         self.installMenuBar();
         self.installStatusBar();
+
+        # Get a speed measurer (must be defined before
+        # call to connectWidgets():
+        self.speedMeasurer = MorseSpeedTimer(self);
         
         self.connectWidgets();
         self.cursorEnteredOnce = False;
-        
+
         # Set cursor to hand icon while inside Morser:
         self.morseCursor = QCursor(Qt.OpenHandCursor);
         QApplication.setOverrideCursor(self.morseCursor);
@@ -165,9 +168,9 @@ class MorseInput(QMainWindow):
         self.createColors();
         self.setStyleSheet("QWidget{background-color: %s}" % self.lightBlueColor.name());
 
-        # Get a speed measurer:
-        self.speedMeasurer = MorseSpeedTimer(self);
-        
+        # Power state: initially on:
+        self.poweredUp = True;
+
         self.show();
 
         # Compute global x positions of dash/dot buttons facing
@@ -302,6 +305,12 @@ class MorseInput(QMainWindow):
         self.backspaceButton.setMinimumHeight(MorseInput.SUPPORT_BUTTON_HEIGHTS)
         self.backspaceHLayout.addWidget(self.backspaceButton);
         
+        self.powerPushButton.setIcon(QIcon(os.path.join(self.iconDir, 'powerIconSmall.png')));
+        # Don't have button assume the pressed-down color when 
+        # clicked:
+        self.powerPushButton.setFocusPolicy(Qt.NoFocus);
+        self.powerPushButton.setChecked(True);
+        
     def installMenuBar(self):
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -341,8 +350,9 @@ class MorseInput(QMainWindow):
         CommChannel.getSignal('MorseInputSignals.letterDone').connect(self.deliverInput);
 
         # Main window:
-        self.timeMeButton.toggled.connect(self.timeMeToggled);
+        self.timeMeButton.pressed.connect(self.speedMeasurer.timeMeToggled);
         self.tickerTapeClearButton.clicked.connect(self.tickerTapeClear);
+        self.powerPushButton.pressed.connect(self.powerToggled);
         
         # Options dialog:
         self.morserOptionsDialog.cursorConstraintCheckBox.stateChanged.connect(partial(self.checkboxStateChanged,
@@ -473,6 +483,10 @@ class MorseInput(QMainWindow):
         #slider.setToolTip(str(newValue));
         #QToolTip.showText(slider.pos(), str(newValue), slider, slider.geometry())
         if slider == self.morserOptionsDialog.keySpeedSlider:
+            # Speed slider goes from 1 to 6, but QT is set to 
+            # have it go from 1 to 60, because fractional intervals
+            # are not allowed. So, scale the read value:
+            newValue = newValue/10.0
             self.cfgParser.set('Morse generation', 'keySpeed', str(newValue));
             self.morseGenerator.setSpeed(newValue);
         elif  slider == self.morserOptionsDialog.interLetterDelaySlider:
@@ -507,13 +521,9 @@ class MorseInput(QMainWindow):
         self.cfgParser.read(self.optionsFilePath);
         self.initOptionsDialogFromOptions();
         
-    def timeMeToggled(self, isChecked):
-        if isChecked:
-            self.speedMeasurer.startTiming();
-        else:
-            self.speedMeasurer.stopTiming();
-    
     def buttonEntered(self, buttonObj):
+        if not self.poweredUp:
+            return;
         if buttonObj == self.dotButton:
             self.morseGenerator.startMorseSeq(Morse.DOT);
         elif buttonObj == self.dashButton:
@@ -788,7 +798,7 @@ class MorseInput(QMainWindow):
         
     def outputNewline(self):
         self.virtKeyboard.typeControlCharToActiveWindow('Linefeed');
-        
+
     def tickerTapeSet(self, text):
         self.tickerTapeLineEdit.setText(text);
         
@@ -822,7 +832,10 @@ class MorseInput(QMainWindow):
         self.crosshairLabel.hide();
        
     def blinkCrosshair(self, doBlink=True, crossHairColor=Crosshairs.CLEAR):
-        if doBlink == True:
+        if doBlink:
+            # If timer already going, don't start a second one:
+            if self.blinkTimer is not None:
+                return;
             self.blinkTimer = QTimer(self);
             self.blinkTimer.setSingleShot(False);
             self.blinkTimer.setInterval(500); # msecs
@@ -845,6 +858,20 @@ class MorseInput(QMainWindow):
             self.showCrossHair(crossHairColor);
             self.crosshairBlinkerOn = True;
                                       
+    def powerToggled(self):
+        if self.poweredUp:
+            self.dotButton.setEnabled(False);
+            self.dashButton.setEnabled(False);
+            self.eowButton.setEnabled(False);
+            self.backspaceButton.setEnabled(False);
+            self.poweredUp = False;
+        else:
+            self.dotButton.setEnabled(True);
+            self.dashButton.setEnabled(True);
+            self.eowButton.setEnabled(True);
+            self.backspaceButton.setEnabled(True);
+            self.poweredUp = True;
+    
     def exit(self):
         self.cleanup();
         QApplication.quit();

@@ -94,7 +94,7 @@
                </sizepolicy>
               </property>
               <property name="styleSheet">
-               <string notr="true">QPushbutton:pressed{background-color: rgb(181, 97, 115); border:none}</string>
+               <string notr="true">QPushButton:checked{background-color: rgb(181, 97, 115); border:none}</string>
               </property>
               <property name="text">
                <string>TimeMe</string>
@@ -236,6 +236,42 @@
               </property>
               <property name="text">
                <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="powerPushButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>25</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton {border-radius : 70px; pressed:background-color: rgb(181, 97, 115); border:none}
+</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../../../../../../../../../../wg/stor2a/paepcke/fuerte/stacks/robhum_ui_utils/morseInput/src/morseInput/icons/powerIconSmall.png</normaloff>../../../../../../../../../../wg/stor2a/paepcke/fuerte/stacks/robhum_ui_utils/morseInput/src/morseInput/icons/powerIconSmall.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
               </property>
              </widget>
             </item>

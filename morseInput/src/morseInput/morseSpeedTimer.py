@@ -17,6 +17,12 @@ class MorseSpeedTimer(QObject):
     def connectWidgets(self):
         self.morseWin.speedMeasureClearButton.clicked.connect(self.resetAll);
 
+    def timeMeToggled(self):
+        if self.currentlyTiming:
+            self.stopTiming();
+        else:
+            self.startTiming();
+            
     def resetAll(self):
         self.numLetters = 0;
         self.numWords   = 0;
@@ -67,17 +73,17 @@ class MorseSpeedTimer(QObject):
             return;
             
         self.numLetters += 1;
-        speed = self.currentSpeed();
         if self.numLetters % 5 == 0:
             self.numWords = self.numLetters / 5.0;
+        speed = self.currentSpeed();
         self.setLettersLabel(self.numLetters);
         self.setWordsLabel(self.numWords);
         self.setSpeedLabel(speed);
         
     def currentSpeed(self):
         elapsedTime = time.time() - self.startTime;
-        wpm = int(self.numLetters*60.0/elapsedTime)
-        return wpm
+        wpm = self.numWords*60.0/elapsedTime;
+        return wpm;
 
     def setLettersLabel(self, newNum):
         self.setNumberDisplay(self.morseWin.numLettersInfoLabel, int(newNum));
@@ -86,6 +92,7 @@ class MorseSpeedTimer(QObject):
         self.setNumberDisplay(self.morseWin.numWordsInfoLabel, int(newNum));
         
     def setSpeedLabel(self, newNum):
+        newNum = '%.2f' % newNum;
         self.setNumberDisplay(self.morseWin.wpmSpeedInfoLabel, newNum);
         
     def setNumberDisplay(self, labelObj, newNum):
