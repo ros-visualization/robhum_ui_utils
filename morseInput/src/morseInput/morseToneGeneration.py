@@ -113,8 +113,7 @@ class MorseGenerator(object):
         # If there will now be a pause long enough
         # to indicate the end of a letter, this
         # watchdog will go off:
-        self.watchdog.changeCallbackArg(TimeoutReason.END_OF_LETTER);
-        self.watchdog.kick();
+        self.watchdog.kick(_timeout=self.interLetterTime, callbackArg=TimeoutReason.END_OF_LETTER);
         
     def abortCurrentMorseElement(self):
         self.watchdog.stop();
@@ -271,26 +270,17 @@ class MorseGenerator(object):
             else:
                 reason = TimeoutReason.BAD_MORSE_INPUT;
                 detail = self.morseResult;
+            # One way or other, a letter has ended. Start the
+            # timeout for a word-separation sized pause:
+            self.watchdog.kick(_timeout=self.interWordTime, callbackArg=TimeoutReason.END_OF_WORD);
         elif reason == TimeoutReason.END_OF_WORD:
-            self.setAlphaStr(self.alphaStr + ' ');
+            # Decided to have the client decide what to do when a word ends.
+            # The commented code would add a space:
+            #self.setAlphaStr(self.alphaStr + ' ');
+            pass;
         self.setMorseResult('');
         if self.callback is not None:
             self.callback(reason, detail);
-
-
-
-#    def watchdogExpired(self, reason):
-#        if reason == TimeoutReason.END_OF_LETTER:
-#            newLetter = self.decodeMorseLetter();
-#            # If Morse sequence was legal and recognized,
-#            # append it:
-#            if newLetter is not None:
-#                self.setAlphaStr(self.alphaStr + newLetter);
-#        elif reason == TimeoutReason.END_OF_WORD:
-#            self.setAlphaStr(self.alphaStr + ' ');
-#        self.morseResult = '';
-#        if self.callback is not None:
-#            self.callback(reason);
 
     def decodeMorseLetter(self):
         try:
