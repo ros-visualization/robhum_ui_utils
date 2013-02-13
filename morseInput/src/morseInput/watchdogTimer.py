@@ -10,9 +10,21 @@ from QtGui import QApplication;
 class WatchdogTimer(QTimer):
     
     def __init__(self, timeout=1, callback=None, callbackArg=None, selfTest=False):
+        '''
+        Create watchdog.
+        @param timeout: number of seconds that are set each time the timer is kicked.
+        @type timeout: float
+        @param callback: callable to invoke when timer expires.
+        @type callback: Python callable
+        @param callbackArg: any argument to pass to the callback
+        @type callbackArg: any
+        @param selfTest: set to true if testing the class
+        @type selfTest: boolean
+        '''
         super(WatchdogTimer,self).__init__();
         # Use leading underscore to avoid
-        # overwriting parent's 'timeout' signal:
+        # overwriting parent's 'timeout' signal.
+        # Internally, work with milliseconds:
         self._timeout = int(1000 * timeout);
         self.callback = callback;
         self.callbackArg = callbackArg;
@@ -31,6 +43,15 @@ class WatchdogTimer(QTimer):
         return self.timedout;
 
     def kick(self, _timeout=None, callback=None, callbackArg=None):
+        '''
+        (Re)-start the timer
+        @param _timeout: timeout in seconds
+        @type _timeout: float
+        @param callback: Python callable to invoke when timer expires.
+        @type callback: callable
+        @param callbackArg: argument to pass to callback
+        @type callbackArg: any
+        '''
         self.timedout = False;
         if _timeout is None:
             _timeout = self._timeout;

@@ -34,10 +34,13 @@ class MorseGenerator(object):
         
         self.callback = callback;
         
+        self.interLetterDelayExplicitlySet = False;
+        self.interWordDelayExplicitlySet = False;
         # setSpeed() must be called before setting up
         # watchdog timer below:
         self.setSpeed(3.3);
         self.automaticMorse = True;
+        
         self.recentDots = 0;
         self.recentDashes = 0;
         # morseResult will accumulate the dots and dashes:
@@ -159,8 +162,12 @@ class MorseGenerator(object):
         self.interSigPauseDots = self.dotDuration;
         self.interSigPauseDashes = self.dotDuration;
         
-        self.interLetterTime = 7.0*self.dotDuration;
-        self.interWordTime   = 9.0*self.dotDuration;
+        # Unless client explicitly set dwell time between
+        # letters and words, compute a default now:
+        if not self.interLetterDelayExplicitlySet:
+            self.interLetterTime = 7.0*self.dotDuration;
+        if not self.interWordDelayExplicitlySet:
+            self.interWordTime   = 9.0*self.dotDuration;
         self.waitDashDotThreadsIdleTime = 0.5 * self.interLetterTime;
     
     def setInterLetterDelay(self, secs):
@@ -172,6 +179,7 @@ class MorseGenerator(object):
         self.interLetterTime = secs;
         self.watchdog.changeTimeout(self.interLetterTime);
         self.waitDashDotThreadsIdleTime = 0.5 * self.interLetterTime;
+        self.interLetterDelayExplicitlySet = True;
         
     def setInterWordDelay(self, secs):
         '''
@@ -180,6 +188,10 @@ class MorseGenerator(object):
         @type secs: float
         '''
         self.interWordTime = secs;
+        # Indicate that client explicitly set the
+        # inter-word dwell time. This note will prevent
+        # setSpeed() from defining its default dwell:
+        self.interWordDelayExplicitlySet = True;
         
     def stopMorseGenerator(self):
         '''
@@ -285,6 +297,12 @@ class MorseGenerator(object):
     def decodeMorseLetter(self):
         try:
             letter = codeKey[self.morseResult];
+            if letter == 'BS':
+                letter = '\b';
+            elif letter == 'NL':
+                letter = '\r';
+            elif letter == 'HS':
+                letter = ' ';
         except KeyError:
             #print("Bad morse seq: '%s'" % self.morseResult);
             return None

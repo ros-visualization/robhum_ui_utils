@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>515</width>
-    <height>405</height>
+    <width>532</width>
+    <height>463</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,8 +27,8 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>491</width>
-     <height>381</height>
+     <width>511</width>
+     <height>441</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -43,7 +43,7 @@
       <x>20</x>
       <y>10</y>
       <width>488</width>
-      <height>356</height>
+      <height>416</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="centralVLayout">
@@ -106,66 +106,6 @@
       </spacer>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="constrainHLayout">
-       <item>
-        <widget class="QLabel" name="cursorLabel">
-         <property name="font">
-          <font>
-           <pointsize>14</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Cursor:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="cursorSpacerLeft">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>126</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="cursorConstraintCheckBox">
-         <property name="font">
-          <font>
-           <pointsize>11</pointsize>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>If set, cursor only moves either up/down, or left/right inside Morser window.</string>
-         </property>
-         <property name="text">
-          <string>Constrain cursor</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="cursorSpacerRight">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </item>
-     <item>
       <layout class="QHBoxLayout" name="dwellHLayout">
        <item>
         <widget class="QLabel" name="dwellLabel">
@@ -196,24 +136,6 @@
         </spacer>
        </item>
        <item>
-        <widget class="QCheckBox" name="letterStopSegmentationCheckBox">
-         <property name="font">
-          <font>
-           <pointsize>11</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Letter stop</string>
-         </property>
-         <property name="checkable">
-          <bool>false</bool>
-         </property>
-         <property name="checked">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QCheckBox" name="wordStopSegmentationCheckBox">
          <property name="font">
           <font>
@@ -224,7 +146,7 @@
           <string>Word stop</string>
          </property>
          <property name="checkable">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="checked">
           <bool>false</bool>
@@ -345,6 +267,129 @@
       </spacer>
      </item>
      <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <spacer name="horizontalSpacer_9">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Cursor Controls</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_10">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="constrainHLayout">
+         <item>
+          <widget class="QCheckBox" name="cursorConstraintCheckBox">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>If set, cursor only moves either up/down, or left/right inside Morser window.</string>
+           </property>
+           <property name="text">
+            <string>Constrain cursor</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="cursorSpacerRight">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="cursorAccelerationLabel">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Speed fraction:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_8">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>38</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QSlider" name="horizontalSlider">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>10</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
       <layout class="QVBoxLayout" name="speedControlVLayout">
        <property name="sizeConstraint">
         <enum>QLayout::SetNoConstraint</enum>
@@ -368,7 +413,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="speedControlsLabel">
            <property name="font">
             <font>
              <pointsize>14</pointsize>

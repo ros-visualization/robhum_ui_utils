@@ -93,6 +93,9 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="focusPolicy">
+               <enum>Qt::NoFocus</enum>
+              </property>
               <property name="styleSheet">
                <string notr="true">QPushButton:checked{background-color: rgb(181, 97, 115); border:none}</string>
               </property>

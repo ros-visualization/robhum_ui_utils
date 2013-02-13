@@ -39,11 +39,14 @@ class MorseCheatSheet(QDialog):
             if morseSheetDict.has_key(punctLetter):
                 punctuation += punctLetter;
         
+        # Special characters:
+        specialChars = ['BS','NL', 'HS'];
+        
         # Fill the text labels:
         colCount = self.morseCodeGrid.columnCount();
         rowCount = self.morseCodeGrid.rowCount();
         keyIndex = 0;
-        letterLists = [string.lowercase, string.digits, punctuation];
+        letterLists = [string.lowercase, string.digits, punctuation, specialChars];
         currentList = 0;
         for col in range(colCount):
             for row in range(rowCount):

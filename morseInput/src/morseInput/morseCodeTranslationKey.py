@@ -44,8 +44,8 @@ codeKey = {
            '.-...'    : '@',
            '..--..'   : '?',
            '-..-.'    : '/',
-	   '.-.-'     : '\r',  # 'AA' procedural morse
-	   '.......'   : ' ',  # 'HS' Invented: space
-	   '-......'  : '\b',  # 'BS' invented; backspace
+	   '.-.-'     : 'NL',  # 'AA' procedural morse
+	   '.......'   : 'HS',  # 'HS' Invented: space
+	   '-......'  : 'BS',  # 'BS' invented; backspace
            }
     

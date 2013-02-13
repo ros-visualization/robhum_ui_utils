@@ -1,19 +1,16 @@
 #!/usr/bin/env python
 
 # To do:
-# - Word/letter dwell turn on/off, output type checkbox
 # - Volume control
 # - Somewhere (moveEvent()?_: ensure that no overlap of morse win with active window.
-#      If so, show error msg.  
+#      If so, show error msg.  (Just put into Doc
 # - Running tooltip with slider values
-# - Take out vertical constraint; add option in options menu
-# - Get new morse codes to show up in Morse list.
-# - Add cursor acceleration in options.
+# - Add cursor acceleration in options. (decided against it)
 # - Publish package
 
 # Doc:
 #   - Abort if mouse click in rest zone.
-#   - Left click to suspend beeping and cursor contraint
+#   - Left click to suspend beeping and cursor contraint and timing measure
 #   - Prefs in $HOME/.morser/morser.cfg
 #   - Cheat sheet (Menu)
 #   - Options window
@@ -311,6 +308,11 @@ class MorseInput(QMainWindow):
         self.powerPushButton.setFocusPolicy(Qt.NoFocus);
         self.powerPushButton.setChecked(True);
         
+        # Prevent focus on the two clear buttons:
+        self.speedMeasureClearButton.setFocusPolicy(Qt.NoFocus);
+        self.tickerTapeClearButton.setFocusPolicy(Qt.NoFocus);
+        self.timeMeButton.setFocusPolicy(Qt.NoFocus);
+        
     def installMenuBar(self):
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -357,8 +359,6 @@ class MorseInput(QMainWindow):
         # Options dialog:
         self.morserOptionsDialog.cursorConstraintCheckBox.stateChanged.connect(partial(self.checkboxStateChanged,
                                                                                        self.morserOptionsDialog.cursorConstraintCheckBox));
-        self.morserOptionsDialog.letterStopSegmentationCheckBox.stateChanged.connect(partial(self.checkboxStateChanged,
-                                                                                             self.morserOptionsDialog.letterStopSegmentationCheckBox));
         self.morserOptionsDialog.wordStopSegmentationCheckBox.stateChanged.connect(partial(self.checkboxStateChanged,
                                                                                            self.morserOptionsDialog.wordStopSegmentationCheckBox));
         self.morserOptionsDialog.typeOutputRadioButton.toggled.connect(partial(self.checkboxStateChanged,
@@ -432,15 +432,14 @@ class MorseInput(QMainWindow):
 
     def initOptionsDialogFromOptions(self):
         self.morserOptionsDialog.cursorConstraintCheckBox.setChecked(self.cfgParser.getboolean('Morse generation', 'constrainCursorInHotZone'));
-        self.morserOptionsDialog.letterStopSegmentationCheckBox.setChecked(self.cfgParser.getboolean('Morse generation', 'letterDwellSegmentation'));
         self.morserOptionsDialog.wordStopSegmentationCheckBox.setChecked(self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation'));
         self.morserOptionsDialog.typeOutputRadioButton.setChecked(self.cfgParser.getint('Output', 'outputDevice')==OutputType.TYPE);
         self.morserOptionsDialog.speechOutputRadioButton.setChecked(self.cfgParser.getint('Output', 'outputDevice')==OutputType.SPEAK);
-        self.morserOptionsDialog.keySpeedSlider.setValue(self.cfgParser.getfloat('Morse generation', 'keySpeed'));
+        self.morserOptionsDialog.keySpeedSlider.setValue(int(10*self.cfgParser.getfloat('Morse generation', 'keySpeed')));
         interLetterSecs = self.cfgParser.getfloat('Morse generation', 'interLetterDwellDelay');
-        self.morserOptionsDialog.interLetterDelaySlider.setValue(int(interLetterSecs*1000.)); # inter-letter dwell is in msecs
+        self.morserOptionsDialog.interLetterDelaySlider.setValue(int(interLetterSecs*1000.)); # inter-letter dwell slider is in msecs
         interWordSecs = self.cfgParser.getfloat('Morse generation', 'interWordDwellDelay');
-        self.morserOptionsDialog.interWordDelaySlider.setValue(int(interWordSecs*1000.));     # inter-word dwell is in msecs
+        self.morserOptionsDialog.interWordDelaySlider.setValue(int(interWordSecs*1000.));     # inter-word dwell slider is in msecs
         self.morserOptionsDialog.useTickerCheckBox.setChecked(self.cfgParser.getboolean('Output', 'useTickerTape'));
         
     def checkboxStateChanged(self, checkbox, newState):
@@ -455,16 +454,9 @@ class MorseInput(QMainWindow):
         if checkbox == self.morserOptionsDialog.cursorConstraintCheckBox:
             self.cfgParser.set('Morse generation','constrainCursorInHotZone',str(checkboxNowChecked));
             self.constrainCursorInHotZone = checkboxNowChecked; 
-        elif checkbox == self.morserOptionsDialog.letterStopSegmentationCheckBox:
-            self.cfgParser.set('Morse generation', 'letterDwellSegmentation', str(checkboxNowChecked)); #********** Checked state is 2? Use isChecked
-            #**************
-            pass
-            #**************
         elif checkbox == self.morserOptionsDialog.wordStopSegmentationCheckBox:
             self.cfgParser.set('Morse generation', 'wordDwellSegmentation', str(checkboxNowChecked));
-            #**************
-            pass
-            #**************
+            self.cfgParser.set('Morse generation', 'interWordDwellDelay', str(self.interWordDelaySlider.value()));
         elif checkbox == self.morserOptionsDialog.typeOutputRadioButton:
             self.cfgParser.set('Output', 'outputDevice', str(OutputType.TYPE));
             #**************
@@ -772,6 +764,7 @@ class MorseInput(QMainWindow):
         alpha = self.morseGenerator.getAndRemoveAlphaStr()
         if reason == TimeoutReason.END_OF_WORD:
             alpha += ' '; 
+            self.outputLetters(alpha);
         elif reason == TimeoutReason.END_OF_LETTER:
             self.outputLetters(alpha);
         elif reason == TimeoutReason.BAD_MORSE_INPUT:
@@ -809,7 +802,15 @@ class MorseInput(QMainWindow):
         if not self.useTickerTape:
             return;
         if text == '\b':
-            self.tickerTapeLineEdit.backspace();
+            # The backspace() method on QLineEdit doesn't work.
+            # Maybe because we disallow focus on the widget to 
+            # avoid people thinking they can edit. So work 
+            # around this limitation:
+            #self.tickerTapeLineEdit.backspace();
+            tickerContent = self.tickerTapeLineEdit.text();
+            if len(tickerContent) == 0:
+                return;
+            self.tickerTapeSet(tickerContent[:-1]);
         elif text == '\r':
             self.tickerTapeSet(self.tickerTapeLineEdit.text() + '\\n');
         else:
