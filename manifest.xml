@@ -1,0 +1,25 @@
+<package>
+  <description brief="morseInput">
+
+     morseInput
+
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/morseInput</url>
+
+  <depend package="rospy" />
+  <depend package="python_qt_binding"/>
+  <depend package="gesture_buttons" />
+  <depend package="qt_comm_channel" />
+  <depend package="qt_dialog_service" />
+  <depend package="virtual_keyboard" />
+
+  <rosdep name="alsa-utils"/>
+  <rosdep name="xdotool"/>
+
+
+</package>
+
+
