@@ -16,8 +16,8 @@
   <depend package="qt_dialog_service" />
   <depend package="virtual_keyboard" />
 
-  <rosdep name="python-qt4"/>
   <rosdep name="alsa-utils"/>
+  <rosdep name="xdotool"/>
 
 
 </package>

@@ -4,8 +4,7 @@
 # - Volume control
 # - Somewhere (moveEvent()?_: ensure that no overlap of morse win with active window.
 #      If so, show error msg.  (Just put into Doc
-# - Running tooltip with slider values
-# - Add cursor acceleration in options. (decided against it)
+# - Occasional X error: output in startup window, and cursor runs into dot/dash buttons.
 # - Publish package
 
 # Doc:
@@ -14,6 +13,8 @@
 #   - Prefs in $HOME/.morser/morser.cfg
 #   - Cheat sheet (Menu)
 #   - Options window
+#   - Crosshair blinks yellow when word separation detected.
+#   - If output gibberish, and you know your Morse was good, *lower* inter letter dwell time
 #
 # Needed PYTHONPATH:
 #   /opt/ros/fuerte/lib/python2.7/dist-packages:/home/paepcke/fuerte/stacks/robhum_ui_utils:/home/paepcke/fuerte/stacks/robhum_ui_utils/gesture_buttons/src:/opt/ros/fuerte/stacks/python_qt_binding/src:/home/paepcke/fuerte/stacks/robhum_ui_utils/qt_comm_channel/src:/home/paepcke/fuerte/stacks/robhum_ui_utils/qt_dialog_service/src:/home/paepcke/fuerte/stacks/robhum_ui_utils/virtual_keyboard/src:
@@ -62,7 +63,7 @@ class Direction:
 
 class Crosshairs:
     CLEAR    = 0
-    Yellow   = 1
+    YELLOW   = 1
     GREEN    = 2
     RED      = 3
     
@@ -150,6 +151,9 @@ class MorseInput(QMainWindow):
         self.morseCursor = QCursor(Qt.OpenHandCursor);
         QApplication.setOverrideCursor(self.morseCursor);
         #QApplication.restoreOverrideCursor()
+        
+        self.blinkTimer = None;
+        self.flashTimer = None;
         
         # Init capability of constraining cursor to
         # move only virtically and horizontally:
@@ -365,6 +369,8 @@ class MorseInput(QMainWindow):
                                                                                self.morserOptionsDialog.typeOutputRadioButton));
         self.morserOptionsDialog.speechOutputRadioButton.toggled.connect(partial(self.checkboxStateChanged,
                                                                                  self.morserOptionsDialog.speechOutputRadioButton));
+        self.morserOptionsDialog.useTickerCheckBox.toggled.connect(partial(self.checkboxStateChanged,
+                                                                           self.morserOptionsDialog.useTickerCheckBox));
 
         self.morserOptionsDialog.keySpeedSlider.valueChanged.connect(partial(self.sliderStateChanged,
                                                                              self.morserOptionsDialog.keySpeedSlider));
@@ -375,6 +381,19 @@ class MorseInput(QMainWindow):
 
         self.morserOptionsDialog.savePushButton.clicked.connect(self.optionsSaveButton);
         self.morserOptionsDialog.cancelPushButton.clicked.connect(self.optionsCancelButton);
+        
+        self.morserOptionsDialog.keySpeedReadoutLineEdit.editingFinished.connect(partial(self.sliderReadoutModified,
+                                                                                         self.morserOptionsDialog.keySpeedSlider));
+        self.morserOptionsDialog.keySpeedReadoutLineEdit.returnPressed.connect(partial(self.sliderReadoutModified,
+                                                                                       self.morserOptionsDialog.keySpeedSlider));
+        self.morserOptionsDialog.letterDwellReadoutLineEdit.editingFinished.connect(partial(self.sliderReadoutModified,
+                                                                                            self.morserOptionsDialog.interLetterDelaySlider));
+        self.morserOptionsDialog.letterDwellReadoutLineEdit.returnPressed.connect(partial(self.sliderReadoutModified,
+                                                                                           self.morserOptionsDialog.interLetterDelaySlider));
+        self.morserOptionsDialog.wordDwellReadoutLineEdit.editingFinished.connect(partial(self.sliderReadoutModified,
+                                                                                          self.morserOptionsDialog.interWordDelaySlider));
+        self.morserOptionsDialog.wordDwellReadoutLineEdit.returnPressed.connect(partial(self.sliderReadoutModified,
+                                                                                       self.morserOptionsDialog.interWordDelaySlider));
         
     def showOptions(self):
         self.morserOptionsDialog.show();
@@ -431,17 +450,51 @@ class MorseInput(QMainWindow):
         self.initOptionsDialogFromOptions();
 
     def initOptionsDialogFromOptions(self):
+
+        # Cursor constraint:
         self.morserOptionsDialog.cursorConstraintCheckBox.setChecked(self.cfgParser.getboolean('Morse generation', 'constrainCursorInHotZone'));
-        self.morserOptionsDialog.wordStopSegmentationCheckBox.setChecked(self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation'));
+        
+        # Automatic word segmentation:
+        enableWordSegmentation = self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation');
+        self.morserOptionsDialog.wordStopSegmentationCheckBox.setChecked(enableWordSegmentation);
+        if not enableWordSegmentation:
+            self.morserOptionsDialog.interWordDelaySlider.setEnabled(False);
+            self.morserOptionsDialog.wordDwellReadoutLineEdit.setEnabled(False);
+        
+        # Output to X11 vs. Speech:    
         self.morserOptionsDialog.typeOutputRadioButton.setChecked(self.cfgParser.getint('Output', 'outputDevice')==OutputType.TYPE);
         self.morserOptionsDialog.speechOutputRadioButton.setChecked(self.cfgParser.getint('Output', 'outputDevice')==OutputType.SPEAK);
+        
+        # Key speed slider:
         self.morserOptionsDialog.keySpeedSlider.setValue(int(10*self.cfgParser.getfloat('Morse generation', 'keySpeed')));
+        # Init the readout of the speed slider:
+        self.morserOptionsDialog.keySpeedReadoutLineEdit.setText(str(self.morserOptionsDialog.keySpeedSlider.value()));
+        
+        # Dwell time that indicates end of Morse letter:
         interLetterSecs = self.cfgParser.getfloat('Morse generation', 'interLetterDwellDelay');
         self.morserOptionsDialog.interLetterDelaySlider.setValue(int(interLetterSecs*1000.)); # inter-letter dwell slider is in msecs
+        # Init the readout of the letter dwell slider:
+        self.morserOptionsDialog.letterDwellReadoutLineEdit.setText(str(self.morserOptionsDialog.interLetterDelaySlider.value()));
+        
+        # Dwell time that indicates end of word:
         interWordSecs = self.cfgParser.getfloat('Morse generation', 'interWordDwellDelay');
         self.morserOptionsDialog.interWordDelaySlider.setValue(int(interWordSecs*1000.));     # inter-word dwell slider is in msecs
+        # Init the readout of the word dwell slider:
+        self.morserOptionsDialog.wordDwellReadoutLineEdit.setText(str(self.morserOptionsDialog.interWordDelaySlider.value()));
         self.morserOptionsDialog.useTickerCheckBox.setChecked(self.cfgParser.getboolean('Output', 'useTickerTape'));
-        
+    
+    def sliderReadoutModified(self, slider):
+        if slider == self.morserOptionsDialog.keySpeedSlider:
+            slider.setValue(int(self.morserOptionsDialog.keySpeedReadoutLineEdit.text()));
+        elif slider == self.morserOptionsDialog.interLetterDelaySlider:
+            slider.setValue(int(self.morserOptionsDialog.letterDwellReadoutLineEdit.text()));
+        elif slider == self.morserOptionsDialog.interWordDelaySlider:
+            slider.setValue(int(self.morserOptionsDialog.wordDwellReadoutLineEdit.text()));
+        else:
+            raise ValueError("Expecting one of the options slider objects.")
+        slider.setFocus();
+
+            
     def checkboxStateChanged(self, checkbox, newState):
         '''
         Called when any of the option dialog's checkboxes change:
@@ -454,9 +507,23 @@ class MorseInput(QMainWindow):
         if checkbox == self.morserOptionsDialog.cursorConstraintCheckBox:
             self.cfgParser.set('Morse generation','constrainCursorInHotZone',str(checkboxNowChecked));
             self.constrainCursorInHotZone = checkboxNowChecked; 
+        elif checkbox == self.morserOptionsDialog.useTickerCheckBox:
+            self.cfgParser.set('Output','useTickerTape', str(checkboxNowChecked));
+            self.useTickerTape = checkboxNowChecked;
         elif checkbox == self.morserOptionsDialog.wordStopSegmentationCheckBox:
             self.cfgParser.set('Morse generation', 'wordDwellSegmentation', str(checkboxNowChecked));
-            self.cfgParser.set('Morse generation', 'interWordDwellDelay', str(self.interWordDelaySlider.value()));
+            self.cfgParser.set('Morse generation', 'interWordDwellDelay', str(self.morserOptionsDialog.interWordDelaySlider.value()/1000.));
+            # Enable or disable the inter word delay slider and text box if
+            # word dwell is enabled, and vice versa:
+            if checkboxNowChecked:
+                self.morserOptionsDialog.interWordDelaySlider.setEnabled(True);
+                self.morserOptionsDialog.wordDwellReadoutLineEdit.setEnabled(True);
+                self.morseGenerator.setInterWordDelay(int(self.morserOptionsDialog.wordDwellReadoutLineEdit.text())/1000.0);
+            else:
+                self.morserOptionsDialog.interWordDelaySlider.setEnabled(False);
+                self.morserOptionsDialog.wordDwellReadoutLineEdit.setEnabled(False);
+                # Disable word segmentation:
+                self.morseGenerator.setInterWordDelay(-1);
         elif checkbox == self.morserOptionsDialog.typeOutputRadioButton:
             self.cfgParser.set('Output', 'outputDevice', str(OutputType.TYPE));
             #**************
@@ -475,6 +542,8 @@ class MorseInput(QMainWindow):
         #slider.setToolTip(str(newValue));
         #QToolTip.showText(slider.pos(), str(newValue), slider, slider.geometry())
         if slider == self.morserOptionsDialog.keySpeedSlider:
+            # Update readout:
+            self.morserOptionsDialog.keySpeedReadoutLineEdit.setText(str(newValue));
             # Speed slider goes from 1 to 6, but QT is set to 
             # have it go from 1 to 60, because fractional intervals
             # are not allowed. So, scale the read value:
@@ -482,10 +551,12 @@ class MorseInput(QMainWindow):
             self.cfgParser.set('Morse generation', 'keySpeed', str(newValue));
             self.morseGenerator.setSpeed(newValue);
         elif  slider == self.morserOptionsDialog.interLetterDelaySlider:
+            self.morserOptionsDialog.letterDwellReadoutLineEdit.setText(str(newValue));
             valInSecs = newValue/1000.;
             self.cfgParser.set('Morse generation', 'interLetterDwellDelay', str(valInSecs));
             self.morseGenerator.setInterLetterDelay(valInSecs);
         elif  slider == self.morserOptionsDialog.interWordDelaySlider:
+            self.morserOptionsDialog.wordDwellReadoutLineEdit.setText(str(newValue));
             valInSecs = newValue/1000.;
             self.cfgParser.set('Morse generation', 'interWordDwellDelay', str(valInSecs));
             self.morseGenerator.setInterWordDelay(valInSecs);
@@ -695,10 +766,12 @@ class MorseInput(QMainWindow):
                     # the edge. This is to avoid the cursor seemingej
                     # To 'bounce' off the right dot button border back
                     # into the dead zone. The pixel is the drop shadow
-                    # on the right side of the dot button.
-                    self.morseCursor.setPos(self.dotButtonGlobalRight-1, self.centralRestGlobalPos.y());
+                    # on the right side of the dot button. The '+12' places
+                    # the hand cursor a bit below the crosshair, so that 
+                    # color flashes of the crosshair can be seen:
+                    self.morseCursor.setPos(self.dotButtonGlobalRight-1, self.centralRestGlobalPos.y() + 12);
                 elif newInDash:
-                    self.morseCursor.setPos(self.dashButtonGlobalLeft+1, self.centralRestGlobalPos.y());
+                    self.morseCursor.setPos(self.dashButtonGlobalLeft+1, self.centralRestGlobalPos.y() + 12);
                 return;
             
             # Only constrain while in rest zone (central empty space), or
@@ -710,7 +783,7 @@ class MorseInput(QMainWindow):
             # vertically or horizontally, enforce that constraint now:
             if self.currentMouseDirection is not None:
                 if self.currentMouseDirection == Direction.HORIZONTAL:
-                    correctedCurPos = QPoint(globalPosX, self.centralRestGlobalPos.y());
+                    correctedCurPos = QPoint(globalPosX, self.centralRestGlobalPos.y() + 12);
                     self.recentMousePos.setX(globalPosX);
                 else:
                     correctedCurPos = QPoint(self.recentMousePos.x(), globalPosY);
@@ -765,6 +838,8 @@ class MorseInput(QMainWindow):
         if reason == TimeoutReason.END_OF_WORD:
             alpha += ' '; 
             self.outputLetters(alpha);
+            # Give very brief indication that word boundary detected:
+            self.flashCrosshair(crossHairColor=Crosshairs.YELLOW);
         elif reason == TimeoutReason.END_OF_LETTER:
             self.outputLetters(alpha);
         elif reason == TimeoutReason.BAD_MORSE_INPUT:
@@ -788,9 +863,13 @@ class MorseInput(QMainWindow):
 
     def outputBackspace(self):
         self.virtKeyboard.typeControlCharToActiveWindow('BackSpace');
+        # Also output to the ticker tape if appropriate:
+        self.tickerTapeAppend('\b');
         
     def outputNewline(self):
         self.virtKeyboard.typeControlCharToActiveWindow('Linefeed');
+        # Also output to the ticker tape if appropriate:
+        self.tickerTapeAppend('\r');
 
     def tickerTapeSet(self, text):
         self.tickerTapeLineEdit.setText(text);
@@ -832,6 +911,27 @@ class MorseInput(QMainWindow):
     def hideCrossHair(self):
         self.crosshairLabel.hide();
        
+    def flashCrosshair(self, crossHairColor=Crosshairs.CLEAR):
+        if self.flashTimer is not None:
+            return;
+        self.flashTimer = QTimer(self);
+        self.flashTimer.setSingleShot(True);
+        self.flashTimer.setInterval(250); # msecs
+        self.showCrossHair(crossHairColor);
+        self.flashTimer.timeout.connect(partial(self.restoreCrosshair, Crosshairs.CLEAR));
+        self.flashTimer.start();
+        
+    def restoreCrosshair(self, crossHairColor=Crosshairs.CLEAR):
+        '''
+        Show the crosshair with the given color. Stop the flash timer.
+        This is a timeout method. Used by flashCrosshair().
+        @param crossHairColor:
+        @type crossHairColor:
+        '''
+        self.flashTimer.stop();
+        self.flashTimer = None;
+        self.showCrossHair(crossHairColor);
+       
     def blinkCrosshair(self, doBlink=True, crossHairColor=Crosshairs.CLEAR):
         if doBlink:
             # If timer already going, don't start a second one:
@@ -852,6 +952,12 @@ class MorseInput(QMainWindow):
             self.showCrossHair(crossHairColor);
 
     def toggleBlink(self, crossHairColor):
+        '''
+        If alternates between crosshair on and off.
+        This is a timeout method. Used by blinkCrosshair()
+        @param crossHairColor:
+        @type crossHairColor:
+        '''
         if self.crosshairBlinkerOn:
             self.hideCrossHair();
             self.crosshairBlinkerOn = False;

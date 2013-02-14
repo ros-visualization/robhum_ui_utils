@@ -142,6 +142,9 @@
            <pointsize>11</pointsize>
           </font>
          </property>
+         <property name="toolTip">
+          <string>If checked, then pauses between Morse letters generate space characters.</string>
+         </property>
          <property name="text">
           <string>Word stop</string>
          </property>
@@ -205,6 +208,9 @@
            <pointsize>11</pointsize>
           </font>
          </property>
+         <property name="toolTip">
+          <string>Output decoded Morse to with window where the keyboard would deliver typed letters.</string>
+         </property>
          <property name="text">
           <string>Type</string>
          </property>
@@ -223,8 +229,14 @@
            <pointsize>11</pointsize>
           </font>
          </property>
+         <property name="toolTip">
+          <string>Output decoded Morse words via text-to-speech (not implemented)</string>
+         </property>
          <property name="text">
           <string>Speech</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -243,6 +255,9 @@
        </item>
        <item>
         <widget class="QCheckBox" name="useTickerCheckBox">
+         <property name="toolTip">
+          <string>Echo all decoded Morse letters to the ticker tape, in addition to the main destination</string>
+         </property>
          <property name="text">
           <string>Use ticker</string>
          </property>
@@ -320,7 +335,7 @@
             </font>
            </property>
            <property name="toolTip">
-            <string>If set, cursor only moves either up/down, or left/right inside Morser window.</string>
+            <string>If set, cursor only moves  left/right inside Morser window. Hold left mouse down to 'disengage'</string>
            </property>
            <property name="text">
             <string>Constrain cursor</string>
@@ -339,51 +354,6 @@
             </size>
            </property>
           </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QLabel" name="cursorAccelerationLabel">
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Speed fraction:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_8">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>38</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QSlider" name="horizontalSlider">
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>10</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
          </item>
         </layout>
        </item>
@@ -471,6 +441,9 @@
          </item>
          <item>
           <widget class="QSlider" name="keySpeedSlider">
+           <property name="toolTip">
+            <string>Controls speed of dots and dashes</string>
+           </property>
            <property name="minimum">
             <number>10</number>
            </property>
@@ -493,6 +466,41 @@
             <number>1</number>
            </property>
           </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="keySpeedReadoutLineEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>40</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>2</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_11">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>41</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
@@ -528,6 +536,9 @@
          </item>
          <item>
           <widget class="QSlider" name="interLetterDelaySlider">
+           <property name="toolTip">
+            <string>Controls how much time must pass after a dot or dash to conclude that one Morse letter has ended</string>
+           </property>
            <property name="minimum">
             <number>100</number>
            </property>
@@ -539,6 +550,37 @@
            </property>
            <property name="tickPosition">
             <enum>QSlider::TicksBelow</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="letterDwellReadoutLineEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>40</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>4</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="letterDelayUnitsLabel">
+           <property name="font">
+            <font>
+             <italic>true</italic>
+            </font>
+           </property>
+           <property name="text">
+            <string>msec</string>
            </property>
           </widget>
          </item>
@@ -576,6 +618,9 @@
          </item>
          <item>
           <widget class="QSlider" name="interWordDelaySlider">
+           <property name="toolTip">
+            <string>Controls how much time must pass after a Morse letter to indicate end of a word (space is entered automatically)</string>
+           </property>
            <property name="minimum">
             <number>100</number>
            </property>
@@ -587,6 +632,37 @@
            </property>
            <property name="tickPosition">
             <enum>QSlider::TicksBelow</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="wordDwellReadoutLineEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>40</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>4</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="font">
+            <font>
+             <italic>true</italic>
+            </font>
+           </property>
+           <property name="text">
+            <string>msec</string>
            </property>
           </widget>
          </item>
@@ -611,18 +687,30 @@
        </item>
        <item>
         <widget class="QPushButton" name="cancelPushButton">
+         <property name="toolTip">
+          <string>Abort any changes made</string>
+         </property>
          <property name="styleSheet">
           <string notr="true">button.background:rgb(15, 51, 255)</string>
          </property>
          <property name="text">
           <string>Cancel</string>
          </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="savePushButton">
+         <property name="toolTip">
+          <string>Save changes across sessions. Configuration stored in $HOME/.morser</string>
+         </property>
          <property name="text">
           <string>Save</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
          </property>
         </widget>
        </item>

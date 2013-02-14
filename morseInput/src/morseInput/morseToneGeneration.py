@@ -167,7 +167,9 @@ class MorseGenerator(object):
         if not self.interLetterDelayExplicitlySet:
             self.interLetterTime = 7.0*self.dotDuration;
         if not self.interWordDelayExplicitlySet:
-            self.interWordTime   = 9.0*self.dotDuration;
+            # Turn automatic word segmentation off by default:
+            self.interWordTime = -1;
+            #self.interWordTime   = 9.0*self.dotDuration;
         self.waitDashDotThreadsIdleTime = 0.5 * self.interLetterTime;
     
     def setInterLetterDelay(self, secs):
@@ -184,6 +186,7 @@ class MorseGenerator(object):
     def setInterWordDelay(self, secs):
         '''
         Sets the time that must elapse between two words.
+        If negative, no word segmentation is performed.
         @param secs: fractional seconds
         @type secs: float
         '''
@@ -284,7 +287,8 @@ class MorseGenerator(object):
                 detail = self.morseResult;
             # One way or other, a letter has ended. Start the
             # timeout for a word-separation sized pause:
-            self.watchdog.kick(_timeout=self.interWordTime, callbackArg=TimeoutReason.END_OF_WORD);
+            if self.interWordTime > 0:
+                self.watchdog.kick(_timeout=self.interWordTime, callbackArg=TimeoutReason.END_OF_WORD);
         elif reason == TimeoutReason.END_OF_WORD:
             # Decided to have the client decide what to do when a word ends.
             # The commented code would add a space:
