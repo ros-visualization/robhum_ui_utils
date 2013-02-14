@@ -66,9 +66,14 @@ class Crosshairs:
     YELLOW   = 1
     GREEN    = 2
     RED      = 3
+
+class PanelExpansion:
+    LESS = 0
+    MORE = 1
     
 class MorseInputSignals(CommChannel):
     letterDone = Signal(int,str);
+    panelCollapsed = Signal(int,int,int,int);
 
 class MorseInput(QMainWindow):
     '''
@@ -91,7 +96,9 @@ class MorseInput(QMainWindow):
         # is supposed to receive the clear text of the 
         # morse:
         self.setFocusPolicy(Qt.NoFocus);
-
+        
+        self.iconDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons')
+        
         CommChannel.registerSignals(MorseInputSignals);
         
         # Find QtCreator's XML file in the PYTHONPATH, and load it:
@@ -160,10 +167,12 @@ class MorseInput(QMainWindow):
         self.initCursorConstrainer();
         
         # Don't allow editing of the ticker tape:
-        self.tickerTapeLineEdit.setFocusPolicy(Qt.NoFocus)
+        self.tickerTapeLineEdit.setFocusPolicy(Qt.NoFocus);
         tickerTapeRegExp = QRegExp('.*');
         tickerTapeValidator = QRegExpValidator(tickerTapeRegExp);
         self.tickerTapeLineEdit.setValidator(tickerTapeValidator);
+        
+        self.expandPushButton.setFocusPolicy(Qt.NoFocus);
         
         # Styling:
         self.createColors();
@@ -254,7 +263,6 @@ class MorseInput(QMainWindow):
     def insertGestureButtons(self):
 
         self.dotButton = GestureButton('dot');
-        self.iconDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons')
         self.dotButton.setIcon(QIcon(os.path.join(self.iconDir, 'dot.png'))); 
         self.dotButton.setText("");
         # Don't have button assume the pressed-down color when 
@@ -354,11 +362,13 @@ class MorseInput(QMainWindow):
         CommChannel.getSignal('GestureSignals.buttonEnteredSig').connect(self.buttonEntered);
         CommChannel.getSignal('GestureSignals.buttonExitedSig').connect(self.buttonExited);
         CommChannel.getSignal('MorseInputSignals.letterDone').connect(self.deliverInput);
+        CommChannel.getSignal('MorseInputSignals.panelCollapsed').connect(self.adjustMainWindowHeight);
 
         # Main window:
         self.timeMeButton.pressed.connect(self.speedMeasurer.timeMeToggled);
         self.tickerTapeClearButton.clicked.connect(self.tickerTapeClear);
         self.powerPushButton.pressed.connect(self.powerToggled);
+        self.expandPushButton.clicked.connect(self.togglePanelExpansion);
         
         # Options dialog:
         self.morserOptionsDialog.cursorConstraintCheckBox.stateChanged.connect(partial(self.checkboxStateChanged,
@@ -395,6 +405,64 @@ class MorseInput(QMainWindow):
         self.morserOptionsDialog.wordDwellReadoutLineEdit.returnPressed.connect(partial(self.sliderReadoutModified,
                                                                                        self.morserOptionsDialog.interWordDelaySlider));
         
+    def expandMorePanel(self, expansion):
+        '''
+        Expand or hide the main window's bottom panel, which holds the speed meter.
+        @param expansion: expand vs. hide
+        @type expansion: PanelExpansion
+        '''
+        if expansion == PanelExpansion.LESS:
+            self.expandPushButton.setIcon(QIcon(os.path.join(self.iconDir, 'plusSign.png')));
+            self.speedMeasureWidget.setHidden(True);
+            # Remember this state in configuration:
+            self.cfgParser.set('Appearance','morePanelExpanded',str(False));
+            newMainWinGeo = self.getAdjustedWinGeo(-1 * self.speedMeasureWidget.geometry().height());
+            MorseInputSignals.getSignal('MorseInputSignals.panelCollapsed').emit(newMainWinGeo.x(),
+                                                                                 newMainWinGeo.y(),
+                                                                                 newMainWinGeo.width(),
+                                                                                 newMainWinGeo.height());
+        else:
+            self.expandPushButton.setIcon(QIcon(os.path.join(self.iconDir, 'minusSign.png')));
+            self.speedMeasureWidget.setHidden(False);
+            self.cfgParser.set('Appearance','morePanelExpanded',str(True));
+
+    def getAdjustedWinGeo(self, pixels):
+        '''
+        Given a positive or negative number of pixels,
+        return a rectangle that is respectively higher or
+        shorter than the current main window.
+        @param pixels: number of pixels to add or subtract from the height
+        @type pixels: int
+        @return: new rectangle
+        @rtype: QRect
+        '''
+        geo = self.geometry();
+        newHeight = geo.height() + pixels;
+        newGeo = QRect(geo.x(), geo.y(), geo.width(), newHeight);
+        return newGeo;
+
+    @QtCore.Slot(int,int,int,int)
+    def adjustMainWindowHeight(self, x,y,width,height):
+        '''
+        Given a rectangle, adjust the main window dimensions
+        to take that shape.
+        @param x: 
+        @type x: int
+        @param y: 
+        @type y: int
+        @param width: 
+        @type width: int
+        @param height: 
+        @type height: int
+        '''
+        self.setGeometry(QRect(x,y,width,height));
+
+    def togglePanelExpansion(self):
+        if self.speedMeasureWidget.isVisible():
+            self.expandMorePanel(PanelExpansion.LESS);
+        else:
+            self.expandMorePanel(PanelExpansion.MORE);
+        
     def showOptions(self):
         self.morserOptionsDialog.show();
     
@@ -418,6 +486,7 @@ class MorseInput(QMainWindow):
                     'interWordDwellDelay'      : str(self.morseGenerator.getInterWordTime()),
                     'winGeometry'              : '100,100,350,350',
                     'useTickerTape'            : str(True),
+                    'morePanelExpanded'        : str(True),
                     }
 
         self.cfgParser = ConfigParser.SafeConfigParser(self.optionsDefaultDict);
@@ -445,6 +514,12 @@ class MorseInput(QMainWindow):
         self.letterDwellSegmentation = self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation');
 
         self.useTickerTape = self.cfgParser.getboolean('Output', 'useTickerTape');
+        
+        self.panelExpanded = self.cfgParser.getboolean('Appearance', 'morePanelExpanded');
+        if self.panelExpanded:
+            self.expandMorePanel(PanelExpansion.MORE);
+        else:
+            self.expandMorePanel(PanelExpansion.LESS);
 
         # Make the options dialog reflect the options we just established:
         self.initOptionsDialogFromOptions();
