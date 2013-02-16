@@ -21,6 +21,8 @@
 
 # Dash/Dot blue value: 35,60,149
 
+import roslib; roslib.load_manifest('morseInput')
+
 import sys
 import os
 import re
