@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Exec=/home/paepcke/fuerte/stacks/proser/launch/proser.sh
+Name=Proser
+Comment=Word completion for onscreen keyboard.

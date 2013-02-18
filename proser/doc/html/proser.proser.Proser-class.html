@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>proser.proser.Proser</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="proser.proser-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;proser ::
+        <a href="proser.proser-module.html">Module&nbsp;proser</a> ::
+        Class&nbsp;Proser
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="proser.proser.Proser-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class Proser</h1><p class="nomargin-top"><span class="codelink"><a href="proser.proser-pysrc.html#Proser">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+QtGui.QDialog --+
+                |
+               <strong class="uidshort">Proser</strong>
+</pre>
+
+<hr />
+<p>Creates a top level X window in which user can type. Proser provides 
+  statistical word completion suggestions. The suggestions are displayed on
+  five buttons at the top of the window. Two methods are available to 
+  select one of the suggestions: Click the respective onscreen button, or 
+  type one of F5-F9. Completion is based on the word_completion package, 
+  which uses a frequency-ranked 6000 word dictionary.</p>
+  <p>A Copy button copies the entire typed text into the X cut buffer 
+  (a.k.a. clipboard), from where it may be pasted into any other 
+  window.</p>
+  <p>A special link exists between Proser and SpeakEasy. Proser provides 
+  two SpeakEasy related buttons:</p>
+  <ol start="1">
+    <li>
+      Erase the SpeakEasy text display
+    </li>
+    <li>
+      Send the entire Proser window text to SpeakEasy and have it spoken by
+      the currently selected voice. The SpeakEasy window may be minimized 
+      during this operation.
+    </li>
+  </ol>
+  <p>Users may type their text from a physical, or any onscreen 
+  keyboard.</p>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__init__"></a><span class="summary-sig-name">__init__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">dictDir</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">userDictFilePath</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="connectWidgets"></a><span class="summary-sig-name">connectWidgets</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Attach slots and widgets to actions.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.connectWidgets">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="actionClear"></a><span class="summary-sig-name">actionClear</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Clear the text display.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionClear">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="proser.proser.Proser-class.html#actionCopy" class="summary-sig-name">actionCopy</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Copy all Proser text to the X cut buffer (i.e.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionCopy">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="proser.proser.Proser-class.html#actionTextChanged" class="summary-sig-name">actionTextChanged</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Act on notification that text in the text panel changed.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionTextChanged">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="proser.proser.Proser-class.html#actionCompletionButton" class="summary-sig-name">actionCompletionButton</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">buttonObj</span>)</span><br />
+      One of the text completion buttons was pushed.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionCompletionButton">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="proser.proser.Proser-class.html#actionKeyShortcut" class="summary-sig-name">actionKeyShortcut</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">buttonIndex</span>)</span><br />
+      User pressed a function key F5-F9.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionKeyShortcut">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="proser.proser.Proser-class.html#actionAddToDictButton" class="summary-sig-name">actionAddToDictButton</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">rank</span>=<span class="summary-sig-default">100</span>)</span><br />
+      Add selected text to the dictionary that is used for word completion.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionAddToDictButton">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="getWordSoFar"></a><span class="summary-sig-name">getWordSoFar</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Service method to retrieve the most recent partially typed word.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.getWordSoFar">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="clearCompletionButtons"></a><span class="summary-sig-name">clearCompletionButtons</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Service method to clear labels on all word completion buttons.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.clearCompletionButtons">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="focusOnTextArea"></a><span class="summary-sig-name">focusOnTextArea</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Service method to force the cursor focus into the text area.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.focusOnTextArea">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="proser.proser.Proser-class.html#actionSendTextToSpeakEasy" class="summary-sig-name">actionSendTextToSpeakEasy</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Copy current content of the text field into the X clipboard.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionSendTextToSpeakEasy">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="proser.proser.Proser-class.html#actionClearSpeakEasyText" class="summary-sig-name">actionClearSpeakEasyText</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Cause a running SpeakEasy process to clear its text area.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionClearSpeakEasyText">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="proser.proser.Proser-class.html#getSpeakEasyPID" class="summary-sig-name">getSpeakEasyPID</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Return the PID of the SpeakEasy application, if it is running.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="proser.proser-pysrc.html#Proser.getSpeakEasyPID">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="VERSION"></a><span class="summary-name">VERSION</span> = <code title="&quot;1.0&quot;">&quot;1.0&quot;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SPEAKEASY_PID_PUBLICATION_FILE"></a><span class="summary-name">SPEAKEASY_PID_PUBLICATION_FILE</span> = <code title="&quot;/tmp/speakeasyPID&quot;">&quot;/tmp/speakeasyPID&quot;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="NO_COMPLETION_TEXT"></a><span class="summary-name">NO_COMPLETION_TEXT</span> = <code title="''">''</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FIRST_SHORTCUT_FUNC_KEY"></a><span class="summary-name">FIRST_SHORTCUT_FUNC_KEY</span> = <code title="5">5</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="REMOTE_CLEAR_TEXT_SIG"></a><span class="summary-name">REMOTE_CLEAR_TEXT_SIG</span> = <code title="signal.SIGUSR1">signal.SIGUSR1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="REMOTE_PASTE_AND_SPEAK_SIG"></a><span class="summary-name">REMOTE_PASTE_AND_SPEAK_SIG</span> = <code title="signal.SIGUSR2">signal.SIGUSR2</code>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="actionCopy"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">actionCopy</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionCopy">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Copy all Proser text to the X cut buffer (i.e. clipboard).</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="actionTextChanged"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">actionTextChanged</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionTextChanged">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Act on notification that text in the text panel changed. This 
+  notification occurs with every one of the user's keystroke. In response 
+  this method updates the text completion buttons.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="actionCompletionButton"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">actionCompletionButton</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">buttonObj</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionCompletionButton">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>One of the text completion buttons was pushed. Insert the respective 
+  text at the current cursor position.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>buttonObj</code></strong> (QPushButton) - the QPushButton object that was pushed.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="actionKeyShortcut"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">actionKeyShortcut</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">buttonIndex</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionKeyShortcut">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>User pressed a function key F5-F9. Invoke the actionCompletionButton()
+  method.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>buttonIndex</code></strong> (int) - Index 0-4 into the array self.completionButtons.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="actionAddToDictButton"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">actionAddToDictButton</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">rank</span>=<span class="sig-default">100</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionAddToDictButton">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Add selected text to the dictionary that is used for word completion. 
+  Words added by this method are appended to the 
+  dict_files/dictUserRankAndWord.txt file in the word_completion package. A
+  default rank of 100 is attached.</p>
+  <p>The method attempts to warn the user if the text selection seems to 
+  span multiple words. In that case, a warning is displayed. A confirmation
+  dialog is raised in case of success.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>rank</code></strong> (int) - Numeric rank to assign to the word. The lower the number (&gt;0),
+          the more likely the word will be chosen as a completion option. 
+          Default is 100.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>ValueError</strong></code> - if provided rank &lt; 0.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="actionSendTextToSpeakEasy"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">actionSendTextToSpeakEasy</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionSendTextToSpeakEasy">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Copy current content of the text field into the X clipboard. Cause a 
+  running SpeakEasy process to paste that newly loaded X clipboard into its
+  SpeakEasy text area, and to speak the content using the current voice. 
+  The method getSpeakEasyPID() is called from here, and that method will 
+  raise a warning dialog if no SpeakEasy process is currently running. That
+  method will also raise the ValueError documented below.</p>
+  <p>Implementation: Send a Unix signal REMOTE_PASTE_AND_SPEAK_SIG to the 
+  SpeakEasy application, if one is running.</p>
+  <dl class="fields">
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>ValueError</strong></code> - if the file /tmp/speakeasyPID does not contain an integer. That 
+        file is initialized by SpeakEasy with that process' PID. While that
+        pid might be stale, it would still be an integer, unless the file 
+        is changed manually.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="actionClearSpeakEasyText"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">actionClearSpeakEasyText</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="proser.proser-pysrc.html#Proser.actionClearSpeakEasyText">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Cause a running SpeakEasy process to clear its text area.</p>
+  <p>Implementation: Send a Unix signal REMOTE_CLEAR_TEXT_SIG to the 
+  SpeakEasy process if one is running. Else a warning dialog is raised.</p>
+  <dl class="fields">
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>ValueError</strong></code> - if the file /tmp/speakeasyPID does not contain an integer. That 
+        file is initialized by SpeakEasy with that process' PID. While that
+        pid might be stale, it would still be an integer, unless the file 
+        is changed manually.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getSpeakEasyPID"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getSpeakEasyPID</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="proser.proser-pysrc.html#Proser.getSpeakEasyPID">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return the PID of the SpeakEasy application, if it is running. Else 
+  return None. The PID is communicated via a file. Note that this file's 
+  content might be stale. So callers must protect against the target 
+  process not running any more.</p>
+  <dl class="fields">
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>ValueError</strong></code> - if the file /tmp/speakeasyPID does not contain an integer. That 
+        file is initialized by SpeakEasy with that process' PID. While that
+        pid might be stale, it would still be an integer, unless the file 
+        is changed manually.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="proser.proser-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Mon Jul  9 15:48:15 2012
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

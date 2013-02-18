@@ -1,0 +1,21 @@
+<package>
+  <description brief="proser">
+
+     Text entry window intended to work with any X onscreen keyboard.
+     Statistically selected word completion choices are offered as user
+     types. Easy copy to clipboard. F6-F10 select among offered word
+     completions. F11 accepts first completion.
+
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/proser</url>
+
+  <depend package="rospy" />
+  <depend package="python_qt_binding" />
+  <depend package="word_completion" />
+
+</package>
+
+
