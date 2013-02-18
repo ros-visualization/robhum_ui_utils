@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AddWordDialog</class>
+ <widget class="QDialog" name="AddWordDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>333</width>
+    <height>349</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Add dictionary word</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(206,230,243);
+</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="verticalLayoutWidget_3">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>9</y>
+     <width>321</width>
+     <height>347</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="outermostVLayout">
+    <item>
+     <layout class="QHBoxLayout" name="titleHLayout">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Add word to dictionary</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="capsAndUsageVLayout">
+      <property name="spacing">
+       <number>10</number>
+      </property>
+      <property name="topMargin">
+       <number>20</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="newWord">
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+          <italic>true</italic>
+         </font>
+        </property>
+        <property name="text">
+         <string>&lt;new word&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="capitalizeCheckbox">
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(89,120,137);
+color: rgb(206,230,243);
+border-radius: 15;
+</string>
+        </property>
+        <property name="text">
+         <string>Captialize</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="useFrequencyGroup">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+         </font>
+        </property>
+        <property name="title">
+         <string>I use this word:</string>
+        </property>
+        <widget class="QWidget" name="verticalLayoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>1</x>
+           <y>22</y>
+           <width>160</width>
+           <height>90</height>
+          </rect>
+         </property>
+         <layout class="QVBoxLayout" name="frequencyButtonsVLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QRadioButton" name="useRarelyButton">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(89,120,137);
+color: rgb(206,230,243);
+border-radius: 15;
+</string>
+            </property>
+            <property name="text">
+             <string>Rarely</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string>useFrequencyCheckboxGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="useOccasionallyButton">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(89,120,137);
+color: rgb(206,230,243);
+border-radius: 15;
+</string>
+            </property>
+            <property name="text">
+             <string>Occasionally</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+            <attribute name="buttonGroup">
+             <string>useFrequencyCheckboxGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="useConstantlyButton">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(89,120,137);
+color: rgb(206,230,243);
+border-radius: 15;
+</string>
+            </property>
+            <property name="text">
+             <string>Constantly</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string>useFrequencyCheckboxGroup</string>
+            </attribute>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="cancelAddWordHLayout">
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="cancelButton">
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(89,120,137);
+color: rgb(206,230,243);
+border-radius: 15;
+</string>
+          </property>
+          <property name="text">
+           <string>Cancel</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="addWordButton">
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(89,120,137);
+color: rgb(206,230,243);
+border-radius: 15;
+</string>
+          </property>
+          <property name="text">
+           <string>Add word</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <zorder>verticalLayoutWidget_3</zorder>
+  <zorder>useFrequencyGroup</zorder>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+ <buttongroups>
+  <buttongroup name="useFrequencyCheckboxGroup"/>
+ </buttongroups>
+</ui>

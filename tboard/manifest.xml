@@ -1,0 +1,21 @@
+<package>
+  <description brief="tboard">
+
+     tboard enables text input primarily via head movement.
+     Only occational clicking is required. The input works
+     via special gesture buttons that use the telephone button
+     letter triplets. A 5000 word, extensible dictionary, organized
+     in a Patricia tree, underlies the system.
+
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/tboard</url>
+  
+  <depend package="rospy" />
+  <depend package="word_completion" />
+
+</package>
+
+
