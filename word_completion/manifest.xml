@@ -1,0 +1,11 @@
+<package>
+  <description brief="word_completion">
+
+
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/word_completion</url>
+
+</package>
