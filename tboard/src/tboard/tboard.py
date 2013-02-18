@@ -7,6 +7,8 @@
 #   - Make cnt-c work
 #   - Hook up with text-to-speech
 #   - Help panel
+#   - Revise UI to get buttons close together.
+
 
 import sys;
 import os;
@@ -114,8 +116,7 @@ class ButtonID:
         except KeyError:
             raise ValueError("Unknown button ID '%s'." % buttonID);
 
-#***class JBoard(QMainWindow):
-class JBoard(QWidget):
+class TBoard(QWidget):
 
     # Ids for checkboxes in the 'add-new-word' dialog:
     RARELY_BUTTON_ID = 0;
@@ -123,13 +124,13 @@ class JBoard(QWidget):
     CONSTANTLY_BUTTON_ID = 2;
     
     def __init__(self):
-        super(JBoard, self).__init__();
+        super(TBoard, self).__init__();
         
-        self.setWindowTitle("JBoard");        
+        self.setWindowTitle("TBoard");        
         
         # Find QtCreator's XML file in the PYTHONPATH:
         currDir = os.path.realpath(__file__);
-        relPathQtCreatorFile = "jboard_ui/jboard_ui.ui";
+        relPathQtCreatorFile = "tboard_ui/tboard_ui.ui";
         qtCreatorXMLFilePath = Utilities.findFile(relPathQtCreatorFile);
         if qtCreatorXMLFilePath is None:
             raise ValueError("Can't find QtCreator user interface file %s" % relPathQtCreatorFile);
@@ -192,7 +193,7 @@ class JBoard(QWidget):
         
         # Find QtCreator's XML file in the PYTHONPATH:
         currDir = os.path.realpath(__file__);
-        relPathQtCreatorFile = "jboard_ui/addWord_dialog/addWordDialog.ui";
+        relPathQtCreatorFile = "tboard_ui/addWord_dialog/addWordDialog.ui";
         qtCreatorXMLFilePath = Utilities.findFile(relPathQtCreatorFile);
         if qtCreatorXMLFilePath is None:
             raise ValueError("Can't find QtCreator user interface file for 'new dictionary word' dialog file %s" % relPathQtCreatorFile);
@@ -204,9 +205,9 @@ class JBoard(QWidget):
         occasionButton = self.addWordDialog.useOccasionallyButton;  
         constantButton = self.addWordDialog.useConstantlyButton; 
         self.addWordButtonGroup = QButtonGroup();
-	self.addWordButtonGroup.addButton(rareButton, JBoard.RARELY_BUTTON_ID);
-	self.addWordButtonGroup.addButton(occasionButton, JBoard.OCCCASIONALLY_BUTTON_ID);
-	self.addWordButtonGroup.addButton(constantButton, JBoard.CONSTANTLY_BUTTON_ID);	
+	self.addWordButtonGroup.addButton(rareButton, TBoard.RARELY_BUTTON_ID);
+	self.addWordButtonGroup.addButton(occasionButton, TBoard.OCCCASIONALLY_BUTTON_ID);
+	self.addWordButtonGroup.addButton(constantButton, TBoard.CONSTANTLY_BUTTON_ID);	
         self.addWordDialog.hide();
             
     def populateGestureButtons(self):
@@ -277,8 +278,8 @@ class JBoard(QWidget):
         buttonHeight = self.letterButtons[0].height();
         for backgroundImgNum in range(NUM_LETTER_BUTTONS):
             buttonPixmap = QPixmap();
-            #****imgPath = os.path.join(imgDirPath, "jboardButtonBackgroundTrail" + str(backgroundImgNum + 1) + ".png");
-            imgPath = os.path.join(imgDirPath, "jboardButtonBackgroundsSmall" + str(backgroundImgNum + 1) + ".png");
+            #****imgPath = os.path.join(imgDirPath, "tboardButtonBackgroundTrail" + str(backgroundImgNum + 1) + ".png");
+            imgPath = os.path.join(imgDirPath, "tboardButtonBackgroundsSmall" + str(backgroundImgNum + 1) + ".png");
             if not buttonPixmap.load(imgPath):
                 raise IOError("Could not find button background icon at " + imgPath);
             #scaledPixmap = buttonPixmap.scaled(buttonWidth, buttonHeight);
@@ -288,7 +289,7 @@ class JBoard(QWidget):
             self.buttonBackGroundPixmaps.append(scaledPixmap);
         
         self.crossedOutButtonBackground = QPixmap();
-        imgPath = os.path.join(imgDirPath, "jboardButtonBackgroundCrossedOut.png");
+        imgPath = os.path.join(imgDirPath, "tboardButtonBackgroundCrossedOut.png");
         if not self.crossedOutButtonBackground.load(imgPath):
             raise IOError("Could not find crossed-out button background icon at " + imgPath);
         self.crossedOutButtonBackground = self.crossedOutButtonBackground.scaled(buttonWidth + 50, buttonHeight);
@@ -489,11 +490,11 @@ class JBoard(QWidget):
             return;
                     
         frequencyCheckboxID = self.addWordButtonGroup.checkedId();
-        if frequencyCheckboxID == JBoard.RARELY_BUTTON_ID:
+        if frequencyCheckboxID == TBoard.RARELY_BUTTON_ID:
             freqRank = UseFrequency.RARELY;
-        elif frequencyCheckboxID == JBoard.OCCCASIONALLY_BUTTON_ID:
+        elif frequencyCheckboxID == TBoard.OCCCASIONALLY_BUTTON_ID:
             freqRank = UseFrequency.OCCASIONALLY;
-        elif frequencyCheckboxID == JBoard.CONSTANTLY_BUTTON_ID:
+        elif frequencyCheckboxID == TBoard.CONSTANTLY_BUTTON_ID:
             freqRank = UseFrequency.CONSTANTLY;
         else:
             raise ValueError("Unknown use frequency checkbox ID in add word to dictionary dialog handling: " + str(frequencyCheckboxID));
@@ -666,10 +667,10 @@ class JBoard(QWidget):
         self.addWordDialog.newWord.setText(newWord);
         
         # Place the dialog somewhere over the application window:
-        jBoardGeoRect = self.geometry();
+        tboardGeoRect = self.geometry();
         dialogGeoRect = self.addWordDialog.geometry();
-        newDialogGeo  = QRect(jBoardGeoRect.x() + 50, 
-                              jBoardGeoRect.y() + 50,
+        newDialogGeo  = QRect(tboardGeoRect.x() + 50, 
+                              tboardGeoRect.y() + 50,
                               dialogGeoRect.width(),
                               dialogGeoRect.height());
         self.addWordDialog.setGeometry(newDialogGeo);
@@ -688,6 +689,6 @@ class JBoard(QWidget):
 if __name__ == "__main__":
     
     app = QApplication(sys.argv);
-    b = JBoard();
+    b = TBoard();
     app.exec_();
     sys.exit();
