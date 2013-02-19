@@ -10,6 +10,7 @@
 # Doc:
 #   - Abort if mouse click in rest zone.
 #   - Left click to suspend beeping and cursor contraint and timing measure
+#   - Right click: recenter cursor
 #   - Prefs in $HOME/.morser/morser.cfg
 #   - Cheat sheet (Menu)
 #   - Options window
@@ -755,7 +756,15 @@ class MorseInput(QMainWindow):
 
         mouseEvent.accept();
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, mouseEvent):
+
+        # If right button is the one that was released,
+        # re-center the mouse to the crosshair. This is
+        # needed with the head mouse tracker to re-calibrate
+        # where it thinks the cursor is located:
+        if mouseEvent.button() == Qt.RightButton:
+            self.morseCursor.setPos(self.centralRestGlobalPos);
+
         if self.cursorContraintSuspended:
             self.cursorContraintSuspended = False;
             self.startCursorConstraint();

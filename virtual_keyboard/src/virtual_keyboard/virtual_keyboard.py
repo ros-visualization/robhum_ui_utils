@@ -158,6 +158,9 @@ class VirtualKeyboard(object):
             raise ValueError('Either retrievalKey or windowTitle must be provided (but not both)');
         
         if retrievalKey is not None:  
+            #***********
+            winKey = str(self._getWinIDSafely_(retrievalKey));
+            #***********
             resCode = subprocess.call(['xdotool', 'windowactivate', '--sync', str(self._getWinIDSafely_(retrievalKey))]);
         else:
             resCode = subprocess.call(['xdotool', 'search', '--name', '--sync', windowTitle, 'windowactivate']);
