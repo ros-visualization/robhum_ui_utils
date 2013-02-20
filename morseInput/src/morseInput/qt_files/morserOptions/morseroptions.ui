@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>532</width>
-    <height>463</height>
+    <height>456</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -43,7 +43,7 @@
       <x>20</x>
       <y>10</y>
       <width>488</width>
-      <height>416</height>
+      <height>422</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="centralVLayout">
@@ -282,11 +282,11 @@
       </spacer>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <layout class="QVBoxLayout" name="cursorVLayout">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <layout class="QHBoxLayout" name="cursorControlHeaderHLayout">
          <item>
-          <spacer name="horizontalSpacer_9">
+          <spacer name="cursorControlsHSpacerLeft">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -299,7 +299,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="cursorControlLabel">
            <property name="font">
             <font>
              <pointsize>14</pointsize>
@@ -311,7 +311,7 @@
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_10">
+          <spacer name="cursorControlsHspacerRight">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -344,6 +344,69 @@
          </item>
          <item>
           <spacer name="cursorSpacerRight">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="cursorDecelerationHLayout">
+         <item>
+          <widget class="QLabel" name="cursorDecelerationLabel">
+           <property name="text">
+            <string>Deceleration: </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="cursorDecelerationSlider">
+           <property name="minimum">
+            <number>10</number>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="tickPosition">
+            <enum>QSlider::TicksBelow</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="cursorDecelerationReadoutLineEdit">
+           <property name="maximumSize">
+            <size>
+             <width>40</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+             <italic>true</italic>
+            </font>
+           </property>
+           <property name="text">
+            <string>x</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_9">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -655,7 +718,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="interWordDleayMsecLabel">
            <property name="font">
             <font>
              <italic>true</italic>

@@ -27,6 +27,7 @@ import roslib; roslib.load_manifest('morseInput')
 import sys
 import os
 import re
+import fcntl
 import ConfigParser
 from functools import partial
 
@@ -91,9 +92,25 @@ class MorseInput(QMainWindow):
     
     MOUSE_UNCONSTRAIN_TIMEOUT = 300; # msec
     
+    HEAD_TRACKER = True;
+    
     def __init__(self):
         super(MorseInput,self).__init__();
 
+        # Only allow a single instance of the Morser program to run:
+        self.morserLockFile = '/tmp/morserLock.lk';
+        MorseInput.morserLockFD = open(self.morserLockFile, 'w')
+        try:
+            # Attempt to lock the lock file exclusively, but
+            # throw IOError if already locked, rather than waiting
+            # for unlock (the LOCK_NB ORing):
+            fcntl.lockf(MorseInput.morserLockFD, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except IOError:
+            errMsg = "The Morser program is already running. Please quit it.\n" +\
+                     "If Morser really is not running, execute 'rm %s' in a terminal window." % self.morserLockFile;
+            sys.stderr.write(errMsg)
+            sys.exit()
+        
         # Disallow focus acquisition for the morse window.
         # Needed to prevent preserve focus on window that
         # is supposed to receive the clear text of the 
@@ -171,9 +188,15 @@ class MorseInput(QMainWindow):
         
         # Don't allow editing of the ticker tape:
         self.tickerTapeLineEdit.setFocusPolicy(Qt.NoFocus);
+        # But allow anything to be placed inside programmatically:
         tickerTapeRegExp = QRegExp('.*');
         tickerTapeValidator = QRegExpValidator(tickerTapeRegExp);
         self.tickerTapeLineEdit.setValidator(tickerTapeValidator);
+        
+        # Deceleration readout is floating point with up to 2 digits after decimal:
+        cursorDecelerationRegExp = QRegExp(r'[\d]{1}[.]{1}[\d]{1,2}$');
+        cursorDecelerationValidator = QRegExpValidator(cursorDecelerationRegExp);
+        self.morserOptionsDialog.cursorDecelerationReadoutLineEdit.setValidator(cursorDecelerationValidator);
         
         self.expandPushButton.setFocusPolicy(Qt.NoFocus);
         
@@ -183,7 +206,7 @@ class MorseInput(QMainWindow):
 
         # Power state: initially on:
         self.poweredUp = True;
-
+        
         self.show();
 
         # Compute global x positions of dash/dot buttons facing
@@ -335,6 +358,8 @@ class MorseInput(QMainWindow):
         exitAction.triggered.connect(self.close)
         
         raiseOptionsDialogAction = QtGui.QAction(QtGui.QIcon('preferences-desktop-accessibility.png'), '&Options', self)
+         
+        raiseOptionsDialogAction.setShortcut('Ctrl+O');
         raiseOptionsDialogAction.setStatusTip('Show options and settings')
         raiseOptionsDialogAction.triggered.connect(self.showOptions)
   
@@ -385,6 +410,8 @@ class MorseInput(QMainWindow):
         self.morserOptionsDialog.useTickerCheckBox.toggled.connect(partial(self.checkboxStateChanged,
                                                                            self.morserOptionsDialog.useTickerCheckBox));
 
+        self.morserOptionsDialog.cursorDecelerationSlider.valueChanged.connect(partial(self.sliderStateChanged,
+                                                                                       self.morserOptionsDialog.cursorDecelerationSlider));
         self.morserOptionsDialog.keySpeedSlider.valueChanged.connect(partial(self.sliderStateChanged,
                                                                              self.morserOptionsDialog.keySpeedSlider));
         self.morserOptionsDialog.interLetterDelaySlider.valueChanged.connect(partial(self.sliderStateChanged,
@@ -395,6 +422,10 @@ class MorseInput(QMainWindow):
         self.morserOptionsDialog.savePushButton.clicked.connect(self.optionsSaveButton);
         self.morserOptionsDialog.cancelPushButton.clicked.connect(self.optionsCancelButton);
         
+        self.morserOptionsDialog.cursorDecelerationReadoutLineEdit.editingFinished.connect(partial(self.sliderReadoutModified,
+                                                                                                   self.morserOptionsDialog.cursorDecelerationSlider));
+        self.morserOptionsDialog.cursorDecelerationReadoutLineEdit.returnPressed.connect(partial(self.sliderReadoutModified,
+                                                                                                 self.morserOptionsDialog.cursorDecelerationSlider));
         self.morserOptionsDialog.keySpeedReadoutLineEdit.editingFinished.connect(partial(self.sliderReadoutModified,
                                                                                          self.morserOptionsDialog.keySpeedSlider));
         self.morserOptionsDialog.keySpeedReadoutLineEdit.returnPressed.connect(partial(self.sliderReadoutModified,
@@ -458,7 +489,7 @@ class MorseInput(QMainWindow):
         @param height: 
         @type height: int
         '''
-        self.setGeometry(QRect(x,y,width,height));
+        self.setMaximumHeight(self.geometry().height() - self.speedMeasureWidget.geometry().height());
 
     def togglePanelExpansion(self):
         if self.speedMeasureWidget.isVisible():
@@ -485,6 +516,7 @@ class MorseInput(QMainWindow):
                     'wordDwellSegmentation'    : str(True),
                     'constrainCursorInHotZone' : str(False),
                     'keySpeed'                 : str(1.7),
+                    'cursorDeceleration'       : str(0.5),
                     'interLetterDwellDelay'    : str(self.morseGenerator.getInterLetterTime()),
                     'interWordDwellDelay'      : str(self.morseGenerator.getInterWordTime()),
                     'winGeometry'              : '100,100,350,350',
@@ -507,6 +539,8 @@ class MorseInput(QMainWindow):
         except Exception as e:
             self.dialogService.showErrorMsg("Could not set window size; config file spec not grammatical: %s. (%s" % (mainWinGeometry, `e`));
         
+        self.setCursorDeceleration(self.cfgParser.getfloat('Morse generation', 'cursorDeceleration'));
+        
         self.morseGenerator.setInterLetterDelay(self.cfgParser.getfloat('Morse generation', 'interLetterDwellDelay'));
         self.morseGenerator.setInterWordDelay(self.cfgParser.getfloat('Morse generation', 'interWordDwellDelay'));
         self.morseGenerator.setSpeed(self.cfgParser.getfloat('Morse generation', 'keySpeed'));
@@ -525,6 +559,7 @@ class MorseInput(QMainWindow):
             self.expandMorePanel(PanelExpansion.LESS);
 
         # Make the options dialog reflect the options we just established:
+        # Path to Morser options file:
         self.initOptionsDialogFromOptions();
 
     def initOptionsDialogFromOptions(self):
@@ -542,6 +577,13 @@ class MorseInput(QMainWindow):
         # Output to X11 vs. Speech:    
         self.morserOptionsDialog.typeOutputRadioButton.setChecked(self.cfgParser.getint('Output', 'outputDevice')==OutputType.TYPE);
         self.morserOptionsDialog.speechOutputRadioButton.setChecked(self.cfgParser.getint('Output', 'outputDevice')==OutputType.SPEAK);
+
+
+        # Cursor deceleration:
+        cursorDeceleration = self.cfgParser.getfloat('Morse generation', 'cursorDeceleration');
+        self.morserOptionsDialog.cursorDecelerationSlider.setValue(int(cursorDeceleration * 100));
+        # Readout for the cursor deceleration:
+        self.morserOptionsDialog.cursorDecelerationReadoutLineEdit.setText(str(cursorDeceleration));
         
         # Key speed slider:
         self.morserOptionsDialog.keySpeedSlider.setValue(int(10*self.cfgParser.getfloat('Morse generation', 'keySpeed')));
@@ -562,7 +604,9 @@ class MorseInput(QMainWindow):
         self.morserOptionsDialog.useTickerCheckBox.setChecked(self.cfgParser.getboolean('Output', 'useTickerTape'));
     
     def sliderReadoutModified(self, slider):
-        if slider == self.morserOptionsDialog.keySpeedSlider:
+        if slider == self.morserOptionsDialog.cursorDecelerationSlider:
+            slider.setValue(int(float(self.morserOptionsDialog.cursorDecelerationReadoutLineEdit.text()) * 100.0));
+        elif slider == self.morserOptionsDialog.keySpeedSlider:
             slider.setValue(int(self.morserOptionsDialog.keySpeedReadoutLineEdit.text()));
         elif slider == self.morserOptionsDialog.interLetterDelaySlider:
             slider.setValue(int(self.morserOptionsDialog.letterDwellReadoutLineEdit.text()));
@@ -619,7 +663,13 @@ class MorseInput(QMainWindow):
     def sliderStateChanged(self, slider, newValue):
         #slider.setToolTip(str(newValue));
         #QToolTip.showText(slider.pos(), str(newValue), slider, slider.geometry())
-        if slider == self.morserOptionsDialog.keySpeedSlider:
+        if slider == self.morserOptionsDialog.cursorDecelerationSlider:
+            newValue = newValue/100.0
+            # Update readout:
+            self.morserOptionsDialog.cursorDecelerationReadoutLineEdit.setText(str(newValue));
+            self.cfgParser.set('Morse generation', 'cursorDeceleration', str(newValue));
+            self.setCursorDeceleration(newValue);
+        elif slider == self.morserOptionsDialog.keySpeedSlider:
             # Update readout:
             self.morserOptionsDialog.keySpeedReadoutLineEdit.setText(str(newValue));
             # Speed slider goes from 1 to 6, but QT is set to 
@@ -638,6 +688,15 @@ class MorseInput(QMainWindow):
             valInSecs = newValue/1000.;
             self.cfgParser.set('Morse generation', 'interWordDwellDelay', str(valInSecs));
             self.morseGenerator.setInterWordDelay(valInSecs);
+        
+    def setCursorDeceleration(self, newValue):
+        '''
+        Change deceleration multiplier for cursor movement inside the 
+        rest zone. Value should vary between 0.001 and 1.0
+        @param newValue: multiplier that decelerates cursor.
+        @type newValue: float.
+        '''
+        self.cursorAcceleration = newValue;
         
     def optionsSaveButton(self):
         try:
@@ -739,7 +798,11 @@ class MorseInput(QMainWindow):
         self.computeInnerButtonEdges();
 
     def mousePressEvent(self, mouseEvent):
-        # Re-activate the most recently active X11 window
+        
+        if (mouseEvent.button() != Qt.LeftButton):
+            return;
+        
+        # Re-activate the most recently active X11 window 
         # to ensure the letters are directed to the 
         # proper window, and not this morse window:
         self.virtKeyboard.activateWindow('keyboardTarget');
@@ -780,6 +843,8 @@ class MorseInput(QMainWindow):
                            str(newMorseWinRect.width()) + ',' +
                            str(newMorseWinRect.height()));
         self.optionsSaveButton();
+        # Update cache of button edge and rest area positions:
+        self.computeInnerButtonEdges();
 
     def cursorInRestZone(self, pos):
         # Button geometries are local, so convert the
@@ -793,19 +858,24 @@ class MorseInput(QMainWindow):
                localPos.y() > dotButtonGeo.top()   and\
                localPos.y() < dotButtonGeo.bottom();
     
-    def cursorInButton(self, buttonObj, pos):
+    def cursorInButton(self, buttonObj, pos, tolerance=0):
         '''
         Return True if given position is within the given button object.
+        An optional positive or negative tolerance is added to the
+        button dimensions. This addition allows for caller to compensate
+        for cursor drift by 'blurring' the true button edges.
         @param buttonObj: QPushButton or derivative to check.
         @type buttonObj: QPushButton
         @param pos: x/y coordinate to test
         @type pos: QPoint
+        @param tolerance: number of pixels the cursor may be outside the button, yet still be reported as inside.
+        @type tolerance: int
         '''
         # Button geometries are local, so convert the
         # given global position:
         buttonGeo = buttonObj.geometry();
-        globalButtonPos = self.mapToGlobal(QPoint(buttonGeo.x(),
-                                                  buttonGeo.y()));
+        globalButtonPos = self.mapToGlobal(QPoint(buttonGeo.x() + tolerance,
+                                                  buttonGeo.y() + tolerance));
         globalGeo = QRect(globalButtonPos.x(), globalButtonPos.y(), buttonGeo.width(), buttonGeo.height());
         return globalGeo.contains(pos);
         
@@ -822,6 +892,7 @@ class MorseInput(QMainWindow):
             if self.recentMousePos is None:
                 # Very first time: establish a 'previous' mouse cursor position:
                 self.recentMousePos = mouseEvent.globalPos();
+                self.headTrackerCursorDrift = 0;
                 return;
                 
             globalPosX = mouseEvent.globalX()
@@ -836,8 +907,8 @@ class MorseInput(QMainWindow):
             # ('Inner edge' means facing the resting zone):
             oldInDot  = self.cursorInButton(self.dotButton, self.recentMousePos);
             oldInDash = self.cursorInButton(self.dashButton, self.recentMousePos);
-            newInDot  = self.cursorInButton(self.dotButton, globalPos);
-            newInDash = self.cursorInButton(self.dashButton, globalPos);
+            newInDot  = self.cursorInButton(self.dotButton, globalPos, tolerance=1);
+            newInDash = self.cursorInButton(self.dashButton, globalPos, tolerance=0);
             
             oldInButton = oldInDot or oldInDash;
             newInButton = newInDot or newInDash;
@@ -845,7 +916,7 @@ class MorseInput(QMainWindow):
             # Mouse moving within one of the buttons? If
             # so, keep mouse at the button's inner edge
             # (facing the rest zone):
-            if oldInButton and newInButton:
+            if newInButton:
                 if newInDot:
                     # The '-1' moves the cursor slightly left into
                     # the Dot button, rather than keeping it right on
@@ -869,11 +940,15 @@ class MorseInput(QMainWindow):
             # vertically or horizontally, enforce that constraint now:
             if self.currentMouseDirection is not None:
                 if self.currentMouseDirection == Direction.HORIZONTAL:
-                    correctedCurPos = QPoint(globalPosX, self.centralRestGlobalPos.y() + 12);
-                    self.recentMousePos.setX(globalPosX);
+                    cursorMove = globalPosX - self.recentMousePos.x();
+                    correctedGlobalX = self.recentMousePos.x() + int(cursorMove * self.cursorAcceleration);
+                    correctedCurPos = QPoint(correctedGlobalX, self.centralRestGlobalPos.y() + 12);
+                    self.recentMousePos.setX(correctedGlobalX);
                 else:
-                    correctedCurPos = QPoint(self.recentMousePos.x(), globalPosY);
-                    self.recentMousePos.setY(globalPosY);
+                    cursorMove = globalPosY - self.recentMousePos.y();
+                    correctedGlobalY = self.recentMousePos.y() + int(cursorMove * self.cursorAcceleration);
+                    correctedCurPos = QPoint(self.recentMousePos.x(), correctedGlobalPosY);
+                    self.recentMousePos.setY(correctedGlobalPosY);
                 self.morseCursor.setPos(correctedCurPos);
                 return;
 
@@ -1087,8 +1162,14 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv);
     #QApplication.setStyle(QCleanlooksStyle())
-    morser = MorseInput();
-    app.exec_();
-    morser.exit();
+    try:
+        morser = MorseInput();
+        app.exec_();
+        morser.exit();
+    finally:
+        try:
+          fcntl.lockf(MorseInput.morserLockFD, fcntl.LOCK_UN)
+        except IOError:
+          print ("Could not release Morser lock.")
     sys.exit();
     
