@@ -1,3 +1,0 @@
-<launch>
-  <node pkg="morseInput" type="morseInput_ui.py" name="morseInput"/>
-</launch>

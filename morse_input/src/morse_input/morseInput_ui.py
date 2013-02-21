@@ -22,7 +22,7 @@
 
 # Dash/Dot blue value: 35,60,149
 
-import roslib; roslib.load_manifest('morseInput')
+import roslib; roslib.load_manifest('morse_input')
 
 import sys
 import os
