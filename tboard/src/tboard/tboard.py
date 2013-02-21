@@ -20,13 +20,15 @@ from functools import partial;
 
 from utilities import Utilities;
 
-from gesture_button import GestureButton;
-from gesture_button import FlickDirection;
-from gesture_button import CommChannel;
+from gesture_buttons.gesture_button import GestureButton;
+from gesture_buttons.gesture_button import FlickDirection;
+
+from qt_comm_channel.commChannel import CommChannel;
 
 from word_completion.word_collection import TelPadEncodedWordCollection;
 
-import QtBindingHelper;
+import python_qt_binding
+from python_qt_binding import QtCore, QtGui, loadUi
 from QtCore import QMutex, QMutexLocker, Qt, QTimer, QRect, Slot
 from QtGui import QApplication, QColor, QDialog, QMainWindow, QMessageBox, QPixmap, QWidget, QIcon
 from QtGui import QButtonGroup
@@ -53,14 +55,23 @@ class HistoryShiftDir:
     YOUNGER = 1;
 
 class StyleID:
+    '''
+    Enum: Identifies whether a style is for a depressed, or released button.
+    '''
     RELEASED = 0;
     PRESSED  = 1;
 
 class ButtonEditMode:
+    '''
+    Enum: input came from gesturing vs. explicit letter input.
+    '''
     DIALPAD = 0;
     LETTER_INPUT = 1;
 
 class ButtonID:
+    '''
+    Enum used to identify gesture buttons.
+    '''
     ABC  = 0;
     DEF  = 1;
     GHI  = 2;
@@ -100,6 +111,11 @@ class ButtonID:
     
     @staticmethod
     def toString(buttonID):
+        '''
+        Returns displayable description of the button.
+        @param buttonID: a key in the C{idRepr} dict 
+        @type buttonID: {ABC|DEF|JKL|MNO|PQR|STUV|WXYZ}
+        '''
         try:
             return ButtonID.strRepr[buttonID];
         except KeyError:
@@ -107,10 +123,21 @@ class ButtonID:
 
     @staticmethod
     def toButtonID(buttonLabel):
+        '''
+        Given a button label, return the button's ID
+        @param buttonLabel: label that is printed on the button
+        @type buttonLabel: string
+        '''
         return ButtonID.strToID[buttonLabel];
     
     @staticmethod
     def idToStringable(buttonID):
+        '''
+        Return a string representing the meaning of a button.
+        @param buttonID: a key in the C{idRepr} dict 
+        @type buttonID: {ABC|DEF|JKL|MNO|PQR|STUV|WXYZ}
+        @raise ValueError: if button ID not recognized. 
+        '''
         try:
             return ButtonID.idRepr[buttonID];
         except KeyError:
@@ -135,7 +162,7 @@ class TBoard(QWidget):
         if qtCreatorXMLFilePath is None:
             raise ValueError("Can't find QtCreator user interface file %s" % relPathQtCreatorFile);
         # Make QtCreator generated UI a child if this instance:
-        QtBindingHelper.loadUi(qtCreatorXMLFilePath, self);
+        python_qt_binding.loadUi(qtCreatorXMLFilePath, self);
         self.letterWidgets = [self.ABCWidget, self.DEFWidget, self.GHIWidget, self.JKLWidget,
                               self.MNOWidget, self.PQRWidget, self.STUVWidget, self.WXYZWidget];
                               
@@ -156,7 +183,6 @@ class TBoard(QWidget):
         self.currButtonUsedForFlick = False;
         self.wordCollection = TelPadEncodedWordCollection();
           
-        self.commChannel = CommChannel.getInstance();
         # Timer to ensure that a crossed-out button doesn't 
         # stay crossed out forever:
         self.crossOutTimer =  QTimer();
@@ -190,6 +216,9 @@ class TBoard(QWidget):
     # -------------------------------------- UI Setup Methods -------------------------
     
     def initNewDictWordDialog(self):
+        '''
+        Initializes dialog window for user to add a new word to the dictionary.
+        '''
         
         # Find QtCreator's XML file in the PYTHONPATH:
         currDir = os.path.realpath(__file__);
@@ -199,7 +228,7 @@ class TBoard(QWidget):
             raise ValueError("Can't find QtCreator user interface file for 'new dictionary word' dialog file %s" % relPathQtCreatorFile);
         #****self.addWordDialog = QWidget();
 	self.addWordDialog = QDialog();
-        QtBindingHelper.loadUi(qtCreatorXMLFilePath, self.addWordDialog);
+        python_qt_binding.loadUi(qtCreatorXMLFilePath, self.addWordDialog);
         # Assign int IDs to the frequency checkboxes:
         rareButton = self.addWordDialog.useRarelyButton;
         occasionButton = self.addWordDialog.useOccasionallyButton;  
@@ -214,13 +243,11 @@ class TBoard(QWidget):
         '''
         Creates GestureButton instances for each telephone pad button.
         Creates convenience data structures:
-        <ul>
-          <li><code>letterButtons</code> is an array of all GestureButton instances</li>
-          <li><code>letterButtonToID</code> maps GestureButton instances to the buttons'
-              IDs, which happen to be their label strings ('ABC', 'DEF', etc.).</li>
-          <li><code>idToLetterButton</code> is the reverse: a dictionary mapping button labels,
-              like "ABC" to the corresponding button instance.</li>
-        </ul>
+          - C{letterButtons} is an array of all GestureButton instances
+          - C{letterButtonToID} maps GestureButton instances to the buttons'
+              IDs, which happen to be their label strings ('ABC', 'DEF', etc.).
+          - C{idToLetterButton} is the reverse: a dictionary mapping button labels,
+              like "ABC" to the corresponding button instance.
         This function also sets style sheets for the all GestureButton instances.
         '''
         # Sorted array of all letter button objs:
@@ -241,9 +268,12 @@ class TBoard(QWidget):
             
                         
     def connectWidgets(self):
-        self.commChannel.flickSig.connect(self.handleButtonFlicks);
-        self.commChannel.buttonEnteredSig.connect(self.handleButtonEntered);
-        self.commChannel.buttonExitedSig.connect(self.handleButtonExited);
+        '''
+        Connect signals and button slots to their handlers. 
+        '''
+        CommChannel.getSignal('GestureSignals.flickSig').connect(self.handleButtonFlicks);
+        CommChannel.getSignal('GestureSignals.buttonEnteredSig').connect(self.handleButtonEntered);
+        CommChannel.getSignal('GestureSignals.buttonExitedSig').connect(self.handleButtonExited);
         self.eraseWordButton.clicked.connect(self.handleEraseWordButton);
         self.addWordButton.clicked.connect(self.handleSaveWordButton);
         self.crossOutTimer.timeout.connect(self.handleCrossoutTimeout);
@@ -271,6 +301,9 @@ class TBoard(QWidget):
         self.copyButton.clicked.connect(self.handleCopyAll);
         
     def preparePixmaps(self):
+        '''
+        Pull icons from the file system, and turn them into pixmaps.
+        '''
         
         imgDirPath = os.path.join(os.path.dirname(__file__), "img/");
         self.buttonBackGroundPixmaps = [];
@@ -311,6 +344,9 @@ class TBoard(QWidget):
         self.setStyleSheet("QWidget{background-color: %s}" % self.offWhiteColor.name());
 
     def createColors(self):
+        '''
+        Create QColor objects from RGB values. 
+        '''
         self.grayBlueColor = QColor(89,120,137);  # Letter buttons
         self.offWhiteColor = QColor(206,230,243); # Background
         self.darkGray      = QColor(65,88,101);   # Central buttons
@@ -318,6 +354,13 @@ class TBoard(QWidget):
         self.purple        = QColor(147,124,195); # Gesture button pressed
 
     def setGestureButtonStyle(self, buttonObj, styleID):
+        '''
+        Style a gesture button.
+        @param buttonObj: the button to style
+        @type buttonObj: GestureButton
+        @param styleID: whether button is pressed or released
+        @type styleID: StyleID
+        '''
         if styleID == StyleID.RELEASED:
             buttonObj.setStyleSheet("background-color: %s; color: %s; border: 2px outset %s; border-radius: 15; font-size: 18px" %
                                     (self.grayBlueColor.name(),
@@ -334,6 +377,13 @@ class TBoard(QWidget):
     
     @Slot(GestureButton, int)
     def handleButtonFlicks(self, gestureButton, flickDirection):
+        '''
+        Action on flicking in and out of a gesture button.
+        @param gestureButton: button that was flicked
+        @type gestureButton: GestureButton
+        @param flickDirection: cursor flicked North, South, East, or West
+        @type flickDirection: GestureButton.FlickDirection
+        '''
         #print "Flick direction: " + FlickDirection.toString(flickDirection);
         
         # Protect against re-entry. Not that 
@@ -393,6 +443,11 @@ class TBoard(QWidget):
 
     @Slot(GestureButton)
     def handleButtonExited(self, gestureButtonObj):
+        '''
+        Handler for cursor having entered a gesture button.
+        @param gestureButtonObj: button object that was entered
+        @type gestureButtonObj: GestureButton
+        '''
         
         # Protect against re-entry. Not that 
         # QtCore.QMutexLocker locks when created, and
@@ -423,20 +478,36 @@ class TBoard(QWidget):
         self.updateTickerTape();
 
     def handleEraseWordButton(self):
+        '''
+        Handler for erase-word button clicked.
+        '''
         self.eraseCurrentWord();
         self.showRemainingWords();
         self.updateTickerTape();
         
     def handleCrossoutTimeout(self):
+        '''
+        Timeout handler that detects crossing out a letter by running through a gesture button and back.
+        '''
         for buttonObj in self.crossedOutButtons:
             self.setButtonImage(buttonObj, self.buttonBackGroundPixmaps[self.currentButtonBackgrounds[buttonObj]]);
         self.crossedOutButtons = [];
             
     def handleNumPad(self, numButton):
+        '''
+        Handler for number pad button pressed.
+        @param numButton: button object
+        @type numButton: QPushButton
+        '''
         buttonLabel = numButton.text();
         self.outputPanel.insertPlainText(buttonLabel);
         
     def handleSpecialChars(self, specCharButton):
+        '''
+        Handler: special character button pushed.
+        @param specCharButton: button object
+        @type specCharButton: QPushButton
+        '''
         if specCharButton == self.backspaceButton:
             self.outputPanel.textCursor().deletePreviousChar();
             return;
@@ -447,6 +518,11 @@ class TBoard(QWidget):
         self.outputPanel.insertPlainText(char);            
     
     def handleGestureButtonClick(self, buttonObj):
+        '''
+        Handler for gesture button click.
+        @param buttonObj: Button object
+        @type buttonObj: GestureButton
+        '''
         
         # If button is in default dialpad mode, switch to letter-input mode:
         if self.buttonEditMode == ButtonEditMode.DIALPAD:

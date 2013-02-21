@@ -7,19 +7,19 @@ class CommChannel(QObject):
     '''
     Combines Qt signals into one place. Avoids error "... has no method 'emit'". 
     This is a static class. Usage:
-       * Subclass this class; without creating any methods, including __init__().
-       * The only active part in the subclass is to define Qt signals. Example:
+       - Subclass this class; without creating any methods, including __init__().
+       - The only active part in the subclass is to define Qt signals. Example::
        
              class MySignals(CommChannel):
                 quitSig      = QtCore.Signal(QPushButton)
                 taskDoneSig  = QtCore.Signal()
                 
-       * Before using the signals in your application, call registerSignals on CommChannel,
-         passing your subclass:
+       - Before using the signals in your application, call registerSignals on CommChannel,
+         passing your subclass::
          
              CommChannel.registerSignals(MySignals)
              
-       * After that call, access your signals like this:
+       - After that call, access your signals like this::
         
             CommChannel.getSignal('MySignals.quitSig')
             
@@ -27,7 +27,7 @@ class CommChannel(QObject):
          of your subclass, followed by a dot, followed by the 
          signal class attribute's name.
          
-       * Other modules in the same application can access the signals the same way.
+       - Other modules in the same application can access the signals the same way.
     
     '''
     # Hold on to the CommChannel subclass instances that
@@ -40,10 +40,8 @@ class CommChannel(QObject):
     def registerSignals(signalsClass):
         '''
         Add a new Qt Signal instance under a name. 
-        @param sigName: name under which signal object is known, and can be retrieved.
-        @type sigName: string
-        @param sigObj: the Qt Signal object to register
-        @type sigObj: QtCore.Signal
+        @param signalsClass: name under which signal object is known, and can be retrieved.
+        @type signalsClass: string
         '''
         if not issubclass(signalsClass, QObject):
             raise ValueError("Class passed to registerSignals must be a subclass of CommChannel.");

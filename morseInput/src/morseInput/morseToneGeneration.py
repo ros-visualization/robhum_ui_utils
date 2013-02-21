@@ -151,8 +151,8 @@ class MorseGenerator(object):
         The higher the number, the faster the dots/dashes are
         generated. Default is 3.3.
         
-        @param speed: rate at which dots or dashes are produced in automatic mode.
-        @type speed: float
+        @param dotsPlusPausePerSec: rate at which dots or dashes are produced in automatic mode.
+        @type dotsPlusPausePerSec: float
         '''
         self.dotDuration = 1.0/(2*dotsPlusPausePerSec);
         #self.dashDuration = 3*self.dotDuration;

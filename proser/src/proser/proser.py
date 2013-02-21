@@ -221,11 +221,6 @@ class Proser(QMainWindow):
         The method attempts to warn the user if the text selection seems to span
         multiple words. In that case, a warning is displayed. A confirmation
         dialog is raised in case of success.
-        
-        @param rank: Numeric rank to assign to the word. The lower the number (>0), the 
-                     more likely the word will be chosen as a completion option. Default
-                     is 100.
-        @type rank: int
         @raise ValueError: if provided rank < 0. 
         '''
         # The following used to be a keyword arg, but keyword args don't
