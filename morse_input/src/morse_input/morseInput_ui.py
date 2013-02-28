@@ -1,11 +1,43 @@
 #!/usr/bin/env python
 
+# Software License Agreement (BSD License)
+#
+# Copyright (c) 2013, Willow Garage, Inc.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above
+#    copyright notice, this list of conditions and the following
+#    disclaimer in the documentation and/or other materials provided
+#    with the distribution.
+#  * Neither the name of the Willow Garage nor the names of its
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE
+
+
 # To do:
 # - Volume control
 # - Somewhere (moveEvent()?_: ensure that no overlap of morse win with active window.
 #      If so, show error msg.  (Just put into Doc
 # - Occasional X error: output in startup window, and cursor runs into dot/dash buttons.
-# - Publish package
 
 # Doc:
 #   - Abort if mouse click in rest zone.
@@ -22,7 +54,11 @@
 
 # Dash/Dot blue value: 35,60,149
 
-import roslib; roslib.load_manifest('morse_input')
+try:
+    import roslib; roslib.load_manifest('morse_input');
+    ROS_AVAILABLE = True;
+except ImportError:
+    ROS_AVAILABLE = False;
 
 import sys
 import os
@@ -31,11 +67,21 @@ import fcntl
 import ConfigParser
 from functools import partial
 
-from gesture_buttons.gesture_button import GestureButton
-from gesture_buttons.gesture_button import FlickDirection
+try:
+    from gesture_buttons.gesture_button import GestureButton
+    from gesture_buttons.gesture_button import FlickDirection
+    from qt_comm_channel.commChannel import CommChannel
+    from qt_dialog_service.qt_dialog_service import DialogService
+    from virtual_keyboard.virtual_keyboard import VirtualKeyboard
+except ImportError as e:
+    print(`e`);
+    print("Roslib is unavailable. So your PYTHONPATH will need to include src directories for:\n" +
+          "gesture_buttons \n" +
+          "qt_comm_channel \n" +
+          "qt_dialog_service \n" +
+          "virtual_keyboard \n");
+    sys.exit();    
 
-from qt_comm_channel.commChannel import CommChannel
-from qt_dialog_service.qt_dialog_service import DialogService
 
 from morseToneGeneration import MorseGenerator
 from morseToneGeneration import Morse
@@ -45,7 +91,6 @@ from morseCheatSheet import MorseCheatSheet;
 
 from morseSpeedTimer import MorseSpeedTimer;
 
-from virtual_keyboard.virtual_keyboard import VirtualKeyboard
 
 from python_qt_binding import loadUi;
 from python_qt_binding import QtGui;

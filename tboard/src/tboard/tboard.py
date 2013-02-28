@@ -1,5 +1,38 @@
 #!/usr/bin/env python
 
+# Software License Agreement (BSD License)
+#
+# Copyright (c) 2013, Willow Garage, Inc.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above
+#    copyright notice, this list of conditions and the following
+#    disclaimer in the documentation and/or other materials provided
+#    with the distribution.
+#  * Neither the name of the Willow Garage nor the names of its
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE
+
+
 # TODO:
 #   - Fast visit interpreted as flick
 #   - Widen word list scroll bar
@@ -9,23 +42,32 @@
 #   - Help panel
 #   - Revise UI to get buttons close together.
 
+try:
+    import roslib; roslib.load_manifest('tboard');
+    ROS_AVAILABLE = True;
+except ImportError:
+    ROS_AVAILABLE = False;
 
 import sys;
 import os;
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"));
-from ternarytree import TernarySearchTree;
 
 import re;
 from functools import partial;
 
 from utilities import Utilities;
-
-from gesture_buttons.gesture_button import GestureButton;
-from gesture_buttons.gesture_button import FlickDirection;
-
-from qt_comm_channel.commChannel import CommChannel;
-
-from word_completion.word_collection import TelPadEncodedWordCollection;
+try:
+    from ternarytree import TernarySearchTree;
+    from gesture_buttons.gesture_button import GestureButton;
+    from gesture_buttons.gesture_button import FlickDirection;
+    from qt_comm_channel.commChannel import CommChannel;
+    from word_completion.word_collection import TelPadEncodedWordCollection;
+except ImportError as e:
+    print(`e`);
+    print("Roslib is unavailable. So your PYTHONPATH will need to include:\n" +
+          "word_completion/lib, and the src dirs of \n" +
+          "word_completion, and gesture_buttons");
+    sys.exit();    
 
 import python_qt_binding
 from python_qt_binding import QtCore, QtGui, loadUi
