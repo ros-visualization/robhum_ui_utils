@@ -74,9 +74,9 @@ class MorseChallenger(QMainWindow):
     def __init__(self):
         super(MorseChallenger,self).__init__();
         
-        self.PIXELS_TO_MOVE_PER_TIMEOUT = 3;
+        self.PIXELS_TO_MOVE_PER_TIMEOUT = 3
         self.ABSOLUTE_MAX_NUM_FLOATERS  = 10;
-        self.FLOATER_POINT_SIZE = 16;
+        self.FLOATER_POINT_SIZE = 20;
         self.LETTER_CHECKBOX_NUM_COLS = 6;
         # Number of timeout cycles that detonated
         # letters stay visible:
@@ -103,11 +103,12 @@ class MorseChallenger(QMainWindow):
         self.setWindowTitle(self.windowTitle);
 
         self.iconDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons')
-        self.explosionPixMap = QPixmap(os.path.join(self.iconDir, 'explosion.jpg'));        
+        self.explosionPixMap = QPixmap(os.path.join(self.iconDir, 'explosion.png'));        
 
         self.connectWidgets();
         
         self.generateLetterCheckBoxes();
+        self.simultaneousLettersComboBox.addItems(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
         self.generateFloaters();
         
         self.letterMoveTimer = QTimer();
@@ -125,6 +126,7 @@ class MorseChallenger(QMainWindow):
         self.speedHSlider.valueChanged.connect(self.speedChangedAction);
         self.startPushButton.clicked.connect(self.startAction);
         self.stopPushButton.clicked.connect(self.stopAction);
+        self.simultaneousLettersComboBox.currentIndexChanged.connect(self.maxNumSimultaneousFloatersAction);
         
     def createColors(self):
         self.grayBlueColor = QColor(89,120,137);  # Letter buttons
@@ -160,8 +162,12 @@ class MorseChallenger(QMainWindow):
     def generateFloaters(self):
         for i in range(self.ABSOLUTE_MAX_NUM_FLOATERS):
             floaterLabel = QLabel();
-            floaterLabel.move(0,0);
-            floaterLabel.font().setPointSize(self.FLOATER_POINT_SIZE);
+            font = QtGui.QFont()
+            font.setFamily("Courier")
+            font.setFixedPitch(True)
+            font.setPointSize(self.FLOATER_POINT_SIZE);
+            floaterLabel.setFont(font);
+
             self.floatersAvailable.add(floaterLabel);
             
     def letterCheckAction(self, checkbox, checkedOrNot):
@@ -183,7 +189,8 @@ class MorseChallenger(QMainWindow):
             self.floatersAvailable.add(floater);
             
     def maxNumSimultaneousFloatersAction(self, newNum):
-        self.maxNumFloaters = newNum;
+        # New Combo box picked: 0-based:
+        self.maxNumFloaters = newNum + 1;
         
     def speedChangedAction(self, newSpeed):
         self.letterMoveTimer.setInterval(newSpeed * 100); # msec.
@@ -196,19 +203,22 @@ class MorseChallenger(QMainWindow):
     
     def moveLetters(self):
         self.cyclesSinceLastLaunch += 1;
-        for floaterLabel in self.floatersInUse:
+        floatersInUseCopy = self.floatersInUse.copy();
+        for floaterLabel in floatersInUseCopy:
 
+            thisFloaterIsDetonated = False;
             # Did floater detonate during previous timeout?:
-            floatersDetonatedCopy = self.floatersDetonated.copy();
-            for detonatedFloater in floatersDetonatedCopy.keys():
+            for detonatedFloater in self.floatersDetonated.keys():
+                if detonatedFloater == floaterLabel:
+                    thisFloaterIsDetonated = True;
                 self.floatersDetonated[detonatedFloater] += 1;
-                if floatersDetonated[detonatedFloater] > self.DETONATION_VISIBLE_CYCLES:
+                if self.floatersDetonated[detonatedFloater] > self.DETONATION_VISIBLE_CYCLES:
                     detonatedFloater.setHidden(True);
                     self.floatersAvailable.add(detonatedFloater);
                     self.floatersInUse.remove(detonatedFloater);
-                    self.floatersDetonated.remove(detonatedFloater);
+                    del self.floatersDetonated[detonatedFloater];
                     
-            if floaterLabel in self.floatersDetonated.keys():
+            if thisFloaterIsDetonated:
                 continue;
             
             geo = floaterLabel.geometry();
@@ -216,7 +226,6 @@ class MorseChallenger(QMainWindow):
             if newY > self.height():
                 newY = self.height();
                 self.detonate(floaterLabel);
-            geo.setY(newY)
             floaterLabel.move(geo.x(), newY);
             
         # Done advancing each floater. Is it time to start a new floater?
@@ -229,13 +238,21 @@ class MorseChallenger(QMainWindow):
         for letter in newLetters:
             # Pick a random horizontal location, at least 3 pixels in
             # from the left edge, and at most 3 pixels back from the right edge:
-            xLoc = random.randint(3, self.projectionScreenWidget.geometry().width() - 3);
-            yLoc = 0;
+            screenGeo = self.projectionScreenWidget.geometry();
+            appWinGeo = self.geometry();
+            appWinX   = appWinGeo.x();
+            # Random number among all the application window's X coordinates:
+            xLoc = random.randint(appWinX + 3, appWinX + screenGeo.width() - 3);
+            yLoc = appWinGeo.y();
             self.getFloaterLabel(letter, xLoc, yLoc);
         self.cyclesSinceLastLaunch = 0;
 
     def getFloaterLabel(self, letter, x, y):
-        label = self.floatersAvailable.pop();
+        try:
+            label = self.floatersAvailable.pop();
+            label.clear();
+        except KeyError:
+            return None;
         self.floatersInUse.add(label);
         label.setText(letter);
         label.move(x,y);

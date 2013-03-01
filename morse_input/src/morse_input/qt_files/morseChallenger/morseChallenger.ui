@@ -38,10 +38,37 @@
           <height>30</height>
          </size>
         </property>
+        <property name="maximum">
+         <number>900</number>
+        </property>
+        <property name="singleStep">
+         <number>10</number>
+        </property>
+        <property name="pageStep">
+         <number>20</number>
+        </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
+        <property name="tickPosition">
+         <enum>QSlider::TicksBelow</enum>
+        </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="maxNumLettersLabel">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Max simultaneous letters:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="simultaneousLettersComboBox"/>
       </item>
       <item>
        <widget class="QPushButton" name="startPushButton">
