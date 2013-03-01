@@ -41,6 +41,7 @@ except ImportError:
 import time
 import sys
 import os
+import threading
 import random
 from functools import partial
 
@@ -86,9 +87,12 @@ class MorseChallenger(QMainWindow):
         self.lettersToUse = set();
         self.floatersAvailable = set();
         self.floatersInUse = set();
+        self.bookeepingAccessLock = threading.Lock();
         # Floaters that detonated. Values are number of timeouts
         # the detonation was visible:
         self.floatersDetonated = {};
+        # Used to launch new floaters at random times:
+        self.cyclesSinceLastLaunch = 0;
         
         self.dialogService = DialogService();        
         
@@ -184,11 +188,11 @@ class MorseChallenger(QMainWindow):
         
     def stopAction(self):
         self.letterMoveTimer.stop();
-        floatersInUseCopy = self.floatersInUse.copy();
-        for floater in floatersInUseCopy:
-            floater.setHidden(True);
-            self.floatersInUse.remove(floater);
-            self.floatersAvailable.add(floater);
+        
+        with self.bookeepingAccessLock:
+            floatersInUseCopy = self.floatersInUse.copy();
+            for floater in floatersInUseCopy:
+                self.decommissionFloater(floater);
             
     def maxNumSimultaneousFloatersAction(self, newNum):
         # New Combo box picked: 0-based:
@@ -198,6 +202,29 @@ class MorseChallenger(QMainWindow):
         #self.letterMoveTimer.setInterval(newSpeed * 100); # msec.
         self.letterMoveTimer.setInterval(self.timerIntervalFromSpeedSlider(newSpeed)); # msec.
         
+    def keyPressEvent(self, keyEvent):
+        #****************8
+        print('Key press: %s: ' % keyEvent.text());
+        #****************8
+        letter = keyEvent.text();
+        matchingFloaters = {};
+        # Find all active floaters that have the pressed key's letter:
+        for floater in self.floatersInUse: 
+            if floater.text() == letter:
+                floaterY = floater.y();
+                try:
+                    matchingFloaters[floaterY].append(floater);
+                except KeyError:
+                    matchingFloaters[floaterY] = [floater];
+        if len(matchingFloaters) == 0:
+            return;
+        # Find the lowest ones:
+        lowestY = self.projectionScreenWidget.y();
+        yPositions = matchingFloaters.keys();
+        for floater in matchingFloaters[min(yPositions)]:
+            self.decommissionFloater(floater);
+            
+    
     def focusInEvent(self, event):
         '''
         Ensure that floaters are always on top of the app window,
@@ -205,8 +232,21 @@ class MorseChallenger(QMainWindow):
         @param event:
         @type event:
         '''
-        for floater in self.floatersInUse:
-            floater.raise_();
+        #***********8
+        print("selected")
+        #***********8
+        self.raiseAllFloaters();
+        
+    def raiseAllFloaters(self):
+        with self.bookeepingAccessLock:
+            for floater in self.floatersInUse:
+                floater.raise_();
+        
+    def decommissionFloater(self, floaterLabel):
+        with self.bookeepingAccessLock:
+            floaterLabel.setHidden(True);
+            self.floatersAvailable.add(floaterLabel);
+            self.floatersInUse.remove(floaterLabel);
     
     def timerIntervalFromSpeedSlider(self, newSpeed=None):
         if newSpeed is None:
@@ -216,7 +256,7 @@ class MorseChallenger(QMainWindow):
     def randomLetters(self, numLetters):
         if len(self.lettersToUse) == 0:
             self.dialogService.showErrorMsg("You must turn on a checkmark for at least one letter.");
-            return;
+            return None;
         lettersToDeploy = [];
         for i in range(numLetters):
             letter = random.sample(self.lettersToUse, 1);
@@ -225,24 +265,19 @@ class MorseChallenger(QMainWindow):
     
     def moveLetters(self):
         self.cyclesSinceLastLaunch += 1;
-        floatersInUseCopy = self.floatersInUse.copy();
-        for floaterLabel in floatersInUseCopy:
-
-            thisFloaterIsDetonated = False;
+        with self.bookeepingAccessLock:
             # Did floater detonate during previous timeout?:
-            for detonatedFloater in self.floatersDetonated.keys():
-                if detonatedFloater == floaterLabel:
-                    thisFloaterIsDetonated = True;
+            detonatedFloaters = self.floatersDetonated.keys();
+            for detonatedFloater in detonatedFloaters:
                 self.floatersDetonated[detonatedFloater] += 1;
                 if self.floatersDetonated[detonatedFloater] > self.DETONATION_VISIBLE_CYCLES:
-                    detonatedFloater.setHidden(True);
-                    self.floatersAvailable.add(detonatedFloater);
-                    self.floatersInUse.remove(detonatedFloater);
+                    self.decommissionFloater(detonatedFloater);
                     del self.floatersDetonated[detonatedFloater];
-                    
-            if thisFloaterIsDetonated:
+        
+        remainingFloaters = self.floatersDetonated.keys();
+        for floaterLabel in self.floatersInUse:
+            if floaterLabel in remainingFloaters:
                 continue;
-            
             geo = floaterLabel.geometry();
             newY = geo.y() + self.PIXELS_TO_MOVE_PER_TIMEOUT;
             if newY > self.height():
@@ -257,6 +292,8 @@ class MorseChallenger(QMainWindow):
 
     def launchFloaters(self, numFloaters):
         newLetters = self.randomLetters(numFloaters);
+        if newLetters is None:
+            return;
         for letter in newLetters:
             # Pick a random horizontal location, at least 3 pixels in
             # from the left edge, and at most 3 pixels back from the right edge:
@@ -270,12 +307,13 @@ class MorseChallenger(QMainWindow):
         self.cyclesSinceLastLaunch = 0;
 
     def getFloaterLabel(self, letter, x, y):
-        try:
-            label = self.floatersAvailable.pop();
-            label.clear();
-        except KeyError:
-            return None;
-        self.floatersInUse.add(label);
+        with self.bookeepingAccessLock:        
+            try:
+                label = self.floatersAvailable.pop();
+                label.clear();
+            except KeyError:
+                return None;
+            self.floatersInUse.add(label);
         label.setText(letter);
         label.move(x,y);
         label.setHidden(False);
