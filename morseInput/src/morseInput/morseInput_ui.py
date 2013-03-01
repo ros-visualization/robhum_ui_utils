@@ -75,7 +75,7 @@ class PanelExpansion:
     
 class MorseInputSignals(CommChannel):
     letterDone = Signal(int,str);
-    panelCollapsed = Signal(int,int,int,int);
+    panelCollapsed = Signal(int); # Morse panel was collapsed. Make main win shorter.
 
 class MorseInput(QMainWindow):
     '''
@@ -419,10 +419,7 @@ class MorseInput(QMainWindow):
             # Remember this state in configuration:
             self.cfgParser.set('Appearance','morePanelExpanded',str(False));
             newMainWinGeo = self.getAdjustedWinGeo(-1 * self.speedMeasureWidget.geometry().height());
-            MorseInputSignals.getSignal('MorseInputSignals.panelCollapsed').emit(newMainWinGeo.x(),
-                                                                                 newMainWinGeo.y(),
-                                                                                 newMainWinGeo.width(),
-                                                                                 newMainWinGeo.height());
+            MorseInputSignals.getSignal('MorseInputSignals.panelCollapsed').emit(newMainWinGeo.height());
         else:
             self.expandPushButton.setIcon(QIcon(os.path.join(self.iconDir, 'minusSign.png')));
             self.speedMeasureWidget.setHidden(False);
@@ -443,21 +440,16 @@ class MorseInput(QMainWindow):
         newGeo = QRect(geo.x(), geo.y(), geo.width(), newHeight);
         return newGeo;
 
-    @QtCore.Slot(int,int,int,int)
-    def adjustMainWindowHeight(self, x,y,width,height):
+    @QtCore.Slot(int)
+    def adjustMainWindowHeight(self, height):
         '''
-        Given a rectangle, adjust the main window dimensions
-        to take that shape.
-        @param x: 
-        @type x: int
-        @param y: 
-        @type y: int
-        @param width: 
-        @type width: int
-        @param height: 
+        Given a new main window height, shorten or
+        lengthen the main window accordingly.
+        @param height: new main window height.
         @type height: int
         '''
-        self.setGeometry(QRect(x,y,width,height));
+        self.setMaximumHeight(height);
+        self.repaint();
 
     def togglePanelExpansion(self):
         if self.speedMeasureWidget.isVisible():
