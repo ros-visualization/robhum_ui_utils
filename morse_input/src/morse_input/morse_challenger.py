@@ -67,7 +67,7 @@ except ImportError as e:
 from morseCodeTranslationKey import codeKey;
 from python_qt_binding import QtCore, QtGui, loadUi;
 from QtGui import QApplication, QMainWindow, QLabel, QPixmap, QCheckBox, QColor;
-from QtCore import QTimer;
+from QtCore import QTimer, Qt;
 
 class MorseChallenger(QMainWindow):
     
@@ -111,8 +111,10 @@ class MorseChallenger(QMainWindow):
         self.simultaneousLettersComboBox.addItems(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
         self.generateFloaters();
         
+        self.setFocusPolicy(Qt.ClickFocus);
+        
         self.letterMoveTimer = QTimer();
-        self.letterMoveTimer.setInterval(100); # milliseconds
+        self.letterMoveTimer.setInterval(self.timerIntervalFromSpeedSlider()); # milliseconds
         self.letterMoveTimer.setSingleShot(False);
         self.letterMoveTimer.timeout.connect(self.moveLetters);
         
@@ -193,13 +195,33 @@ class MorseChallenger(QMainWindow):
         self.maxNumFloaters = newNum + 1;
         
     def speedChangedAction(self, newSpeed):
-        self.letterMoveTimer.setInterval(newSpeed * 100); # msec.
+        #self.letterMoveTimer.setInterval(newSpeed * 100); # msec.
+        self.letterMoveTimer.setInterval(self.timerIntervalFromSpeedSlider(newSpeed)); # msec.
+        
+    def focusInEvent(self, event):
+        '''
+        Ensure that floaters are always on top of the app window,
+        even if user changes speed slider, checkmarks, etc.:
+        @param event:
+        @type event:
+        '''
+        for floater in self.floatersInUse:
+            floater.raise_();
+    
+    def timerIntervalFromSpeedSlider(self, newSpeed=None):
+        if newSpeed is None:
+            newSpeed = self.speedHSlider.value();
+        return 1000 - newSpeed;
             
     def randomLetters(self, numLetters):
         if len(self.lettersToUse) == 0:
             self.dialogService.showErrorMsg("You must turn on a checkmark for at least one letter.");
             return;
-        return random.sample(self.lettersToUse, numLetters);
+        lettersToDeploy = [];
+        for i in range(numLetters):
+            letter = random.sample(self.lettersToUse, 1);
+            lettersToDeploy.extend(letter);
+        return lettersToDeploy;
     
     def moveLetters(self):
         self.cyclesSinceLastLaunch += 1;
@@ -261,6 +283,7 @@ class MorseChallenger(QMainWindow):
     def detonate(self, floaterLabel):
         # Floater was detonated zero cycles ago:
         self.floatersDetonated[floaterLabel] = 0;
+        floaterLabel.clear();
         floaterLabel.setPixmap(self.explosionPixMap);
 
     def findFile(self, path, matchFunc=os.path.isfile):
