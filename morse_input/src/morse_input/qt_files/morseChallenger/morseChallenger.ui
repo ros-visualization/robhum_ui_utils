@@ -31,6 +31,24 @@
        <enum>QLayout::SetFixedSize</enum>
       </property>
       <item>
+       <widget class="QLineEdit" name="letterLineEdit">
+        <property name="maximumSize">
+         <size>
+          <width>20</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="maxLength">
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QSlider" name="speedHSlider">
         <property name="maximumSize">
          <size>

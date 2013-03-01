@@ -58,17 +58,22 @@ from functools import partial
 
 try:
     from qt_dialog_service.qt_dialog_service import DialogService
+    from qt_comm_channel.commChannel import CommChannel
 except ImportError as e:
     print(`e`);
     print("Roslib is unavailable. So your PYTHONPATH will need to include src directories for:\n" +
-          "qt_dialog_service \n");
+          "qt_dialog_service \n" +\
+          "qt_comm_service");
     sys.exit();    
 
 
 from morseCodeTranslationKey import codeKey;
 from python_qt_binding import QtCore, QtGui, loadUi;
 from QtGui import QApplication, QMainWindow, QLabel, QPixmap, QCheckBox, QColor;
-from QtCore import QTimer, Qt;
+from QtCore import QTimer, Qt, Signal;
+
+class MorseChallengerSignals(CommChannel):
+    focusLostInadvertently = Signal();
 
 class MorseChallenger(QMainWindow):
     
@@ -109,6 +114,8 @@ class MorseChallenger(QMainWindow):
         self.iconDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'icons')
         self.explosionPixMap = QPixmap(os.path.join(self.iconDir, 'explosion.png'));        
 
+        CommChannel.registerSignals(MorseChallengerSignals);
+
         self.connectWidgets();
         
         self.generateLetterCheckBoxes();
@@ -133,6 +140,8 @@ class MorseChallenger(QMainWindow):
         self.startPushButton.clicked.connect(self.startAction);
         self.stopPushButton.clicked.connect(self.stopAction);
         self.simultaneousLettersComboBox.currentIndexChanged.connect(self.maxNumSimultaneousFloatersAction);
+        
+        CommChannel.getSignal('MorseChallengerSignals.focusLostInadvertently').connect(self.reassertWindowFocus);
         
     def createColors(self):
         self.grayBlueColor = QColor(89,120,137);  # Letter buttons
@@ -188,11 +197,10 @@ class MorseChallenger(QMainWindow):
         
     def stopAction(self):
         self.letterMoveTimer.stop();
-        
-        with self.bookeepingAccessLock:
-            floatersInUseCopy = self.floatersInUse.copy();
-            for floater in floatersInUseCopy:
-                self.decommissionFloater(floater);
+
+        floatersInUseCopy = self.floatersInUse.copy();
+        for floater in floatersInUseCopy:
+            self.decommissionFloater(floater);
             
     def maxNumSimultaneousFloatersAction(self, newNum):
         # New Combo box picked: 0-based:
@@ -203,10 +211,8 @@ class MorseChallenger(QMainWindow):
         self.letterMoveTimer.setInterval(self.timerIntervalFromSpeedSlider(newSpeed)); # msec.
         
     def keyPressEvent(self, keyEvent):
-        #****************8
-        print('Key press: %s: ' % keyEvent.text());
-        #****************8
         letter = keyEvent.text();
+        self.letterLineEdit.setText(letter);
         matchingFloaters = {};
         # Find all active floaters that have the pressed key's letter:
         for floater in self.floatersInUse: 
@@ -217,12 +223,17 @@ class MorseChallenger(QMainWindow):
                 except KeyError:
                     matchingFloaters[floaterY] = [floater];
         if len(matchingFloaters) == 0:
+            self.activateWindow();
+            self.setFocus();
             return;
         # Find the lowest ones:
         lowestY = self.projectionScreenWidget.y();
         yPositions = matchingFloaters.keys();
-        for floater in matchingFloaters[min(yPositions)]:
+        for floater in matchingFloaters[max(yPositions)]:
             self.decommissionFloater(floater);
+        self.activateWindow();
+        self.setFocus();
+
             
     
     def focusInEvent(self, event):
@@ -232,21 +243,25 @@ class MorseChallenger(QMainWindow):
         @param event:
         @type event:
         '''
-        #***********8
-        print("selected")
-        #***********8
         self.raiseAllFloaters();
         
     def raiseAllFloaters(self):
-        with self.bookeepingAccessLock:
-            for floater in self.floatersInUse:
-                floater.raise_();
+        for floater in self.floatersInUse:
+            floater.raise_();
+        for floater in self.floatersDetonated.keys():
+            floater.raise_();
         
     def decommissionFloater(self, floaterLabel):
-        with self.bookeepingAccessLock:
-            floaterLabel.setHidden(True);
-            self.floatersAvailable.add(floaterLabel);
+        floaterLabel.setHidden(True);
+        # Just in case: protect removal, in case caller 
+        # passes in an already decommissioned floater:
+        try:
             self.floatersInUse.remove(floaterLabel);
+        except KeyError:
+            pass
+        # Adding a floater twice is not an issue,
+        # b/c floatersAvailable is a set:
+        self.floatersAvailable.add(floaterLabel);
     
     def timerIntervalFromSpeedSlider(self, newSpeed=None):
         if newSpeed is None:
@@ -265,14 +280,13 @@ class MorseChallenger(QMainWindow):
     
     def moveLetters(self):
         self.cyclesSinceLastLaunch += 1;
-        with self.bookeepingAccessLock:
-            # Did floater detonate during previous timeout?:
-            detonatedFloaters = self.floatersDetonated.keys();
-            for detonatedFloater in detonatedFloaters:
-                self.floatersDetonated[detonatedFloater] += 1;
-                if self.floatersDetonated[detonatedFloater] > self.DETONATION_VISIBLE_CYCLES:
-                    self.decommissionFloater(detonatedFloater);
-                    del self.floatersDetonated[detonatedFloater];
+        # Did floater detonate during previous timeout?:
+        detonatedFloaters = self.floatersDetonated.keys();
+        for detonatedFloater in detonatedFloaters:
+            self.floatersDetonated[detonatedFloater] += 1;
+            if self.floatersDetonated[detonatedFloater] > self.DETONATION_VISIBLE_CYCLES:
+                self.decommissionFloater(detonatedFloater);
+                del self.floatersDetonated[detonatedFloater];
         
         remainingFloaters = self.floatersDetonated.keys();
         for floaterLabel in self.floatersInUse:
@@ -286,10 +300,18 @@ class MorseChallenger(QMainWindow):
             floaterLabel.move(geo.x(), newY);
             
         # Done advancing each floater. Is it time to start a new floater?
-        if (len(self.floatersInUse) < self.maxNumFloaters) or len(self.floatersInUse) == 0:
-            if self.cyclesSinceLastLaunch > random.randint(2,10):
-                self.launchFloaters(self.maxNumFloaters - len(self.floatersInUse));
-
+        numFloatersToLaunch = self.maxNumFloaters - len(self.floatersInUse) + len(self.floatersDetonated);   
+        if numFloatersToLaunch > 0:
+             # Use the following commented lines if you want the launching of
+             # new floaters to be random, e.g. between 2 and 10 timeout intervals:
+#            if self.cyclesSinceLastLaunch > random.randint(2,10):
+#                self.launchFloaters(self.maxNumFloaters - len(self.floatersInUse));
+             self.launchFloaters(numFloatersToLaunch);
+        # Launching floaters deactivates the main window, thereby losing the keyboard focus.
+        # We can't seem to reassert that focus within this timer interrupt service routine.
+        # So, issue a signal that will do it after return:
+        CommChannel.getSignal('MorseChallengerSignals.focusLostInadvertently').emit();
+                
     def launchFloaters(self, numFloaters):
         newLetters = self.randomLetters(numFloaters);
         if newLetters is None:
@@ -307,13 +329,12 @@ class MorseChallenger(QMainWindow):
         self.cyclesSinceLastLaunch = 0;
 
     def getFloaterLabel(self, letter, x, y):
-        with self.bookeepingAccessLock:        
-            try:
-                label = self.floatersAvailable.pop();
-                label.clear();
-            except KeyError:
-                return None;
-            self.floatersInUse.add(label);
+        try:
+            label = self.floatersAvailable.pop();
+            label.clear();
+        except KeyError:
+            return None;
+        self.floatersInUse.add(label);
         label.setText(letter);
         label.move(x,y);
         label.setHidden(False);
@@ -332,6 +353,11 @@ class MorseChallenger(QMainWindow):
             if matchFunc(candidate):
                 return candidate
         return None;
+
+    def reassertWindowFocus(self):
+        self.window().activateWindow();
+        self.raise_();
+        self.raiseAllFloaters();
 
     def exit(self):
         QApplication.quit();
