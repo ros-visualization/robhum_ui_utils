@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>watchdogTimer</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Module&nbsp;watchdogTimer
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="watchdogTimer-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="watchdogTimer-module.html">Module watchdogTimer</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment">#!/usr/bin/env python</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">sys</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">time</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">python_qt_binding</tt> <tt class="py-keyword">import</tt> <tt class="py-name">QtCore</tt><tt class="py-op">,</tt> <tt class="py-name">QtGui</tt><tt class="py-op">;</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">QtCore</tt> <tt class="py-keyword">import</tt> <tt class="py-name">QTimer</tt><tt class="py-op">;</tt> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">QtGui</tt> <tt class="py-keyword">import</tt> <tt class="py-name">QApplication</tt><tt class="py-op">;</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"> </tt>
+<a name="WatchdogTimer"></a><div id="WatchdogTimer-def"><a name="L10"></a><tt class="py-lineno"> 10</tt> <a class="py-toggle" href="#" id="WatchdogTimer-toggle" onclick="return toggle('WatchdogTimer');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="watchdogTimer.WatchdogTimer-class.html">WatchdogTimer</a><tt class="py-op">(</tt><tt class="py-base-class">QTimer</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WatchdogTimer-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="WatchdogTimer-expanded"><a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line">     </tt>
+<a name="WatchdogTimer.__init__"></a><div id="WatchdogTimer.__init__-def"><a name="L12"></a><tt class="py-lineno"> 12</tt> <a class="py-toggle" href="#" id="WatchdogTimer.__init__-toggle" onclick="return toggle('WatchdogTimer.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="watchdogTimer.WatchdogTimer-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">timeout</tt><tt class="py-op">=</tt><tt class="py-number">1</tt><tt class="py-op">,</tt> <tt class="py-param">callback</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-param">callbackArg</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-param">selfTest</tt><tt class="py-op">=</tt><tt class="py-name">False</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WatchdogTimer.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WatchdogTimer.__init__-expanded"><a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line">        <tt class="py-docstring">'''</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"><tt class="py-docstring">        Create watchdog.</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt class="py-docstring">        @param timeout: number of seconds that are set each time the timer is kicked.</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt class="py-docstring">        @type timeout: float</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"><tt class="py-docstring">        @param callback: callable to invoke when timer expires.</tt> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt class="py-docstring">        @type callback: Python callable</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"><tt class="py-docstring">        @param callbackArg: any argument to pass to the callback</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line"><tt class="py-docstring">        @type callbackArg: any</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line"><tt class="py-docstring">        @param selfTest: set to true if testing the class</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line"><tt class="py-docstring">        @type selfTest: boolean</tt> </tt>
+<a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line"><tt class="py-docstring">        '''</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line">        <tt class="py-name">super</tt><tt class="py-op">(</tt><tt id="link-0" class="py-name" targets="Class watchdogTimer.WatchdogTimer=watchdogTimer.WatchdogTimer-class.html"><a title="watchdogTimer.WatchdogTimer" class="py-name" href="#" onclick="return doclink('link-0', 'WatchdogTimer', 'link-0');">WatchdogTimer</a></tt><tt class="py-op">,</tt><tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-1" class="py-name" targets="Method morseCheatSheet.MorseCheatSheet.__init__()=morseCheatSheet.MorseCheatSheet-class.html#__init__,Method morseInput_ui.MorseInput.__init__()=morseInput_ui.MorseInput-class.html#__init__,Method morseSpeedTimer.MorseSpeedTimer.__init__()=morseSpeedTimer.MorseSpeedTimer-class.html#__init__,Method morseToneGeneration.MorseGenerator.DashGenerator.__init__()=morseToneGeneration.MorseGenerator.DashGenerator-class.html#__init__,Method morseToneGeneration.MorseGenerator.DotGenerator.__init__()=morseToneGeneration.MorseGenerator.DotGenerator-class.html#__init__,Method morseToneGeneration.MorseGenerator.__init__()=morseToneGeneration.MorseGenerator-class.html#__init__,Method watchdogTimer.WatchdogTimer.__init__()=watchdogTimer.WatchdogTimer-class.html#__init__"><a title="morseCheatSheet.MorseCheatSheet.__init__
+morseInput_ui.MorseInput.__init__
+morseSpeedTimer.MorseSpeedTimer.__init__
+morseToneGeneration.MorseGenerator.DashGenerator.__init__
+morseToneGeneration.MorseGenerator.DotGenerator.__init__
+morseToneGeneration.MorseGenerator.__init__
+watchdogTimer.WatchdogTimer.__init__" class="py-name" href="#" onclick="return doclink('link-1', '__init__', 'link-1');">__init__</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line">        <tt class="py-comment"># Use leading underscore to avoid</tt> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line">        <tt class="py-comment"># overwriting parent's 'timeout' signal.</tt> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line">        <tt class="py-comment"># Internally, work with milliseconds:</tt> </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_timeout</tt> <tt class="py-op">=</tt> <tt class="py-name">int</tt><tt class="py-op">(</tt><tt class="py-number">1000</tt> <tt class="py-op">*</tt> <tt class="py-name">timeout</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">callback</tt> <tt class="py-op">=</tt> <tt class="py-name">callback</tt><tt class="py-op">;</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">callbackArg</tt> <tt class="py-op">=</tt> <tt class="py-name">callbackArg</tt><tt class="py-op">;</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line"> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">timedout</tt> <tt class="py-op">=</tt> <tt class="py-name">True</tt><tt class="py-op">;</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">stopped</tt>  <tt class="py-op">=</tt> <tt class="py-name">True</tt><tt class="py-op">;</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line">         </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">setSingleShot</tt><tt class="py-op">(</tt><tt class="py-name">True</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">timeout</tt><tt class="py-op">.</tt><tt class="py-name">connect</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-2" class="py-name" targets="Method watchdogTimer.WatchdogTimer.timerExpiredHandler()=watchdogTimer.WatchdogTimer-class.html#timerExpiredHandler"><a title="watchdogTimer.WatchdogTimer.timerExpiredHandler" class="py-name" href="#" onclick="return doclink('link-2', 'timerExpiredHandler', 'link-2');">timerExpiredHandler</a></tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line">                 </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">selfTest</tt><tt class="py-op">:</tt> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-3" class="py-name" targets="Method watchdogTimer.WatchdogTimer.runSelfTest()=watchdogTimer.WatchdogTimer-class.html#runSelfTest"><a title="watchdogTimer.WatchdogTimer.runSelfTest" class="py-name" href="#" onclick="return doclink('link-3', 'runSelfTest', 'link-3');">runSelfTest</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line">            <tt class="py-comment">#sys.exit();</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line"> </tt>
+<a name="WatchdogTimer.timedOut"></a><div id="WatchdogTimer.timedOut-def"><a name="L42"></a><tt class="py-lineno"> 42</tt> <a class="py-toggle" href="#" id="WatchdogTimer.timedOut-toggle" onclick="return toggle('WatchdogTimer.timedOut');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="watchdogTimer.WatchdogTimer-class.html#timedOut">timedOut</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WatchdogTimer.timedOut-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WatchdogTimer.timedOut-expanded"><a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">timedout</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line"> </tt>
+<a name="WatchdogTimer.kick"></a><div id="WatchdogTimer.kick-def"><a name="L45"></a><tt class="py-lineno"> 45</tt> <a class="py-toggle" href="#" id="WatchdogTimer.kick-toggle" onclick="return toggle('WatchdogTimer.kick');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="watchdogTimer.WatchdogTimer-class.html#kick">kick</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">_timeout</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-param">callback</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-param">callbackArg</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WatchdogTimer.kick-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WatchdogTimer.kick-expanded"><a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line">        <tt class="py-docstring">'''</tt> </tt>
+<a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line"><tt class="py-docstring">        (Re)-start the timer</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line"><tt class="py-docstring">        @param _timeout: timeout in seconds</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line"><tt class="py-docstring">        @type _timeout: float</tt> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line"><tt class="py-docstring">        @param callback: Python callable to invoke when timer expires.</tt> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line"><tt class="py-docstring">        @type callback: callable</tt> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line"><tt class="py-docstring">        @param callbackArg: argument to pass to callback</tt> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line"><tt class="py-docstring">        @type callbackArg: any</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line"><tt class="py-docstring">        '''</tt> </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">timedout</tt> <tt class="py-op">=</tt> <tt class="py-name">False</tt><tt class="py-op">;</tt> </tt>
+<a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">_timeout</tt> <tt class="py-keyword">is</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line">            <tt class="py-name">_timeout</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_timeout</tt><tt class="py-op">;</tt> </tt>
+<a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line">            <tt class="py-name">_timeout</tt> <tt class="py-op">=</tt> <tt class="py-name">int</tt><tt class="py-op">(</tt><tt class="py-number">1000</tt> <tt class="py-op">*</tt> <tt class="py-name">_timeout</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">callback</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">callback</tt> <tt class="py-op">=</tt> <tt class="py-name">callback</tt><tt class="py-op">;</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">callbackArg</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">callbackArg</tt> <tt class="py-op">=</tt> <tt class="py-name">callbackArg</tt><tt class="py-op">;</tt> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">stopped</tt>  <tt class="py-op">=</tt> <tt class="py-name">False</tt><tt class="py-op">;</tt> </tt>
+<a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">start</tt><tt class="py-op">(</tt><tt class="py-name">_timeout</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line">         </tt>
+<a name="WatchdogTimer.stop"></a><div id="WatchdogTimer.stop-def"><a name="L67"></a><tt class="py-lineno"> 67</tt> <a class="py-toggle" href="#" id="WatchdogTimer.stop-toggle" onclick="return toggle('WatchdogTimer.stop');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="watchdogTimer.WatchdogTimer-class.html#stop">stop</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WatchdogTimer.stop-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WatchdogTimer.stop-expanded"><a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line">        <tt class="py-name">super</tt><tt class="py-op">(</tt><tt id="link-4" class="py-name"><a title="watchdogTimer.WatchdogTimer" class="py-name" href="#" onclick="return doclink('link-4', 'WatchdogTimer', 'link-0');">WatchdogTimer</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-5" class="py-name" targets="Method watchdogTimer.WatchdogTimer.stop()=watchdogTimer.WatchdogTimer-class.html#stop"><a title="watchdogTimer.WatchdogTimer.stop" class="py-name" href="#" onclick="return doclink('link-5', 'stop', 'link-5');">stop</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">timedout</tt> <tt class="py-op">=</tt> <tt class="py-name">False</tt><tt class="py-op">;</tt> </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">stopped</tt>  <tt class="py-op">=</tt> <tt class="py-name">True</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line">     </tt>
+<a name="WatchdogTimer.changeTimeout"></a><div id="WatchdogTimer.changeTimeout-def"><a name="L72"></a><tt class="py-lineno"> 72</tt> <a class="py-toggle" href="#" id="WatchdogTimer.changeTimeout-toggle" onclick="return toggle('WatchdogTimer.changeTimeout');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="watchdogTimer.WatchdogTimer-class.html#changeTimeout">changeTimeout</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">newTimeout</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WatchdogTimer.changeTimeout-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WatchdogTimer.changeTimeout-expanded"><a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_timeout</tt> <tt class="py-op">=</tt> <tt class="py-name">int</tt><tt class="py-op">(</tt><tt class="py-number">1000</tt> <tt class="py-op">*</tt> <tt class="py-name">newTimeout</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">         </tt>
+<a name="WatchdogTimer.changeCallback"></a><div id="WatchdogTimer.changeCallback-def"><a name="L75"></a><tt class="py-lineno"> 75</tt> <a class="py-toggle" href="#" id="WatchdogTimer.changeCallback-toggle" onclick="return toggle('WatchdogTimer.changeCallback');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="watchdogTimer.WatchdogTimer-class.html#changeCallback">changeCallback</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">newCallback</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WatchdogTimer.changeCallback-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WatchdogTimer.changeCallback-expanded"><a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">callback</tt> <tt class="py-op">=</tt> <tt class="py-name">newCallback</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line">         </tt>
+<a name="WatchdogTimer.changeCallbackArg"></a><div id="WatchdogTimer.changeCallbackArg-def"><a name="L78"></a><tt class="py-lineno"> 78</tt> <a class="py-toggle" href="#" id="WatchdogTimer.changeCallbackArg-toggle" onclick="return toggle('WatchdogTimer.changeCallbackArg');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="watchdogTimer.WatchdogTimer-class.html#changeCallbackArg">changeCallbackArg</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">newArg</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WatchdogTimer.changeCallbackArg-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WatchdogTimer.changeCallbackArg-expanded"><a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">callbackArg</tt> <tt class="py-op">=</tt> <tt class="py-name">newArg</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line">     </tt>
+<a name="WatchdogTimer.timerExpiredHandler"></a><div id="WatchdogTimer.timerExpiredHandler-def"><a name="L81"></a><tt class="py-lineno"> 81</tt> <a class="py-toggle" href="#" id="WatchdogTimer.timerExpiredHandler-toggle" onclick="return toggle('WatchdogTimer.timerExpiredHandler');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="watchdogTimer.WatchdogTimer-class.html#timerExpiredHandler">timerExpiredHandler</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WatchdogTimer.timerExpiredHandler-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WatchdogTimer.timerExpiredHandler-expanded"><a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-6" class="py-name"><a title="watchdogTimer.WatchdogTimer.stop" class="py-name" href="#" onclick="return doclink('link-6', 'stop', 'link-5');">stop</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">timedout</tt> <tt class="py-op">=</tt> <tt class="py-name">True</tt><tt class="py-op">;</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">callback</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">callbackArg</tt> <tt class="py-keyword">is</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">callback</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">            <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">callback</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">callbackArg</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line">             </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line"><tt class="py-comment"># -----------------------------  Testing  ----------------------------</tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line"> </tt>
+<a name="WatchdogTimer.runSelfTest"></a><div id="WatchdogTimer.runSelfTest-def"><a name="L92"></a><tt class="py-lineno"> 92</tt> <a class="py-toggle" href="#" id="WatchdogTimer.runSelfTest-toggle" onclick="return toggle('WatchdogTimer.runSelfTest');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="watchdogTimer.WatchdogTimer-class.html#runSelfTest">runSelfTest</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WatchdogTimer.runSelfTest-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WatchdogTimer.runSelfTest-expanded"><a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-7" class="py-name" targets="Method watchdogTimer.WatchdogTimer.changeCallback()=watchdogTimer.WatchdogTimer-class.html#changeCallback"><a title="watchdogTimer.WatchdogTimer.changeCallback" class="py-name" href="#" onclick="return doclink('link-7', 'changeCallback', 'link-7');">changeCallback</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-8" class="py-name" targets="Method watchdogTimer.WatchdogTimer.testTimeoutHandler()=watchdogTimer.WatchdogTimer-class.html#testTimeoutHandler"><a title="watchdogTimer.WatchdogTimer.testTimeoutHandler" class="py-name" href="#" onclick="return doclink('link-8', 'testTimeoutHandler', 'link-8');">testTimeoutHandler</a></tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-9" class="py-name" targets="Method watchdogTimer.WatchdogTimer.kick()=watchdogTimer.WatchdogTimer-class.html#kick"><a title="watchdogTimer.WatchdogTimer.kick" class="py-name" href="#" onclick="return doclink('link-9', 'kick', 'link-9');">kick</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+</div><a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line">                             </tt>
+<a name="WatchdogTimer.testTimeoutHandler"></a><div id="WatchdogTimer.testTimeoutHandler-def"><a name="L96"></a><tt class="py-lineno"> 96</tt> <a class="py-toggle" href="#" id="WatchdogTimer.testTimeoutHandler-toggle" onclick="return toggle('WatchdogTimer.testTimeoutHandler');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="watchdogTimer.WatchdogTimer-class.html#testTimeoutHandler">testTimeoutHandler</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="WatchdogTimer.testTimeoutHandler-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WatchdogTimer.testTimeoutHandler-expanded"><a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt><tt class="py-op">(</tt><tt class="py-string">"Timed out."</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-10" class="py-name"><a title="watchdogTimer.WatchdogTimer.kick" class="py-name" href="#" onclick="return doclink('link-10', 'kick', 'link-9');">kick</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt><tt class="py-op">(</tt><tt class="py-string">"Stop test: stopped == %s"</tt> <tt class="py-op">%</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">stopped</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-11" class="py-name"><a title="watchdogTimer.WatchdogTimer.kick" class="py-name" href="#" onclick="return doclink('link-11', 'kick', 'link-9');">kick</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt><tt class="py-op">(</tt><tt class="py-string">"After kick: stopped == %s"</tt> <tt class="py-op">%</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">stopped</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-12" class="py-name"><a title="watchdogTimer.WatchdogTimer.stop" class="py-name" href="#" onclick="return doclink('link-12', 'stop', 'link-5');">stop</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">stopped</tt><tt class="py-op">:</tt> </tt>
+<a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt><tt class="py-op">(</tt><tt class="py-string">"Timer successfully stopped."</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt><tt class="py-op">(</tt><tt class="py-string">"Bad: timer not stopped."</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+</div></div><a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line">     </tt>
+<a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line"><tt class="py-keyword">if</tt> <tt class="py-name">__name__</tt> <tt class="py-op">==</tt> <tt class="py-string">'__main__'</tt><tt class="py-op">:</tt> </tt>
+<a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line">     </tt>
+<a name="L110"></a><tt class="py-lineno">110</tt>  <tt class="py-line">    <tt class="py-name">app</tt> <tt class="py-op">=</tt> <tt class="py-name">QtGui</tt><tt class="py-op">.</tt><tt class="py-name">QApplication</tt><tt class="py-op">(</tt><tt class="py-name">sys</tt><tt class="py-op">.</tt><tt class="py-name">argv</tt><tt class="py-op">)</tt> </tt>
+<a name="L111"></a><tt class="py-lineno">111</tt>  <tt class="py-line">    <tt class="py-name">dog</tt> <tt class="py-op">=</tt> <tt id="link-13" class="py-name"><a title="watchdogTimer.WatchdogTimer" class="py-name" href="#" onclick="return doclink('link-13', 'WatchdogTimer', 'link-0');">WatchdogTimer</a></tt><tt class="py-op">(</tt><tt class="py-name">selfTest</tt><tt class="py-op">=</tt><tt class="py-name">True</tt><tt class="py-op">)</tt> </tt>
+<a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line">    <tt class="py-name">sys</tt><tt class="py-op">.</tt><tt id="link-14" class="py-name" targets="Method morseInput_ui.MorseInput.exit()=morseInput_ui.MorseInput-class.html#exit"><a title="morseInput_ui.MorseInput.exit" class="py-name" href="#" onclick="return doclink('link-14', 'exit', 'link-14');">exit</a></tt><tt class="py-op">(</tt><tt class="py-name">app</tt><tt class="py-op">.</tt><tt class="py-name">exec_</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Feb 21 11:48:07 2013
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

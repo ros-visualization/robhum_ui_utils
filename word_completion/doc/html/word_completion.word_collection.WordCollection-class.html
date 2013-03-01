@@ -1,0 +1,629 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>word_completion.word_collection.WordCollection</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="word_completion-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="word_completion-module.html">Package&nbsp;word_completion</a> ::
+        <a href="word_completion.word_collection-module.html">Module&nbsp;word_collection</a> ::
+        Class&nbsp;WordCollection
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="word_completion.word_collection.WordCollection-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class WordCollection</h1><p class="nomargin-top"><span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+                   object --+    
+                            |    
+ternarytree.TernarySearchTree --+
+                                |
+                               <strong class="uidshort">WordCollection</strong>
+</pre>
+
+<dl><dt>Known Subclasses:</dt>
+<dd>
+      <ul class="subclass-list">
+<li><a href="word_completion.word_collection.TelPadEncodedWordCollection-class.html">TelPadEncodedWordCollection</a></li>  </ul>
+</dd></dl>
+
+<hr />
+<p>Word lookup based on a Patricia tree (a.k.a. Radix Tree, a.k.a. Trie 
+  data structure). This data structure is efficiently searchable by the 
+  prefix of words. Such a prefix search takes a string prefix, and returns 
+  all dictionary words that begin with that prefix.</p>
+  <p>This class ingests rank/word pair files in a given directory. The 
+  ranks are intended to be relative usage frequencies. The class manages 
+  these frequency ranks.</p>
+  <p>Public methods:</p>
+  <ul>
+    <li>
+      add(word)
+    </li>
+    <li>
+      contains(word)
+    </li>
+    <li>
+      prefix_search(prefix)
+    </li>
+    <li>
+      rank(word)
+    </li>
+  </ul>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="word_completion.word_collection.WordCollection-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">dictDir</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">userDictFilePath</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Keep track of a Python dict mapping from word to its frequency rank, 
+      of the total number of entries, and the number of word files ingested
+      from disk.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="word_completion.word_collection.WordCollection-class.html#createDictStructureFromFiles" class="summary-sig-name">createDictStructureFromFiles</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Goes through the self.dictDir directory on disk, and reads all the 
+      files there.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.createDictStructureFromFiles">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="word_completion.word_collection.WordCollection-class.html#addToUserDict" class="summary-sig-name">addToUserDict</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">newWord</span>,
+        <span class="summary-sig-arg">rankInt</span>=<span class="summary-sig-default">0</span>)</span><br />
+      Given a word, checks whether the word is already in the in-memory 
+      dictionary.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.addToUserDict">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="word_completion.word_collection.WordCollection-class.html#insert" class="summary-sig-name">insert</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">word</span>,
+        <span class="summary-sig-arg">rankInt</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Insert one word into the word collection.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.insert">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="word_completion.word_collection.WordCollection-class.html#rank" class="summary-sig-name">rank</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">word</span>)</span><br />
+      Return the frequency rank of the given word in the collection.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.rank">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="word_completion.word_collection.WordCollection-class.html#prefix_search" class="summary-sig-name">prefix_search</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">word</span>,
+        <span class="summary-sig-arg">cutoffRank</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Returns all dictionary entries that begin with the string word.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.prefix_search">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="word_completion.word_collection.WordCollection-class.html#startsWith" class="summary-sig-name">startsWith</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">word</span>,
+        <span class="summary-sig-arg">prefix</span>)</span><br />
+      True if word starts with, or is equal to prefix.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.startsWith">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__len__"></a><span class="summary-sig-name">__len__</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Return number of words in the collection.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.__len__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>ternarytree.TernarySearchTree</code></b>:
+      <code>__new__</code>,
+      <code>add</code>,
+      <code>contains</code>
+      </p>
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="DEFAULT_USER_DICT_FILE_NAME"></a><span class="summary-name">DEFAULT_USER_DICT_FILE_NAME</span> = <code title="'dictUserRankAndWord.txt'"><code class="variable-quote">'</code><code class="variable-string">dictUserRankAndWord.txt</code><code class="variable-quote">'</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="USER_DICT_FILE_PATH"></a><span class="summary-name">USER_DICT_FILE_PATH</span> = <code title="None">None</code>
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>ternarytree.TernarySearchTree</code></b>:
+      <code>root</code>,
+      <code>size</code>
+      </p>
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">dictDir</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">userDictFilePath</span>=<span class="sig-default">None</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Keep track of a Python dict mapping from word to its frequency rank, 
+  of the total number of entries, and the number of word files ingested 
+  from disk.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>dictDir</code></strong> (string) - full path to directory that contains the dictionary files. If 
+          None, a built-in dictionary of 6000 words is used.</li>
+        <li><strong class="pname"><code>userDictFilePath</code></strong> (string) - full path to within a user dictionary. That file must be 
+          organized like the other dictionary files.</li>
+    </ul></dd>
+    <dt>Overrides:
+        object.__init__
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="createDictStructureFromFiles"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">createDictStructureFromFiles</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.createDictStructureFromFiles">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Goes through the self.dictDir directory on disk, and reads all the 
+  files there. Each file must be a list of whitespace-separated 
+  frequency-rank / word pairs. Assumes that self.dictDir is set to 
+  directory of dictionary files.</p>
+  <dl class="fields">
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>ValueError</strong></code> - if a rank in any of the files cannot be read as an integer.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addToUserDict"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addToUserDict</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">newWord</span>,
+        <span class="sig-arg">rankInt</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.addToUserDict">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Given a word, checks whether the word is already in the in-memory 
+  dictionary. If so, does nothing and returns False; Else appends the word 
+  to dict_files/dictUserRankAndWord.txt with the provided rank; then 
+  returns True</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>newWord</code></strong> (string) - word to be added to the user dictionary.</li>
+        <li><strong class="pname"><code>rankInt</code></strong> (int) - frequency rank of the word. Rank 0 is most important; 1 is 
+          second-most important, etc. OK to have ties.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="insert"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">insert</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">word</span>,
+        <span class="sig-arg">rankInt</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.insert">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Insert one word into the word collection.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>word</code></strong> (string) - word to insert.</li>
+        <li><strong class="pname"><code>rankInt</code></strong> (int) - Optionally the frequency rank of the word. If None, no rank is 
+          recorded, and subsequent calls to the rank() method will fail.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>ValueError</strong></code> - if word is not valid or empty.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="rank"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">rank</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">word</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.rank">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return the frequency rank of the given word in the collection. I is an
+  error to request the rank of a word that is not in the collection, or of 
+  a word whose rank was never specified in an ingestion file or as part of 
+  an insert() call.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>word</code></strong> (string) - the word whose frequency rank is requested.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>KeyError</strong></code> - if word or rank are not present in the word collection.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="prefix_search"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">prefix_search</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">word</span>,
+        <span class="sig-arg">cutoffRank</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.prefix_search">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns all dictionary entries that begin with the string word. If the
+  optional cutoffRank is specified, it limits the length of the returned 
+  list to include only the top cutoffRank words. Example, if cutoffRank=5, 
+  only the five most highly ranked dictionary entries are returned. Also, 
+  if cutoffRank is specified, the returned list is sorted by decreasing 
+  word rank. If cutoffRank is not specified, or is None, the returned list 
+  is unsorted.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>word</code></strong> (string.) - prefix to search by.</li>
+        <li><strong class="pname"><code>cutoffRank</code></strong> (int) - Number of most highly ranked dictionary entries to return in 
+          rank-sorted order.</li>
+    </ul></dd>
+    <dt>Returns: list</dt>
+    <dt>Overrides:
+        ternarytree.TernarySearchTree.prefix_search
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="startsWith"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">startsWith</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">word</span>,
+        <span class="sig-arg">prefix</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="word_completion.word_collection-pysrc.html#WordCollection.startsWith">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>True if word starts with, or is equal to prefix. Else False.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>word</code></strong> (string.) - word to examine.</li>
+        <li><strong class="pname"><code>prefix</code></strong> (string) - string that word is required to start with for a return of True</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="word_completion-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Feb 21 13:27:59 2013
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

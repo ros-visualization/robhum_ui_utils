@@ -1,0 +1,838 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>morseToneGeneration.MorseGenerator</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="morseToneGeneration-module.html">Module&nbsp;morseToneGeneration</a> ::
+        Class&nbsp;MorseGenerator
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="morseToneGeneration.MorseGenerator-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class MorseGenerator</h1><p class="nomargin-top"><span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">MorseGenerator</strong>
+</pre>
+
+<hr />
+<p>Manages non-UI issues for Morse code generation: Interacts with the 
+  tone generator, regulates auto dot/dash generation speed.</p>
+
+<!-- ==================== NESTED CLASSES ==================== -->
+<a name="section-NestedClasses"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Nested Classes</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-NestedClasses"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="morseToneGeneration.MorseGenerator.DotGenerator-class.html" class="summary-name">DotGenerator</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="morseToneGeneration.MorseGenerator.DashGenerator-class.html" class="summary-name">DashGenerator</a>
+    </td>
+  </tr>
+</table>
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="morseToneGeneration.MorseGenerator-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">callback</span>=<span class="summary-sig-default">None</span>)</span><br />
+      x.__init__(...) initializes x; see help(type(x)) for signature</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="morseToneGeneration.MorseGenerator-class.html#startMorseSeq" class="summary-sig-name">startMorseSeq</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">morseElement</span>)</span><br />
+      Start a sequence of dots or dashes.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.startMorseSeq">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="morseToneGeneration.MorseGenerator-class.html#stopMorseSeq" class="summary-sig-name">stopMorseSeq</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Stop a running sequence of dots or dashes.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.stopMorseSeq">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="abortCurrentMorseElement"></a><span class="summary-sig-name">abortCurrentMorseElement</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.abortCurrentMorseElement">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="morseToneGeneration.MorseGenerator-class.html#setAutoMorse" class="summary-sig-name">setAutoMorse</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">yesNo</span>)</span><br />
+      Determine whether dots and dashes are generated one at a time each 
+      time startMorseSeq() is called, or whether each call generates 
+      sequences of signals until stopMorseGenerator() is called.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.setAutoMorse">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="numRecentDots"></a><span class="summary-sig-name">numRecentDots</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.numRecentDots">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="numRecentDashes"></a><span class="summary-sig-name">numRecentDashes</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.numRecentDashes">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="morseToneGeneration.MorseGenerator-class.html#setSpeed" class="summary-sig-name">setSpeed</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">dotsPlusPausePerSec</span>)</span><br />
+      Sets speed at which automatic dots and dashes are generated.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.setSpeed">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="morseToneGeneration.MorseGenerator-class.html#setInterLetterDelay" class="summary-sig-name">setInterLetterDelay</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">secs</span>)</span><br />
+      Sets the time that must elapse between two letters.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.setInterLetterDelay">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="morseToneGeneration.MorseGenerator-class.html#setInterWordDelay" class="summary-sig-name">setInterWordDelay</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">secs</span>)</span><br />
+      Sets the time that must elapse between two words.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.setInterWordDelay">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="morseToneGeneration.MorseGenerator-class.html#stopMorseGenerator" class="summary-sig-name">stopMorseGenerator</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Stop the entire generator.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.stopMorseGenerator">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="getAndRemoveAlphaStr"></a><span class="summary-sig-name">getAndRemoveAlphaStr</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.getAndRemoveAlphaStr">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="setAlphaStr"></a><span class="summary-sig-name">setAlphaStr</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">newAlphaStr</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.setAlphaStr">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="setMorseResult"></a><span class="summary-sig-name">setMorseResult</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">newMorseResult</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.setMorseResult">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="morseToneGeneration.MorseGenerator-class.html#getInterLetterTime" class="summary-sig-name">getInterLetterTime</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Return the minimum amount of silence time required for the system to 
+      conclude that the Morse code equivalent of a letter has been 
+      generated.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.getInterLetterTime">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="morseToneGeneration.MorseGenerator-class.html#getInterWordTime" class="summary-sig-name">getInterWordTime</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Return the minimum amount of silence time required for the system to 
+      conclude that a word has ended.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.getInterWordTime">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="morseToneGeneration.MorseGenerator-class.html#reallySleep" class="summary-sig-name">reallySleep</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">secs</span>)</span><br />
+      Truly return only after specified time.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.reallySleep">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="addMorseElements"></a><span class="summary-sig-name">addMorseElements</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">dotsOrDashes</span>,
+        <span class="summary-sig-arg">numElements</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.addMorseElements">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="watchdogExpired"></a><span class="summary-sig-name">watchdogExpired</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">reason</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.watchdogExpired">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="decodeMorseLetter"></a><span class="summary-sig-name">decodeMorseLetter</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.decodeMorseLetter">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">callback</span>=<span class="sig-default">None</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>x.__init__(...) initializes x; see help(type(x)) for signature</p>
+  <dl class="fields">
+    <dt>Overrides:
+        object.__init__
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="startMorseSeq"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">startMorseSeq</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">morseElement</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.startMorseSeq">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Start a sequence of dots or dashes. If auto-morse is False, only one 
+  dot or dash is produced per call. Else a dashes or dots are produced at 
+  an adjustable speed until stopMorseSeq() is called. Use setAutoMorse() to
+  control whether single-shot or automatic sequences are produced. Use 
+  setSpeed() to set the speed at which the signals are generated.</p>
+  <p>After stopMorseSeq() is called, use getRecentDots() or 
+  getRecentDashes() return the number of dots or dashes that were 
+  generated.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>morseElement</code></strong> (Morse enum) - whether to produce dots or dashes</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="stopMorseSeq"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">stopMorseSeq</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.stopMorseSeq">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Stop a running sequence of dots or dashes. After this call, use 
+  getRecentDots() or getRecentDashes() to get a count of Morse elements 
+  (dots or dashes) that were emitted. If automatic Morse generation is 
+  disabled, it is not necessary to call this method. See setAutoMorse(). 
+  Called when mouse cursor leaves</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="setAutoMorse"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setAutoMorse</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">yesNo</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.setAutoMorse">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Determine whether dots and dashes are generated one at a time each 
+  time startMorseSeq() is called, or whether each call generates sequences 
+  of signals until stopMorseGenerator() is called.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>yesNo</code></strong> ()</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="setSpeed"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setSpeed</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">dotsPlusPausePerSec</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.setSpeed">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Sets speed at which automatic dots and dashes are generated. Units are
+  Herz. One cycle is a single dot, followed by the pause that separates two
+  dots. Since that pause is standardized to be equal to a dot length, one 
+  can think of the speed as the number times the letter &quot;i&quot; is 
+  generated per second.</p>
+  <p>The higher the number, the faster the dots/dashes are generated. 
+  Default is 3.3.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>dotsPlusPausePerSec</code></strong> (float) - rate at which dots or dashes are produced in automatic mode.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="setInterLetterDelay"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setInterLetterDelay</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">secs</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.setInterLetterDelay">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Sets the time that must elapse between two letters.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>secs</code></strong> (float) - fractional seconds</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="setInterWordDelay"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setInterWordDelay</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">secs</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.setInterWordDelay">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Sets the time that must elapse between two words. If negative, no word
+  segmentation is performed.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>secs</code></strong> (float) - fractional seconds</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="stopMorseGenerator"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">stopMorseGenerator</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.stopMorseGenerator">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Stop the entire generator. All threads are killed. Subsequent calls to
+  startMorseSeq() or stopMorseSeq() generate exceptions.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="getInterLetterTime"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getInterLetterTime</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.getInterLetterTime">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return the minimum amount of silence time required for the system to 
+  conclude that the Morse code equivalent of a letter has been generated. 
+  I.e.: end-of-letter pause.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="getInterWordTime"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getInterWordTime</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.getInterWordTime">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return the minimum amount of silence time required for the system to 
+  conclude that a word has ended. I.e.: end-of-word pause.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="reallySleep"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">reallySleep</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">secs</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="morseToneGeneration-pysrc.html#MorseGenerator.reallySleep">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Truly return only after specified time. Just using time.sleep() sleeps
+  shorter if any interrupts occur during the sleep period.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>secs</code></strong> (float) - fractional seconds to sleep</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Feb 21 11:48:06 2013
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find speakeasy)/launch/speakeasy_local.launch"/>
+  <node name="proser" pkg="proser" type="proser.py" />
+</launch>

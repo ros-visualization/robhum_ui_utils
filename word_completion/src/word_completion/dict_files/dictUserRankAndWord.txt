@@ -1,0 +1,15 @@
+100	Andreas
+100	damnit
+100	Dummkopf
+100	Leila
+100	Steve
+100	quadriplegic
+100	envisioned
+100	surrogate
+100	googled
+100	Menlo
+100	Robots
+100	Humanity
+100	disabled
+100	robots
+

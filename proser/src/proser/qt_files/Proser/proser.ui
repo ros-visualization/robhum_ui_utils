@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Proser</class>
+ <widget class="QMainWindow" name="Proser">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>663</width>
+    <height>427</height>
+   </rect>
+  </property>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>15</y>
+     <width>626</width>
+     <height>388</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="outerVBox">
+    <item>
+     <layout class="QHBoxLayout" name="wordButtonHBox">
+      <item>
+       <widget class="QPushButton" name="wordOption1Button">
+        <property name="text">
+         <string>&lt;no word&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="wordOption2Button">
+        <property name="text">
+         <string>&lt;no word&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="wordOption3Button">
+        <property name="text">
+         <string>&lt;no word&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="wordOption4Button">
+        <property name="text">
+         <string>&lt;no word&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="wordOption5Button">
+        <property name="text">
+         <string>&lt;no word&gt;</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTextEdit" name="textArea"/>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="controlButtonHBox">
+      <item>
+       <widget class="QPushButton" name="addToDictButton">
+        <property name="text">
+         <string>Add to Dictionary</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clearButton">
+        <property name="text">
+         <string>Clear</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="copyButton">
+        <property name="text">
+         <string>Copy</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clearSpeakEasyButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton {background-color: rgb(85, 0, 0); color: rgb(225, 225, 225)}</string>
+        </property>
+        <property name="text">
+         <string>Clear SpeakEasy</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="sayButton">
+        <property name="styleSheet">
+         <string notr="true">QPushButton {background-color: rgb(85, 0, 0); color: rgb(225, 225, 225)}</string>
+        </property>
+        <property name="text">
+         <string>Say It!</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

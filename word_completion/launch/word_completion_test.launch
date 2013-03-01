@@ -1,0 +1,3 @@
+<launch>
+	<node name="word_completion" pkg="word_completion" type="word_collection.py" args="local"/>
+</launch>

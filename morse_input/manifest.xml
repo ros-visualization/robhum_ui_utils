@@ -1,0 +1,28 @@
+<package>
+  <description brief="morse_input">
+
+     Provides the onscreen equivalent of a single-paddle electronic telegraph key.
+     The interface can be operated using head trackers and a single button.
+     The human operator generates Morse code, which is decoded into ASCII characters. 
+     Those characters are sent to the X11 window with focus. 
+
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/morse_input</url>
+
+  <depend package="rospy" />
+  <depend package="python_qt_binding"/>
+  <depend package="gesture_buttons" />
+  <depend package="qt_comm_channel" />
+  <depend package="qt_dialog_service" />
+  <depend package="virtual_keyboard" />
+
+  <rosdep name="alsa-utils"/>
+  <rosdep name="xdotool"/>
+
+
+</package>
+
+
