@@ -265,6 +265,16 @@ class MorseChallenger(QMainWindow):
         @type event:
         '''
         self.raiseAllFloaters();
+
+    def resizeEvent(self, event):
+        newWinRect = self.geometry();
+        self.cfgParser.set('Appearance', 
+                           'winGeometry', 
+                           str(newWinRect.x()) 	+ ',' +
+                           str(newWinRect.y()) 	+ ',' +
+                           str(newWinRect.width()) + ',' +
+                           str(newWinRect.height()));
+        self.saveOptions();
         
     def raiseAllFloaters(self):
         for floater in self.floatersInUse:
