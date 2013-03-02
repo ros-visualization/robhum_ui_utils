@@ -43,6 +43,7 @@ import sys
 import os
 import threading
 import random
+import ConfigParser
 from functools import partial
 
 #try:
@@ -70,7 +71,7 @@ except ImportError as e:
 from morseCodeTranslationKey import codeKey;
 from python_qt_binding import QtCore, QtGui, loadUi;
 from QtGui import QApplication, QMainWindow, QLabel, QPixmap, QCheckBox, QColor;
-from QtCore import QTimer, Qt, Signal;
+from QtCore import QTimer, Qt, Signal, QRect;
 
 class MorseChallengerSignals(CommChannel):
     focusLostInadvertently = Signal();
@@ -100,7 +101,8 @@ class MorseChallenger(QMainWindow):
         self.cyclesSinceLastLaunch = 0;
         
         self.dialogService = DialogService();        
-        
+        self.optionsFilePath = os.path.join(os.getenv('HOME'), '.morser/morseChallenger.cfg');
+
         # Load UI for Morse Challenger:
         relPathQtCreatorFileMainWin = "qt_files/morseChallenger/morseChallenger.ui";
         qtCreatorXMLFilePath = self.findFile(relPathQtCreatorFileMainWin);
@@ -128,6 +130,9 @@ class MorseChallenger(QMainWindow):
         self.letterMoveTimer.setInterval(self.timerIntervalFromSpeedSlider()); # milliseconds
         self.letterMoveTimer.setSingleShot(False);
         self.letterMoveTimer.timeout.connect(self.moveLetters);
+        
+        # Bring options from config file:
+        self.setOptions();
         
         # Styling:
         self.createColors();
@@ -186,11 +191,19 @@ class MorseChallenger(QMainWindow):
             self.floatersAvailable.add(floaterLabel);
             
     def letterCheckAction(self, checkbox, checkedOrNot):
+        
+        changedLetter = self.checkBoxesToLetters[checkbox];
+        configedLetters = self.cfgParser.get('Main', 'letters');
         if checkedOrNot:
             self.lettersToUse.add(self.checkBoxesToLetters[checkbox]);
+            configedLetters += changedLetter;
         else:
             self.lettersToUse.discard(self.checkBoxesToLetters[checkbox]);
-
+            configedLetters.replace(changedLetter, "");
+            
+        self.cfgParser.set('Main', 'letters', configedLetters);
+        self.saveOptions();
+        
     def startAction(self):
         self.launchFloaters(1);
         self.letterMoveTimer.start();
@@ -205,10 +218,18 @@ class MorseChallenger(QMainWindow):
     def maxNumSimultaneousFloatersAction(self, newNum):
         # New Combo box picked: 0-based:
         self.maxNumFloaters = newNum + 1;
+        try:
+            self.cfgParser.set('Main','numLettersTogether', str(newNum));
+            self.saveOptions();
+        except AttributeError:
+            # At startup cfgParser won't exist yet. Ignore:
+            pass
         
     def speedChangedAction(self, newSpeed):
         #self.letterMoveTimer.setInterval(newSpeed * 100); # msec.
         self.letterMoveTimer.setInterval(self.timerIntervalFromSpeedSlider(newSpeed)); # msec.
+        self.cfgParser.set('Main','letterSpeed', str(newSpeed));
+        self.saveOptions();
         
     def keyPressEvent(self, keyEvent):
         letter = keyEvent.text();
@@ -359,6 +380,54 @@ class MorseChallenger(QMainWindow):
         self.raise_();
         self.raiseAllFloaters();
 
+    def setOptions(self):
+        
+        self.optionsDefaultDict = {
+                    'letters'             : "",
+                    'letterSpeed'         : str(10),
+                    'numLettersTogether'  : str(0),
+                    'winGeometry'         : '100,100,700,560',
+                    }
+
+        self.cfgParser = ConfigParser.SafeConfigParser(self.optionsDefaultDict);
+        self.cfgParser.add_section('Main');
+        self.cfgParser.add_section('Appearance');
+        self.cfgParser.read(self.optionsFilePath);
+        
+        mainWinGeometry = self.cfgParser.get('Appearance', 'winGeometry');
+        # Get four ints from the comma-separated string of upperLeftX, upperLeftY,
+        # Width,Height numbers:
+        try:
+            nums = mainWinGeometry.split(',');
+            self.setGeometry(QRect(int(nums[0].strip()),int(nums[1].strip()),int(nums[2].strip()),int(nums[3].strip())));
+        except Exception as e:
+            self.dialogService.showErrorMsg("Could not set window size; config file spec not grammatical: %s. (%s" % (mainWinGeometry, `e`));
+        
+        letterSpeed = self.cfgParser.getint('Main', 'letterSpeed');
+        self.speedHSlider.setValue(letterSpeed);
+        #self.speedChangedAction(letterSpeed);
+        self.letterMoveTimer.setInterval(self.timerIntervalFromSpeedSlider()); # milliseconds
+        
+        numLettersTogether = self.cfgParser.getint('Main', 'numLettersTogether');
+        self.simultaneousLettersComboBox.setCurrentIndex(numLettersTogether);
+        
+        lettersToUse = self.cfgParser.get('Main', 'letters');
+        for letter in lettersToUse:
+            self.lettersToCheckBoxes[letter].setChecked(True);
+  
+    def saveOptions(self):
+        try:
+            # Does the config dir already exist? If not
+            # create it:
+            optionsDir = os.path.dirname(self.optionsFilePath);
+            if not os.path.isdir(optionsDir):
+                os.makedirs(optionsDir, 0777);
+            with open(self.optionsFilePath, 'wb') as outFd:
+                self.cfgParser.write(outFd);
+        except IOError as e:
+            self.dialogService.showErrorMsg("Could not save options: %s" % `e`);
+
+        
     def exit(self):
         QApplication.quit();
 
