@@ -226,7 +226,6 @@ class MorseChallenger(QMainWindow):
             pass
         
     def speedChangedAction(self, newSpeed):
-        #self.letterMoveTimer.setInterval(newSpeed * 100); # msec.
         self.letterMoveTimer.setInterval(self.timerIntervalFromSpeedSlider(newSpeed)); # msec.
         self.cfgParser.set('Main','letterSpeed', str(newSpeed));
         self.saveOptions();
@@ -297,7 +296,7 @@ class MorseChallenger(QMainWindow):
     def timerIntervalFromSpeedSlider(self, newSpeed=None):
         if newSpeed is None:
             newSpeed = self.speedHSlider.value();
-        return 1000 - newSpeed;
+        return max(500 - newSpeed, 20); #msec
             
     def randomLetters(self, numLetters):
         if len(self.lettersToUse) == 0:
@@ -325,10 +324,13 @@ class MorseChallenger(QMainWindow):
                 continue;
             geo = floaterLabel.geometry();
             newY = geo.y() + self.PIXELS_TO_MOVE_PER_TIMEOUT;
+            savedHeight = geo.height();
             if newY > self.height():
-                newY = self.height();
+                newY = self.height(); #********
                 self.detonate(floaterLabel);
-            floaterLabel.move(geo.x(), newY);
+            geo.setY(newY)
+            geo.setHeight(savedHeight);
+            floaterLabel.setGeometry(geo);
             
         # Done advancing each floater. Is it time to start a new floater?
         numFloatersToLaunch = self.maxNumFloaters - len(self.floatersInUse) + len(self.floatersDetonated);   
