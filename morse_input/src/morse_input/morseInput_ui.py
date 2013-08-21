@@ -817,7 +817,7 @@ class MorseInput(QMainWindow):
             self.virtKeyboard.activateWindow(retrievalKey='morseWinID');
         #if (eventType == QEvent.MouseMove) or (event == QHoverEvent):
         elif eventType == QEvent.MouseMove:
-            if self.constrainCursorInHotZone:
+            if self.constrainCursorInHotZone and (app.mouseButtons() != QtCore.Qt.LeftButton):
                 self.mouseUnconstrainTimer.stop();
                 self.handleCursorConstraint(event);
         # Pass this event on to its destination (rather than filtering it):
