@@ -114,12 +114,15 @@ class WatchdogTimer(QTimer):
     def timerExpiredHandler(self):
         self.stop();
         self.timedout = True;
-        if self.callback is not None:
-            if self.callbackArg is None:
-                self.callback();
-            else:
-                self.callback(self.callbackArg);
-            
+        try:
+            if self.callback is not None:
+                if self.callbackArg is None:
+                    self.callback();
+                else:
+                    self.callback(self.callbackArg);
+        except Exception:
+            # Don't let a callback snaffu kill us.
+            pass
 # -----------------------------  Testing  ----------------------------
 
     def runSelfTest(self):

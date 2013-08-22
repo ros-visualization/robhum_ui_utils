@@ -89,7 +89,7 @@ class MorseGenerator(object):
 
         # Lock for regulating write-access to alpha string:
         self.alphaStrLock = threading.Lock();
-        # Lock for regulating write-access to mores elements
+        # Lock for regulating write-access to morse elements
         # delivered from the dot and dash threads:
         self.morseResultLock = threading.Lock();
 
@@ -149,7 +149,8 @@ class MorseGenerator(object):
         # If there will now be a pause long enough
         # to indicate the end of a letter, this
         # watchdog will go off:
-        self.watchdog.kick(_timeout=self.interLetterTime, callbackArg=TimeoutReason.END_OF_LETTER);
+        if self.interLetterTime > 0:
+            self.watchdog.kick(_timeout=self.interLetterTime, callbackArg=TimeoutReason.END_OF_LETTER);
         
     def abortCurrentMorseElement(self):
         self.watchdog.stop();
@@ -198,12 +199,14 @@ class MorseGenerator(object):
         # Unless client explicitly set dwell time between
         # letters and words, compute a default now:
         if not self.interLetterDelayExplicitlySet:
-            self.interLetterTime = 7.0*self.dotDuration;
+            # Turn automatic word segmentation off by default:
+            self.interLetterTime = -1;
+            # self.interLetterTime = 7.0*self.dotDuration;
         if not self.interWordDelayExplicitlySet:
             # Turn automatic word segmentation off by default:
             self.interWordTime = -1;
             #self.interWordTime   = 9.0*self.dotDuration;
-        self.waitDashDotThreadsIdleTime = 0.5 * self.interLetterTime;
+        self.waitDashDotThreadsIdleTime = 0.5 * 7.0*self.dotDuration;
     
     def setInterLetterDelay(self, secs):
         '''
@@ -212,8 +215,13 @@ class MorseGenerator(object):
         @type secs: float
         '''
         self.interLetterTime = secs;
-        self.watchdog.changeTimeout(self.interLetterTime);
-        self.waitDashDotThreadsIdleTime = 0.5 * self.interLetterTime;
+        # The following are commented, b/c mouse-click-controlled
+        # inter-letter delay was introduced. That feature sets
+        # interLetterTime to -1, which would cause bugs
+        # below. The lines make sense if interLetterTime is known
+        # to be positive:
+        #self.watchdog.changeTimeout(self.interLetterTime);
+        #self.waitDashDotThreadsIdleTime = 0.5 * self.interLetterTime;
         self.interLetterDelayExplicitlySet = True;
         
     def setInterWordDelay(self, secs):
@@ -254,6 +262,13 @@ class MorseGenerator(object):
     def setMorseResult(self, newMorseResult):
         with self.morseResultLock:
             self.morseResult = newMorseResult;
+    
+    def inMidLetter(self):
+        '''
+        Return True if user has morsed any dots or dashes
+        since the last letter or word segmentation
+        '''
+        return len(self.morseResult) > 0;
         
     def getInterLetterTime(self):
         '''

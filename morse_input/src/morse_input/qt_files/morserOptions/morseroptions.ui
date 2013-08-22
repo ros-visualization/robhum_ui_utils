@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>532</width>
-    <height>456</height>
+    <height>481</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -28,7 +28,7 @@
      <x>10</x>
      <y>10</y>
      <width>511</width>
-     <height>441</height>
+     <height>461</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -42,8 +42,8 @@
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>488</width>
-      <height>422</height>
+      <width>501</width>
+      <height>451</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="centralVLayout">
@@ -146,7 +146,7 @@
           <string>If checked, then pauses between Morse letters generate space characters.</string>
          </property>
          <property name="text">
-          <string>Word stop</string>
+          <string>Mouse clicks delimit letters and words</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -566,6 +566,9 @@
           </spacer>
          </item>
         </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout"/>
        </item>
        <item>
         <layout class="QHBoxLayout" name="interLetterDelayHLayout">

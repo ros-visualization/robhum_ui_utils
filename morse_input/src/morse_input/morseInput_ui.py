@@ -141,7 +141,7 @@ class MorseInput(QMainWindow):
     
     def __init__(self):
         super(MorseInput,self).__init__();
-
+        
         # Only allow a single instance of the Morser program to run:
         self.morserLockFile = '/tmp/morserLock.lk';
         MorseInput.morserLockFD = open(self.morserLockFile, 'w')
@@ -269,13 +269,6 @@ class MorseInput(QMainWindow):
         self.recentMousePos = None;
         self.currentMouseDirection = None;
         self.enableConstrainVertical = False;
-        # Holding left mouse button inside the Morse
-        # window will suspend cursor constraining,
-        # if it is enabled. Letting go of the button
-        # will re-enable constraints. This var
-        # keeps track of suspension so mouse-button-up
-        # knows whether to re-instate constraining:
-        self.cursorContraintSuspended = False;
         
         # Timer that frees the cursor from
         # vertical/horizontal constraint every few
@@ -604,13 +597,6 @@ class MorseInput(QMainWindow):
         # Cursor constraint:
         self.morserOptionsDialog.cursorConstraintCheckBox.setChecked(self.cfgParser.getboolean('Morse generation', 'constrainCursorInHotZone'));
         
-        # Automatic word segmentation:
-        enableWordSegmentation = self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation');
-        self.morserOptionsDialog.wordStopSegmentationCheckBox.setChecked(enableWordSegmentation);
-        if not enableWordSegmentation:
-            self.morserOptionsDialog.interWordDelaySlider.setEnabled(False);
-            self.morserOptionsDialog.wordDwellReadoutLineEdit.setEnabled(False);
-        
         # Output to X11 vs. Speech:    
         self.morserOptionsDialog.typeOutputRadioButton.setChecked(self.cfgParser.getint('Output', 'outputDevice')==OutputType.TYPE);
         self.morserOptionsDialog.speechOutputRadioButton.setChecked(self.cfgParser.getint('Output', 'outputDevice')==OutputType.SPEAK);
@@ -640,6 +626,24 @@ class MorseInput(QMainWindow):
         self.morserOptionsDialog.wordDwellReadoutLineEdit.setText(str(self.morserOptionsDialog.interWordDelaySlider.value()));
         self.morserOptionsDialog.useTickerCheckBox.setChecked(self.cfgParser.getboolean('Output', 'useTickerTape'));
     
+        # Automatic word segmentation:
+        enableMouseClickSegmentation = self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation');
+        self.morserOptionsDialog.wordStopSegmentationCheckBox.setChecked(enableMouseClickSegmentation);
+        if enableMouseClickSegmentation:
+            self.morserOptionsDialog.interWordDelaySlider.setEnabled(False);
+            self.morserOptionsDialog.wordDwellReadoutLineEdit.setEnabled(False);
+            self.morserOptionsDialog.interLetterDelaySlider.setEnabled(False);
+            self.morserOptionsDialog.letterDwellReadoutLineEdit.setEnabled(False);
+            self.morseGenerator.setInterWordDelay(-1);
+            self.morseGenerator.setInterLetterDelay(-1);
+        else:
+            self.morserOptionsDialog.interWordDelaySlider.setEnabled(True);
+            self.morserOptionsDialog.wordDwellReadoutLineEdit.setEnabled(True);
+            self.morserOptionsDialog.interLetterDelaySlider.setEnabled(True);
+            self.morserOptionsDialog.letterDwellReadoutLineEdit.setEnabled(True);
+            self.morseGenerator.setInterWordDelay(int(self.morserOptionsDialog.wordDwellReadoutLineEdit.text())/1000.0);
+            self.morseGenerator.setInterLetterDelay(int(self.morserOptionsDialog.letterDwellReadoutLineEdit.text())/1000.0);
+        
     def sliderReadoutModified(self, slider):
         if slider == self.morserOptionsDialog.cursorDecelerationSlider:
             slider.setValue(int(float(self.morserOptionsDialog.cursorDecelerationReadoutLineEdit.text()) * 100.0));
@@ -672,17 +676,29 @@ class MorseInput(QMainWindow):
         elif checkbox == self.morserOptionsDialog.wordStopSegmentationCheckBox:
             self.cfgParser.set('Morse generation', 'wordDwellSegmentation', str(checkboxNowChecked));
             self.cfgParser.set('Morse generation', 'interWordDwellDelay', str(self.morserOptionsDialog.interWordDelaySlider.value()/1000.));
-            # Enable or disable the inter word delay slider and text box if
-            # word dwell is enabled, and vice versa:
+            self.cfgParser.set('Morse generation', 'interLetterDwellDelay', str(self.morserOptionsDialog.interLetterDelaySlider.value()/1000.));
+            # Enable or disable the inter letter and word delay sliders and associated text 
+            # value readouts if letter/word dwell is enabled, and vice versa:
             if checkboxNowChecked:
-                self.morserOptionsDialog.interWordDelaySlider.setEnabled(True);
-                self.morserOptionsDialog.wordDwellReadoutLineEdit.setEnabled(True);
-                self.morseGenerator.setInterWordDelay(int(self.morserOptionsDialog.wordDwellReadoutLineEdit.text())/1000.0);
-            else:
                 self.morserOptionsDialog.interWordDelaySlider.setEnabled(False);
                 self.morserOptionsDialog.wordDwellReadoutLineEdit.setEnabled(False);
                 # Disable word segmentation:
                 self.morseGenerator.setInterWordDelay(-1);
+
+                self.morserOptionsDialog.interLetterDelaySlider.setEnabled(False);
+                self.morserOptionsDialog.letterDwellReadoutLineEdit.setEnabled(False);
+                # Disable letter segmentation:
+                self.morseGenerator.setInterLetterDelay(-1);
+                
+            else:
+                self.morserOptionsDialog.interWordDelaySlider.setEnabled(True);
+                self.morserOptionsDialog.wordDwellReadoutLineEdit.setEnabled(True);
+                self.morseGenerator.setInterWordDelay(int(self.morserOptionsDialog.wordDwellReadoutLineEdit.text())/1000.0);
+                
+                self.morserOptionsDialog.interLetterDelaySlider.setEnabled(True);
+                self.morserOptionsDialog.letterDwellReadoutLineEdit.setEnabled(True);
+                self.morseGenerator.setInterLetterDelay(int(self.morserOptionsDialog.letterDwellReadoutLineEdit.text())/1000.0);
+        
         elif checkbox == self.morserOptionsDialog.typeOutputRadioButton:
             self.cfgParser.set('Output', 'outputDevice', str(OutputType.TYPE));
             #**************
@@ -838,21 +854,35 @@ class MorseInput(QMainWindow):
         
         if (mouseEvent.button() != Qt.LeftButton):
             return;
-        
+
         # Re-activate the most recently active X11 window 
         # to ensure the letters are directed to the 
         # proper window, and not this morse window:
         self.virtKeyboard.activateWindow('keyboardTarget');
-        if self.cursorInRestZone(mouseEvent.pos()):
+        
+        inRestZone = self.cursorInRestZone(mouseEvent.pos()); 
+        
+        # If we are using dwell time for segmentation, then
+        # a mouse down is solely for disengaging cursor constraints.
+        # We discard any partially entered Morse:
+        if inRestZone and not self.mouseClicksForSegmentation():
             self.morseGenerator.abortCurrentMorseElement();
         
-        # Release cursor constraint while mouse button is pressed down.
-        if self.constrainCursorInHotZone:    
-            self.stopCursorConstraint();
-            self.cursorContraintSuspended = True;
+        # Pause speed timing, if it's running, and cursor
+        # is now outside the hot zone:
+        if not inRestZone:
+            self.speedMeasurer.pauseTiming();
             
-        # Pause speed timing, if it's running:
-        self.speedMeasurer.pauseTiming();
+        # If inter letter/word segmentation is set to 
+        # mouse control in Options, then:
+        # If user is in the midst of entering a letter,
+        # this mouse click terminates the letter. Else
+        # the mouse click means a word separator:
+        if self.mouseClicksForSegmentation():
+            if self.morseGenerator.inMidLetter() and inRestZone:
+                self.morseGenerator.watchdogExpired(TimeoutReason.END_OF_LETTER);
+            else:
+                self.morseGenerator.watchdogExpired(TimeoutReason.END_OF_WORD)
 
         mouseEvent.accept();
 
@@ -865,9 +895,6 @@ class MorseInput(QMainWindow):
         if mouseEvent.button() == Qt.RightButton:
             self.morseCursor.setPos(self.centralRestGlobalPos);
 
-        if self.cursorContraintSuspended:
-            self.cursorContraintSuspended = False;
-            self.startCursorConstraint();
         # Resume speed timing, (if it was paused:
         self.speedMeasurer.resumeTiming();
 
@@ -890,6 +917,12 @@ class MorseInput(QMainWindow):
         
         dotButtonGeo  = self.dotButton.geometry();
         dashButtonGeo = self.dashButton.geometry();
+        #**************
+        dotRight = dotButtonGeo.right()
+        dashLeft = dashButtonGeo.left()
+        dotTop   = dotButtonGeo.top()
+        dotBottom= dotButtonGeo.bottom()
+        #**************
         return localPos.x() > dotButtonGeo.right() and\
                localPos.x() < dashButtonGeo.left() and\
                localPos.y() > dotButtonGeo.top()   and\
@@ -1007,6 +1040,13 @@ class MorseInput(QMainWindow):
                 self.mouseUnconstrainTimer.setInterval(MorseInput.MOUSE_UNCONSTRAIN_TIMEOUT);
                 self.mouseUnconstrainTimer.start();
             return
+
+    def mouseClicksForSegmentation(self):
+        '''
+        Return True if option to use mouse clicks instead of
+        dwell for letter and word segmentation. Else return False.
+        '''
+        return self.morserOptionsDialog.wordStopSegmentationCheckBox.isChecked();
 
     def unconstrainTheCursor(self):
         # If user is hovering inside the dot or dash button,
