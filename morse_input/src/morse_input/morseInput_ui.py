@@ -860,7 +860,11 @@ class MorseInput(QMainWindow):
         # proper window, and not this morse window:
         self.virtKeyboard.activateWindow('keyboardTarget');
         
-        inRestZone = self.cursorInRestZone(mouseEvent.pos()); 
+        inRestZone = self.cursorInRestZone(mouseEvent.pos());
+        if inRestZone:
+            self.mousePressedInRestZone = True;
+        else:
+            self.mousePressedInRestZone = False;
         
         # If we are using dwell time for segmentation, then
         # a mouse down is solely for disengaging cursor constraints.
@@ -873,17 +877,6 @@ class MorseInput(QMainWindow):
         if not inRestZone:
             self.speedMeasurer.pauseTiming();
             
-        # If inter letter/word segmentation is set to 
-        # mouse control in Options, then:
-        # If user is in the midst of entering a letter,
-        # this mouse click terminates the letter. Else
-        # the mouse click means a word separator:
-        if self.mouseClicksForSegmentation():
-            if self.morseGenerator.inMidLetter() and inRestZone:
-                self.morseGenerator.watchdogExpired(TimeoutReason.END_OF_LETTER);
-            elif inRestZone:
-                self.morseGenerator.watchdogExpired(TimeoutReason.END_OF_WORD)
-
         mouseEvent.accept();
 
     def mouseReleaseEvent(self, mouseEvent):
@@ -898,10 +891,25 @@ class MorseInput(QMainWindow):
         if mouseEvent.button() == Qt.RightButton:
             self.morseCursor.setPos(self.centralRestGlobalPos);
             return;
-        # If letter/word segmentation is set to be done via mouse
-        # clicks, rather than dwell, then check whether the mouse
-        # is release outside the rest area. If so, then a word-separating
-        #
+        
+        inRestZone = self.cursorInRestZone(mouseEvent.pos()); 
+
+        # If inter letter/word segmentation is set to 
+        # mouse control in Options AND cursor is in rest area,
+        # AND the corresponding mouse PRESS occurred inside
+        # the rest area then:
+        # If user is in the midst of entering a letter,
+        # this mouse click terminates the letter. Else
+        # the mouse click means a word separator:
+        if not inRestZone or not self.mousePressedInRestZone:
+            return;
+        
+        if self.mouseClicksForSegmentation():
+            if self.morseGenerator.inMidLetter() and inRestZone:
+                self.morseGenerator.watchdogExpired(TimeoutReason.END_OF_LETTER);
+            elif inRestZone:
+                self.morseGenerator.watchdogExpired(TimeoutReason.END_OF_WORD)
+
 
     def resizeEvent(self, event):
         newMorseWinRect = self.geometry();
