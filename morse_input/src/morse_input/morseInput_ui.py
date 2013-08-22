@@ -881,22 +881,27 @@ class MorseInput(QMainWindow):
         if self.mouseClicksForSegmentation():
             if self.morseGenerator.inMidLetter() and inRestZone:
                 self.morseGenerator.watchdogExpired(TimeoutReason.END_OF_LETTER);
-            else:
+            elif inRestZone:
                 self.morseGenerator.watchdogExpired(TimeoutReason.END_OF_WORD)
 
         mouseEvent.accept();
 
     def mouseReleaseEvent(self, mouseEvent):
 
+        # Resume speed timing, (if it was paused:
+        self.speedMeasurer.resumeTiming();
+        
         # If right button is the one that was released,
         # re-center the mouse to the crosshair. This is
         # needed with the head mouse tracker to re-calibrate
         # where it thinks the cursor is located:
         if mouseEvent.button() == Qt.RightButton:
             self.morseCursor.setPos(self.centralRestGlobalPos);
-
-        # Resume speed timing, (if it was paused:
-        self.speedMeasurer.resumeTiming();
+            return;
+        # If letter/word segmentation is set to be done via mouse
+        # clicks, rather than dwell, then check whether the mouse
+        # is release outside the rest area. If so, then a word-separating
+        #
 
     def resizeEvent(self, event):
         newMorseWinRect = self.geometry();
@@ -911,10 +916,6 @@ class MorseInput(QMainWindow):
         self.computeInnerButtonEdges();
 
     def cursorInRestZone(self, pos):
-        # Button geometries are local, so convert the
-        # given global position:
-        localPos = self.mapFromGlobal(pos);
-        
         dotButtonGeo  = self.dotButton.geometry();
         dashButtonGeo = self.dashButton.geometry();
         #**************
@@ -923,10 +924,10 @@ class MorseInput(QMainWindow):
         dotTop   = dotButtonGeo.top()
         dotBottom= dotButtonGeo.bottom()
         #**************
-        return localPos.x() > dotButtonGeo.right() and\
-               localPos.x() < dashButtonGeo.left() and\
-               localPos.y() > dotButtonGeo.top()   and\
-               localPos.y() < dotButtonGeo.bottom();
+        return pos.x() > dotButtonGeo.right() and\
+               pos.x() < dashButtonGeo.left() and\
+               pos.y() > dotButtonGeo.top()   and\
+               pos.y() < dotButtonGeo.bottom();
     
     def cursorInButton(self, buttonObj, pos, tolerance=0):
         '''
@@ -1003,7 +1004,7 @@ class MorseInput(QMainWindow):
             
             # Only constrain while in rest zone (central empty space), or
             # inside the dot or dash buttons:
-            if not (self.cursorInRestZone(globalPos) or newInButton):
+            if not (self.cursorInRestZone(localPos) or newInButton):
                 return;
             
             # If cursor moved while we are constraining motion 
