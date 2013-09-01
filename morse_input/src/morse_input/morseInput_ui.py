@@ -577,8 +577,8 @@ class MorseInput(QMainWindow):
         
         self.constrainCursorInHotZone = self.cfgParser.getboolean('Morse generation', 'constrainCursorInHotZone');
         self.outputDevice = self.cfgParser.getint('Output', 'outputDevice');
-        self.letterDwellSegmentation = self.cfgParser.getboolean('Morse generation', 'letterDwellSegmentation');
-        self.letterDwellSegmentation = self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation');
+        self.wordDwellSegmentation = self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation');
+        self.controlInterWordAndLetterSegmentation(segmentByMouse=not self.wordDwellSegmentation);
 
         self.useTickerTape = self.cfgParser.getboolean('Output', 'useTickerTape');
         
@@ -627,7 +627,7 @@ class MorseInput(QMainWindow):
         self.morserOptionsDialog.useTickerCheckBox.setChecked(self.cfgParser.getboolean('Output', 'useTickerTape'));
     
         # Automatic word segmentation:
-        enableMouseClickSegmentation = self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation');
+        enableMouseClickSegmentation = not self.cfgParser.getboolean('Morse generation', 'wordDwellSegmentation');
         self.morserOptionsDialog.wordStopSegmentationCheckBox.setChecked(enableMouseClickSegmentation);
         if enableMouseClickSegmentation:
             self.morserOptionsDialog.interWordDelaySlider.setEnabled(False);
@@ -658,46 +658,45 @@ class MorseInput(QMainWindow):
         slider.setFocus();
 
             
-    def checkboxStateChanged(self, checkbox, newState):
+    def checkboxStateChanged(self, checkbox, checkboxNowChecked):
         '''
         Called when any of the option dialog's checkboxes change:
         @param checkbox: the affected checkbox
         @type checkbox: QCheckBox
-        @param newState: the new state, though Qt docs are cagey about what this means: an int of some kind.
-        @type newState: QCheckState
+        @param checkboxNowChecked: the new state.
+        @type checkboxNowChecked: QCheckState: Qt.Checked or Qt.Unchecked
         '''
-        checkboxNowChecked = checkbox.isChecked();
         if checkbox == self.morserOptionsDialog.cursorConstraintCheckBox:
-            self.cfgParser.set('Morse generation','constrainCursorInHotZone',str(checkboxNowChecked));
-            self.constrainCursorInHotZone = checkboxNowChecked; 
+            self.cfgParser.set('Morse generation','constrainCursorInHotZone',str(checkboxNowChecked==Qt.Checked));
+            self.constrainCursorInHotZone = checkboxNowChecked==Qt.Checked; 
         elif checkbox == self.morserOptionsDialog.useTickerCheckBox:
-            self.cfgParser.set('Output','useTickerTape', str(checkboxNowChecked));
-            self.useTickerTape = checkboxNowChecked;
+            self.cfgParser.set('Output','useTickerTape', str(checkboxNowChecked==QtChecked));
+            self.useTickerTape = checkboxNowChecked==QtChecked;
         elif checkbox == self.morserOptionsDialog.wordStopSegmentationCheckBox:
-            self.cfgParser.set('Morse generation', 'wordDwellSegmentation', str(checkboxNowChecked));
+            # Note the negation: we check for checkbox Unchecked: 
+            self.cfgParser.set('Morse generation', 'wordDwellSegmentation', str(checkboxNowChecked==Qt.Unchecked));
             self.cfgParser.set('Morse generation', 'interWordDwellDelay', str(self.morserOptionsDialog.interWordDelaySlider.value()/1000.));
             self.cfgParser.set('Morse generation', 'interLetterDwellDelay', str(self.morserOptionsDialog.interLetterDelaySlider.value()/1000.));
+            
             # Enable or disable the inter letter and word delay sliders and associated text 
             # value readouts if letter/word dwell is enabled, and vice versa:
-            if checkboxNowChecked:
+            if checkboxNowChecked==Qt.Checked: # use mouse, not dwell
                 self.morserOptionsDialog.interWordDelaySlider.setEnabled(False);
                 self.morserOptionsDialog.wordDwellReadoutLineEdit.setEnabled(False);
-                # Disable word segmentation:
-                self.morseGenerator.setInterWordDelay(-1);
 
                 self.morserOptionsDialog.interLetterDelaySlider.setEnabled(False);
                 self.morserOptionsDialog.letterDwellReadoutLineEdit.setEnabled(False);
                 # Disable letter segmentation:
-                self.morseGenerator.setInterLetterDelay(-1);
+                self.controlInterWordAndLetterSegmentation(segmentByMouse=True);
                 
-            else:
+            else: # use dwell
                 self.morserOptionsDialog.interWordDelaySlider.setEnabled(True);
                 self.morserOptionsDialog.wordDwellReadoutLineEdit.setEnabled(True);
-                self.morseGenerator.setInterWordDelay(int(self.morserOptionsDialog.wordDwellReadoutLineEdit.text())/1000.0);
                 
                 self.morserOptionsDialog.interLetterDelaySlider.setEnabled(True);
                 self.morserOptionsDialog.letterDwellReadoutLineEdit.setEnabled(True);
-                self.morseGenerator.setInterLetterDelay(int(self.morserOptionsDialog.letterDwellReadoutLineEdit.text())/1000.0);
+
+                self.controlInterWordAndLetterSegmentation(segmentByMouse=False);
         
         elif checkbox == self.morserOptionsDialog.typeOutputRadioButton:
             self.cfgParser.set('Output', 'outputDevice', str(OutputType.TYPE));
@@ -712,6 +711,22 @@ class MorseInput(QMainWindow):
         else:
             raise ValueError('Unknown checkbox: %s' % str(checkbox));
 
+    def controlInterWordAndLetterSegmentation(self, segmentByMouse=True):
+        
+            # Enable or disable the inter letter and word delay sliders and associated text 
+            # value readouts if letter/word dwell is enabled, and vice versa:
+            if segmentByMouse:
+                # Disable word segmentation:
+                self.morseGenerator.setInterWordDelay(-1);
+
+                # Disable letter segmentation:
+                self.morseGenerator.setInterLetterDelay(-1);
+                
+            else: # use dwell
+                self.morseGenerator.setInterWordDelay(int(self.morserOptionsDialog.wordDwellReadoutLineEdit.text())/1000.0);
+                self.morseGenerator.setInterLetterDelay(int(self.morserOptionsDialog.letterDwellReadoutLineEdit.text())/1000.0);
+        
+        
 
     def sliderStateChanged(self, slider, newValue):
         #slider.setToolTip(str(newValue));
